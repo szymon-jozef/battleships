@@ -20,6 +20,8 @@
           clang
           gcc
           cmake
+          boost
+          catch2_3
         ];
 
         battleships = (
@@ -34,6 +36,7 @@
             buildPhase = "make -j $NIX_BUILD_CORES";
             installPhase = ''
               mkdir -p $out/bin
+              cp battleships $out/bin/
             '';
           }
         );
