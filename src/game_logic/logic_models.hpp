@@ -33,12 +33,19 @@ public:
 enum class FieldState { EMPTY, TAKEN, MISSED, HIT, SUNK };
 
 /// Every field stores it's  current state and a pointer to the ship
-/// that's there, if any. Otherwise nullptr
+/// that's there, if any. Otherwise nullptr. By default every FieldState is
+/// FieldState::EMPTY
 class Field {
-  Field();
   FieldState state;
   // One ship may be on multiple fields so we use an shared_ptr
-  std::shared_ptr<Ship> ship;
+  std::shared_ptr<Ship> morred_ship;
+
+public:
+  Field();
+  void placeShip(std::shared_ptr<Ship> ship);
+  void setState(FieldState new_state);
+  FieldState getState() const;
+  Ship *getShip() const;
 };
 
 enum class ShotResult {

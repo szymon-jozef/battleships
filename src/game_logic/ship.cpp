@@ -1,4 +1,4 @@
-#include "models.hpp"
+#include "logic_models.hpp"
 #include <boost/uuid.hpp>
 
 Ship::Ship(ShipType type)

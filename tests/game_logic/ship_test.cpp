@@ -1,4 +1,4 @@
-#include "models.hpp"
+#include "logic_models.hpp"
 #include <catch2/catch_test_macros.hpp>
 
 TEST_CASE("Ship sunking test") {
