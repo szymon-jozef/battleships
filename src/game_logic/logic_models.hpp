@@ -63,18 +63,22 @@ protected:
   const unsigned short int WIDTH;
   const unsigned short int HEIGHT;
   std::vector<std::vector<Field>> grid;
+  /// @brief Uses BFS to mark all nearby Fields that are hit as sunk
+  void markNearbyAsSunk(unsigned short int row, unsigned short int column);
 
 public:
   BaseGrid(const unsigned short int width, const unsigned short int height);
   FieldState getFieldState(unsigned short int row,
                            unsigned short int column) const;
-  virtual std::string asString() const = 0;
-  /// @brief Uses BFS to mark all nearby Fields that are hit as sunk
-  void markNearbyAsSunk(unsigned short int row, unsigned short int column);
+
+  std::string asString() const;
 };
 
 class Board : public BaseGrid {
 public:
+  /// @brief Create 10x10 board
+  Board();
+  /// @brief Create `width` x `height` board
   Board(const unsigned short int width, const unsigned short int height);
 
   /// @brief Attempts to place a ship at given coordinates.
@@ -93,7 +97,6 @@ public:
   /// - logic_error when can't retrieve the ship under taken field
   /// - invalid_argument when coords are out of bounds
   FieldState takeShot(unsigned short int row, unsigned short int column);
-  virtual std::string asString() const override;
 };
 
 class Radar : public BaseGrid {

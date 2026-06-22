@@ -2,6 +2,8 @@
 #include <logic_models.hpp>
 #include <stdexcept>
 
+Board::Board() : BaseGrid(10, 10) {}
+
 Board::Board(const unsigned short int width, const unsigned short int height)
     : BaseGrid(width, height) {}
 
@@ -73,6 +75,7 @@ FieldState Board::takeShot(unsigned short int row, unsigned short int column) {
       markNearbyAsSunk(row, column);
       return FieldState::SUNK;
     }
+    grid[row][column].setState(FieldState::HIT);
     return FieldState::HIT;
   }
 
