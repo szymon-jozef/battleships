@@ -54,3 +54,21 @@ bool Board::placeShip(std::shared_ptr<Ship> ship, unsigned short int startRow,
 
   return true;
 }
+
+FieldState Board::takeShot(unsigned short int row, unsigned short int column) {
+  if (row >= HEIGHT || column >= WIDTH) {
+    throw std::invalid_argument("Given coordinates are out of bounds!");
+  }
+
+  if (grid[row][column].getState() == FieldState::TAKEN) {
+    Ship *ship = grid[row][column].getShip();
+    ship->hit();
+
+    if (ship->isSunk()) {
+      // TODO! this should mark all the other fields of given ship as sunk
+      return FieldState::SUNK;
+    }
+    return FieldState::HIT;
+  }
+  return FieldState::EMPTY;
+}
