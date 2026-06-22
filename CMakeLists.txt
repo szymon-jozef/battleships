@@ -26,7 +26,7 @@ target_sources(battleships
 
 add_library(game_logic)
 
-file(GLOB LOGIC_SOURCES CONFIGURE_DEPENDS "src/game_logic/*.cpp")
+file(GLOB_RECURSE LOGIC_SOURCES CONFIGURE_DEPENDS "src/game_logic/*.cpp")
 
 target_sources(game_logic
     PRIVATE

@@ -7,7 +7,7 @@
 
 /* --- Ships --- */
 
-/// ShipType defines how many field the ship takes
+/// @brief ShipType defines how many field the ship takes
 enum class ShipType {
   FourMaster = 4,
   ThreeMaster = 3,
@@ -15,7 +15,7 @@ enum class ShipType {
   OneMaster = 1
 };
 
-/// Every ship has it's own type, UUID and hp.
+/// @brief Every ship has it's own type, UUID and hp.
 /// HP is the same as ship length
 class Ship {
   boost::uuids::uuid id;
@@ -27,12 +27,19 @@ public:
   bool isSunk() const;
   /// Decrement ship health by one
   void hit();
+  ShipType getType() const;
 };
 
 /* --- Fields --- */
-enum class FieldState { EMPTY, TAKEN, MISSED, HIT, SUNK };
+enum class FieldState : char {
+  EMPTY = 'O',
+  TAKEN = 'T',
+  MISSED = 'M',
+  HIT = 'x',
+  SUNK = 'X'
+};
 
-/// Every field stores it's  current state and a pointer to the ship
+/// @brief Every field stores it's  current state and a pointer to the ship
 /// that's there, if any. Otherwise nullptr. By default every FieldState is
 /// FieldState::EMPTY
 class Field {
@@ -48,36 +55,35 @@ public:
   Ship *getShip() const;
 };
 
-enum class ShotResult {
-  MISS,
-  HIT,
-  SUNK,
-  ALREADY_SHOT,
-  OUT_OF_BOUNDS,
-};
-
-/* --- Grids --- */
 class BaseGrid {
   // we use short int, because no one wants to play with 23894723984723489
   // fields
+protected:
   const unsigned short int WIDTH;
   const unsigned short int HEIGHT;
-  // should reserve width * height in the constructor
   std::vector<std::vector<Field>> grid;
 
 public:
   BaseGrid(const unsigned short int width, const unsigned short int height);
   FieldState getFieldState(unsigned short int row,
                            unsigned short int column) const;
-  virtual std::string asString() const;
+  virtual std::string asString() const = 0;
 };
 
 class Board : public BaseGrid {
 public:
   Board(const unsigned short int width, const unsigned short int height);
-  bool placeShip(ShipType shipType, unsigned short int startRow,
+
+  /// @brief Attempts to place a ship at given coordinates.
+  ///
+  /// @throws:
+  /// - std::invalid_argument when input is out of bounds
+  bool placeShip(std::shared_ptr<Ship> ship, unsigned short int startRow,
                  unsigned short int startColumn, bool isHorizontal);
-  ShotResult takeShot(unsigned short int row, unsigned short int column);
+
+  /// @brief Check if there is any ship at given coordinates and return the
+  /// result. Marks the field as the result. Hits the ship if present.
+  FieldState takeShot(unsigned short int row, unsigned short int column);
   virtual std::string asString() const override;
 };
 

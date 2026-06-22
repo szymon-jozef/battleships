@@ -10,3 +10,5 @@ Ship::Ship(ShipType type)
 bool Ship::isSunk() const { return health <= 0; }
 
 void Ship::hit() { health--; }
+
+ShipType Ship::getType() const { return type; }
