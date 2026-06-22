@@ -16,6 +16,8 @@ endif()
 
 find_package(Boost REQUIRED)
 find_package(Catch2 3 REQUIRED)
+find_package(spdlog  REQUIRED)
+find_package(fmt  REQUIRED)
 
 add_executable(battleships)
 
@@ -42,6 +44,12 @@ target_sources(game_logic
 target_link_libraries(battleships
     PRIVATE
         game_logic
+)
+
+target_link_libraries(game_logic
+    PUBLIC
+    spdlog::spdlog
+    fmt::fmt
 )
 
 file(GLOB TEST_LOGIC_SOURCES CONFIGURE_DEPENDS "tests/game_logic/*.cpp")

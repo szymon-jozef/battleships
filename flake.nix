@@ -22,6 +22,7 @@
           cmake
           boost
           catch2_3
+          spdlog
         ];
 
         battleships = (
