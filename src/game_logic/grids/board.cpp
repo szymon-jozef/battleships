@@ -62,6 +62,10 @@ FieldState Board::takeShot(unsigned short int row, unsigned short int column) {
 
   if (grid[row][column].getState() == FieldState::TAKEN) {
     Ship *ship = grid[row][column].getShip();
+    if (!ship) {
+      throw std::logic_error("Taken field couldn't retrieve the ship. This "
+                             "__should never happen!__");
+    }
     ship->hit();
 
     if (ship->isSunk()) {

@@ -84,8 +84,14 @@ public:
   bool placeShip(std::shared_ptr<Ship> ship, unsigned short int startRow,
                  unsigned short int startColumn, bool isHorizontal);
 
-  /// @brief Check if there is any ship at given coordinates and return the
-  /// result. Marks the field as the result. Hits the ship if present.
+  /// @brief Check if there is any ship at given coordinates mark the field as
+  /// the result. Hits the ship if present.
+  ///
+  /// @return result of the shot as `FieldState`
+  ///
+  /// @throws
+  /// - logic_error when can't retrieve the ship under taken field
+  /// - invalid_argument when coords are out of bounds
   FieldState takeShot(unsigned short int row, unsigned short int column);
   virtual std::string asString() const override;
 };
