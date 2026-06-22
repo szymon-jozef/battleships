@@ -65,3 +65,18 @@ TEST_CASE("Board throws exceptions for out of bounds inputs",
     REQUIRE_THROWS(board.takeShot(11, 11));
   }
 }
+
+TEST_CASE("Radar logic: marking fields", "[radar]") {
+  Radar radar = Radar();
+  REQUIRE(radar.getFieldState(0, 0) == FieldState::EMPTY);
+
+  radar.markShotResult(FieldState::HIT, 0, 0);
+  REQUIRE(radar.getFieldState(0, 0) == FieldState::HIT);
+  radar.markShotResult(FieldState::HIT, 0, 1);
+  REQUIRE(radar.getFieldState(0, 1) == FieldState::HIT);
+
+  radar.markShotResult(FieldState::SUNK, 0, 2);
+  REQUIRE(radar.getFieldState(0, 2) == FieldState::SUNK);
+  radar.markShotResult(FieldState::SUNK, 0, 1);
+  REQUIRE(radar.getFieldState(0, 0) == FieldState::SUNK);
+}

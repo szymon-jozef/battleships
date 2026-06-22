@@ -101,6 +101,9 @@ public:
 
 class Radar : public BaseGrid {
 public:
+  /// @brief Default constructor defaults to 10x10 size
+  Radar();
   Radar(const unsigned short int width, const unsigned short int height);
-  void markShotResult(unsigned short int row, unsigned short int);
+  void markShotResult(FieldState shotResult, unsigned short int row,
+                      unsigned short int);
 };
