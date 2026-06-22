@@ -18,6 +18,7 @@ enum class ShipType {
 /// @brief Every ship has it's own type, UUID and hp.
 /// HP is the same as ship length
 class Ship {
+  // TODO! remove this is since it's useless
   boost::uuids::uuid id;
   ShipType type;
   unsigned int health;
@@ -68,6 +69,8 @@ public:
   FieldState getFieldState(unsigned short int row,
                            unsigned short int column) const;
   virtual std::string asString() const = 0;
+  /// @brief Uses BFS to mark all nearby Fields that are hit as sunk
+  void markNearbyAsSunk(unsigned short int row, unsigned short int column);
 };
 
 class Board : public BaseGrid {

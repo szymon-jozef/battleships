@@ -1,5 +1,6 @@
 #include "logic_models.hpp"
 #include <sstream>
+#include <tuple>
 
 BaseGrid::BaseGrid(const unsigned short int width,
                    const unsigned short int height)
@@ -19,4 +20,37 @@ std::string BaseGrid::asString() const {
     s << '\n';
   }
   return s.str();
+}
+
+void BaseGrid::markNearbyAsSunk(unsigned short int row,
+                                unsigned short int column) {
+  FieldState baseFieldState = grid[row][column].getState();
+
+  std::vector<std::tuple<unsigned short int, unsigned short int>> toCheck;
+
+  if (baseFieldState == FieldState::SUNK) {
+    toCheck.push_back(std::make_tuple(row, column));
+  }
+
+  while (!toCheck.empty()) {
+    auto [r, c] = toCheck.back();
+    toCheck.pop_back();
+
+    for (int i = -1; i <= 1; i++) {
+      for (int j = -1; j <= 1; j++) {
+
+        int checkRow = r + i;
+        int checkColumn = c + j;
+
+        if (checkRow >= 0 && checkRow < HEIGHT && checkColumn >= 0 &&
+            checkColumn < WIDTH) {
+
+          if (grid[checkRow][checkColumn].getState() == FieldState::HIT) {
+            toCheck.push_back(std::make_tuple(checkRow, checkColumn));
+            grid[checkRow][checkColumn].setState(FieldState::SUNK);
+          }
+        }
+      }
+    }
+  }
 }

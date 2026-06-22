@@ -65,10 +65,13 @@ FieldState Board::takeShot(unsigned short int row, unsigned short int column) {
     ship->hit();
 
     if (ship->isSunk()) {
-      // TODO! this should mark all the other fields of given ship as sunk
+      grid[row][column].setState(FieldState::SUNK);
+      markNearbyAsSunk(row, column);
       return FieldState::SUNK;
     }
     return FieldState::HIT;
   }
-  return FieldState::EMPTY;
+
+  grid[row][column].setState(FieldState::MISSED);
+  return FieldState::MISSED;
 }
