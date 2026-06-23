@@ -10,7 +10,7 @@
 /// @brief ShipType defines how many field the ship takes
 enum class ShipType { FourMaster = 4, ThreeMaster = 3, TwoMaster = 2, OneMaster = 1 };
 
-/// @brief Every ship has it's own type, UUID and hp.
+/// @brief Every ship has it's own type and hp.
 /// HP is the same as ship length
 class Ship {
   ShipType type;
@@ -90,6 +90,7 @@ public:
   /// @brief Default constructor defaults to 10x10 size
   Radar();
   Radar(const unsigned short int width, const unsigned short int height);
+  /// @throws invalid_argument for wrong row or column
   void markShotResult(FieldState shotResult, unsigned short int row, unsigned short int column);
 };
 
@@ -114,29 +115,40 @@ public:
 /// - `getBoardState`
 /// - `getRadarState`
 /// - `hasShips`
+/// - `getName`
 class Player {
   std::string name;
   boost::uuids::uuid id;
   Board board;
   Radar radar;
+  /// ShipsBay is a vector of pointer to the ships that will be placed on the board.
+  std::vector<std::shared_ptr<Ship>> shipsBay;
+  /// Ships is a vector of pointers to the ships
   std::vector<std::shared_ptr<Ship>> ships;
 
 public:
   /// Defaults to board and radar size `10 x 10`
   Player(std::string name);
   Player(std::string name, unsigned short int width, unsigned short int height);
-  /// Constructor for test purpose
+  /// Constructor only for test purpose
   Player(std::string name, std::vector<std::shared_ptr<Ship>> ships);
 
   /// @return Ship type at the end of ships vector. Return nullopt if empty
   std::optional<ShipType> getShipType();
   /// @brief Places the ship at the end of ships vector.
-  void placeShip(unsigned short int row, unsigned short int column, bool isHorizontal);
+  /// @throws:
+  /// - std::invalid_argument when input is out of bounds
+  bool placeShip(unsigned short int row, unsigned short int column, bool isHorizontal);
   FieldState recieveShot(unsigned short int row, unsigned short int column);
+  /// @brief Mark radar field
+  /// @throws invalid_argument for wrong row or column
   void markShotResult(FieldState shotResult, unsigned short int row, unsigned short int column);
   bool isDead();
   FieldState getBoardState(unsigned short int row, unsigned short int column);
   FieldState getRadarState(unsigned short int row, unsigned short int column);
   /// @return True if ships vector isn't empty. False otherwise
   bool hasShips();
+  std::string getName();
+  std::string boardAsString();
+  std::string radarAsString();
 };

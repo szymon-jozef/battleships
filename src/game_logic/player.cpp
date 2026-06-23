@@ -1,6 +1,7 @@
 #include "logic_models.hpp"
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/random_generator.hpp>
+#include <boost/uuid/uuid_io.hpp>
 #include <memory>
 #include <spdlog/spdlog.h>
 #include <string>
@@ -10,17 +11,18 @@ Player::Player(std::string name, unsigned short int width, unsigned short int he
     , id(boost::uuids::random_generator()())
     , board(Board(width, height))
     , radar(Radar(width, height)) {
-  spdlog::info("[Logic] Player named {} with ID: {} was created!", name, boost::lexical_cast<std::string>(id));
+  spdlog::info("[Logic] Player named {} with ID: {} was created!", name, boost::uuids::to_string(id));
   // there are 10 ships at total
-  ships.reserve(10);
+  shipsBay.reserve(10);
   for (int i = 0; i < 4; ++i)
-    ships.emplace_back(std::make_shared<Ship>(ShipType::OneMaster));
+    shipsBay.emplace_back(std::make_shared<Ship>(ShipType::OneMaster));
   for (int i = 0; i < 3; ++i)
-    ships.emplace_back(std::make_shared<Ship>(ShipType::TwoMaster));
+    shipsBay.emplace_back(std::make_shared<Ship>(ShipType::TwoMaster));
   for (int i = 0; i < 2; ++i)
-    ships.emplace_back(std::make_shared<Ship>(ShipType::ThreeMaster));
+    shipsBay.emplace_back(std::make_shared<Ship>(ShipType::ThreeMaster));
 
-  ships.emplace_back(std::make_shared<Ship>(ShipType::FourMaster));
+  shipsBay.emplace_back(std::make_shared<Ship>(ShipType::FourMaster));
+  ships = shipsBay;
 }
 
 Player::Player(std::string name)
@@ -31,27 +33,28 @@ Player::Player(std::string name, std::vector<std::shared_ptr<Ship>> ships)
     , id(boost::uuids::random_generator()())
     , board()
     , radar()
-    , ships(std::move(ships)) {
+    , shipsBay(std::move(ships))
+    , ships(shipsBay) {
   spdlog::info("[Logic] created test player!");
 }
 
 std::optional<ShipType> Player::getShipType() {
-  if (!ships.empty()) {
-    return ships.back()->getType();
+  if (!shipsBay.empty()) {
+    return shipsBay.back()->getType();
   }
   return std::nullopt;
 }
 
-void Player::placeShip(unsigned short int row, unsigned short int column, bool isHorizontal) {
-  if (ships.empty()) {
+bool Player::placeShip(unsigned short int row, unsigned short int column, bool isHorizontal) {
+  if (shipsBay.empty()) {
     spdlog::warn("[Logic] Tried placing a ship at ({}, {}), but the ships vector was empty!", row, column);
-    return;
+    return false;
   }
 
-  std::shared_ptr<Ship> currentShip = ships.back();
-  ships.pop_back(); // we take one ship off the stack
-
+  std::shared_ptr<Ship> currentShip = shipsBay.back();
   board.placeShip(currentShip, row, column, isHorizontal);
+  shipsBay.pop_back(); // we take one ship off the stack, after we place it
+  return true;
 }
 
 FieldState Player::recieveShot(unsigned short int row, unsigned short int column) {
@@ -80,5 +83,17 @@ FieldState Player::getRadarState(unsigned short int row, unsigned short int colu
 }
 
 bool Player::hasShips() {
-  return !ships.empty();
+  return !shipsBay.empty();
+}
+
+std::string Player::getName() {
+  return name;
+}
+
+std::string Player::boardAsString() {
+  return board.asString();
+}
+
+std::string Player::radarAsString() {
+  return radar.asString();
 }

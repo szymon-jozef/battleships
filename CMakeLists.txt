@@ -61,6 +61,9 @@ target_link_libraries(LogicTests
         game_logic
 )
 
+target_compile_options(LogicTests PUBLIC -fsanitize=address -g)
+target_link_options(LogicTests PUBLIC -fsanitize=address)
+
 include(CTest)
 include(Catch)
 catch_discover_tests(LogicTests)
