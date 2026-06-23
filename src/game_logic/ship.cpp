@@ -2,13 +2,17 @@
 #include <boost/uuid.hpp>
 
 Ship::Ship(ShipType type)
-    : type(type), health(static_cast<unsigned int>(type)) {
-  boost::uuids::random_generator gen;
-  id = gen();
+    : type(type)
+    , health(static_cast<unsigned int>(type)) {}
+
+bool Ship::isSunk() const {
+  return health <= 0;
 }
 
-bool Ship::isSunk() const { return health <= 0; }
+void Ship::hit() {
+  health--;
+}
 
-void Ship::hit() { health--; }
-
-ShipType Ship::getType() const { return type; }
+ShipType Ship::getType() const {
+  return type;
+}

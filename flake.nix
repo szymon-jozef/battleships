@@ -23,6 +23,8 @@
           boost
           catch2_3
           spdlog
+          clang-tools
+          clang-analyzer
         ];
 
         battleships = (
