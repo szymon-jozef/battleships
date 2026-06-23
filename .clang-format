@@ -1,0 +1,13 @@
+---
+BasedOnStyle: LLVM 
+
+ColumnLimit: 120 
+
+BinPackArguments: false
+BinPackParameters: false
+
+BreakConstructorInitializers: BeforeComma
+ConstructorInitializerIndentWidth: 4
+
+AllowShortFunctionsOnASingleLine: Empty
+---
