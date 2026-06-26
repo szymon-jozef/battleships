@@ -58,6 +58,8 @@ target_sources(networking
         src/networking
     FILES
         src/networking/messages.hpp
+        src/networking/data_types.hpp
+
 )
 
 target_link_libraries(networking
