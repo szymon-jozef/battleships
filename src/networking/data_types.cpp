@@ -23,10 +23,9 @@ Message MessageQueue::pop_back() {
   return msg;
 }
 
-Message MessageQueue::back() {
+const Message &MessageQueue::back() {
   std::scoped_lock lock(mutex);
-  Message msg = queue.back();
-  return msg;
+  return queue.back();
 }
 
 Message MessageQueue::pop_front() {
@@ -36,10 +35,9 @@ Message MessageQueue::pop_front() {
   return msg;
 }
 
-Message MessageQueue::front() {
+const Message &MessageQueue::front() {
   std::scoped_lock lock(mutex);
-  Message msg = queue.front();
-  return msg;
+  return queue.front();
 }
 
 size_t MessageQueue::size() const {

@@ -58,6 +58,7 @@ target_sources(networking
         src/networking
     FILES
         src/networking/messages.hpp
+        src/networking/connection.hpp
         src/networking/data_types.hpp
 
 )

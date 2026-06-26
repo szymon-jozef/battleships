@@ -1,0 +1,137 @@
+#include "connection.hpp"
+#include <boost/asio/connect.hpp>
+#include <boost/asio/post.hpp>
+#include <boost/asio/read.hpp>
+#include <boost/asio/write.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/uuid/random_generator.hpp>
+#include <spdlog/spdlog.h>
+
+namespace battleship {
+namespace networking {
+Connection::Connection(Owner owner,
+                       boost::asio::io_context &context,
+                       boost::asio::ip::tcp::socket socket,
+                       MessageQueue &qIn)
+    : owner(owner)
+    , socket(std::move(socket))
+    , context(context)
+    , queIn(qIn)
+    , id(boost::uuids::random_generator()()) {}
+
+void Connection::connectToServer(const boost::asio::ip::tcp::resolver::results_type &endpoints) {
+  switch (owner) {
+  case Owner::CLIENT:
+    boost::asio::async_connect(
+        socket,
+        endpoints,
+        [this, self = shared_from_this()](std::error_code ec, boost::asio::ip::tcp::endpoint endpoint) {
+          if (!ec)
+            readHeader();
+        });
+    break;
+  case Owner::SERVER:
+    // only client can connect to server
+    return;
+  }
+}
+
+void Connection::disconnect() {
+  if (isConnected()) {
+    boost::asio::post(context, [this]() { socket.close(); });
+  }
+}
+
+bool Connection::isConnected() const {
+  return socket.is_open();
+}
+
+void Connection::send(const Message &msg) {
+  boost::asio::post(context, [this, msg]() {
+    bool writingMessage = !queOut.empty();
+    queOut.push_back(msg);
+    if (!writingMessage) {
+      writeHeader();
+    }
+  });
+}
+
+void Connection::startListening() {
+  readHeader();
+}
+
+void Connection::writeHeader() {
+  boost::asio::async_write(socket,
+                           boost::asio::buffer(&queOut.front().header, sizeof(MessageHeader)),
+                           [this, self = shared_from_this()](std::error_code ec, size_t length) {
+                             if (ec) {
+                               socket.close();
+                               return;
+                             }
+                             if (queOut.front().body.size() > 0) {
+                               writeBody();
+                             } else {
+                               queOut.pop_front();
+                               if (!queOut.empty()) {
+                                 writeHeader();
+                               }
+                             }
+                           });
+}
+
+void Connection::writeBody() {
+  boost::asio::async_write(socket,
+                           boost::asio::buffer(queOut.front().body.msg.data(), queOut.front().body.size()),
+                           [this, self = shared_from_this()](std::error_code ec, size_t length) {
+                             if (ec) {
+                               spdlog::error("[Network] {} Write body fail", boost::uuids::to_string(id));
+                               socket.close();
+                               return;
+                             }
+                             queOut.pop_front();
+                             if (!queOut.empty()) {
+                               writeHeader();
+                             }
+                           });
+}
+
+void Connection::readHeader() {
+  boost::asio::async_read(socket,
+                          boost::asio::buffer(&temporaryMessage.header, sizeof(MessageHeader)),
+                          [this, self = shared_from_this()](std::error_code ec, size_t length) {
+                            if (ec) {
+                              spdlog::error("[Network] {} Read header fail.", boost::uuids::to_string(id));
+                              socket.close();
+                              return;
+                            }
+
+                            if (temporaryMessage.header.size > 0) {
+                              temporaryMessage.body.msg.resize(temporaryMessage.header.size);
+                              readBody();
+                            } else {
+                              addIncomingMessageQueue();
+                            }
+                          });
+}
+
+void Connection::readBody() {
+  boost::asio::async_read(socket,
+                          boost::asio::buffer(temporaryMessage.body.msg.data(), temporaryMessage.body.size()),
+                          [this, self = shared_from_this()](std::error_code ec, size_t length) {
+                            if (ec) {
+                              spdlog::error("[Network] {} Read body fail.", boost::uuids::to_string(id));
+                              socket.close();
+                              return;
+                            }
+
+                            addIncomingMessageQueue();
+                          });
+}
+
+void Connection::addIncomingMessageQueue() {
+  queIn.push_back(temporaryMessage);
+  readHeader();
+}
+
+} // namespace networking
+} // namespace battleship

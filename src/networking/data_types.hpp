@@ -14,8 +14,8 @@ public:
   void push_front(const Message &item);
   Message pop_back();
   Message pop_front();
-  Message back();
-  Message front();
+  const Message &back();
+  const Message &front();
   size_t size() const;
   bool empty() const;
 

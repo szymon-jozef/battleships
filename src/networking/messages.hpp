@@ -56,11 +56,10 @@ public:
   }
 };
 
-class Message {
+struct Message {
   MessageHeader header;
   MessageBody body;
 
-public:
   Message() = default;
   Message(MessageHeader header, MessageBody body);
 };
