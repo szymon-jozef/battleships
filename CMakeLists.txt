@@ -20,16 +20,14 @@ find_package(spdlog  REQUIRED)
 find_package(fmt  REQUIRED)
 
 add_executable(battleships)
-
 target_sources(battleships
     PRIVATE
         main.cpp
 )
 
+# === Game logic ===
 add_library(game_logic)
-
 file(GLOB_RECURSE LOGIC_SOURCES CONFIGURE_DEPENDS "src/game_logic/*.cpp")
-
 target_sources(game_logic
     PRIVATE
         ${LOGIC_SOURCES}
@@ -41,17 +39,44 @@ target_sources(game_logic
             src/game_logic/logic_models.hpp
 )
 
-target_link_libraries(battleships
-    PRIVATE
-        game_logic
-)
-
 target_link_libraries(game_logic
     PUBLIC
     spdlog::spdlog
     fmt::fmt
 )
 
+
+# === Networking ===
+add_library(networking)
+file(GLOB NETWORKING_SOURCES CONFIGURE_DEPENDS "src/networking/*.cpp")
+target_sources(networking
+    PRIVATE
+        ${NETWORKING_SOURCES}
+    PUBLIC
+    FILE_SET HEADERS
+    BASE_DIRS
+        src/networking
+    FILES
+        src/networking/network_models.hpp
+)
+
+target_link_libraries(networking
+    PUBLIC
+    spdlog::spdlog
+    fmt::fmt
+    Boost::headers
+)
+
+# === Linking ===
+target_link_libraries(battleships
+    PRIVATE
+        game_logic
+        networking
+)
+
+
+
+# === Tests ===
 file(GLOB TEST_LOGIC_SOURCES CONFIGURE_DEPENDS "tests/game_logic/*.cpp")
 add_executable(LogicTests ${TEST_LOGIC_SOURCES})
 
@@ -61,8 +86,8 @@ target_link_libraries(LogicTests
         game_logic
 )
 
-target_compile_options(LogicTests PUBLIC -fsanitize=address -g)
-target_link_options(LogicTests PUBLIC -fsanitize=address)
+target_compile_options(LogicTests PRIVATE -fsanitize=address -g)
+target_link_options(LogicTests PRIVATE -fsanitize=address)
 
 include(CTest)
 include(Catch)
