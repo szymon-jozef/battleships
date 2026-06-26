@@ -57,7 +57,7 @@ target_sources(networking
     BASE_DIRS
         src/networking
     FILES
-        src/networking/network_models.hpp
+        src/networking/messages.hpp
 )
 
 target_link_libraries(networking
