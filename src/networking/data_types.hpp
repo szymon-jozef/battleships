@@ -1,5 +1,6 @@
 #pragma once
 #include "messages.hpp"
+#include <boost/uuid.hpp>
 #include <deque>
 #include <mutex>
 
