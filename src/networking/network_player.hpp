@@ -1,4 +1,5 @@
 #include "connection.hpp"
+#include <algorithm>
 #include <boost/uuid.hpp>
 #include <memory>
 #include <spdlog/spdlog.h>
@@ -24,9 +25,8 @@ struct NetworkPlayer {
 /// @brief Container for storing players
 class PlayerList {
   std::mutex mutex;
-  std::array<std::shared_ptr<NetworkPlayer>, 2> playerList;
+  std::vector<std::shared_ptr<NetworkPlayer>> playerList;
   std::shared_ptr<NetworkPlayer> currentTurn = nullptr;
-  uint8_t size = 0;
 
 public:
   PlayerList() = default;
@@ -37,11 +37,11 @@ public:
   /// @brief Add a player to the list
   void push(std::shared_ptr<NetworkPlayer> player) {
     std::scoped_lock lock(mutex);
-    if (size >= 2) {
+    if (playerList.size() >= 2) {
       spdlog::error("[Network] Tried to push into playerList but it was full!");
       return;
     }
-    playerList[size++] = player;
+    playerList.push_back(player);
 
     // if currentTurn wasn't set yet we default it to the first connected player
     currentTurn = currentTurn == nullptr ? player : currentTurn;
@@ -50,17 +50,24 @@ public:
   /// @brief Remove every player from the list
   void clear() {
     std::scoped_lock lock(mutex);
-    for (int i = 0; i < size; i++) {
-      playerList[i] = nullptr;
+    playerList.clear();
+    currentTurn = nullptr;
+  }
+
+  void remove(std::shared_ptr<NetworkPlayer> player) {
+    std::scoped_lock lock(mutex);
+    std::erase(playerList, player);
+
+    if (currentTurn == player) {
+      currentTurn = playerList.empty() ? nullptr : playerList[0];
     }
-    size = 0;
   }
 
   void switchTurn() {
     std::scoped_lock lock(mutex);
-    for (int i = 0; i < size; i++) {
-      if (currentTurn != playerList[i]) {
-        currentTurn = playerList[i];
+    for (auto &player : playerList) {
+      if (currentTurn != player) {
+        currentTurn = player;
         return;
       }
     }
