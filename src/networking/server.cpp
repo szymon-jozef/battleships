@@ -64,6 +64,29 @@ void Server::waitForConnection() {
   });
 }
 
+void Server::messageClient(std::shared_ptr<NetworkPlayer> player, const Message &msg) {
+  if (!player->connection || !player->connection->isConnected()) {
+    onClientDisconnect(player->connection);
+    player->connection.reset();
+    playerList.remove(player);
+    return;
+  }
+
+  player->connection->send(msg);
+}
+
+void Server::broadcast(const Message &msg) {
+  for (const auto &player : playerList.getPlayers()) {
+    messageClient(player, msg);
+  }
+}
+
+void Server::update(size_t maxMessages, bool) {
+  if (wait) {
+    queIn.wait();
+  }
+}
+
 // === Event handlers ===
 bool Server::onClientConnect(std::shared_ptr<Connection> client) {
   return true;

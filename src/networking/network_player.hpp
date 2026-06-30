@@ -1,5 +1,4 @@
 #include "connection.hpp"
-#include <algorithm>
 #include <boost/uuid.hpp>
 #include <memory>
 #include <spdlog/spdlog.h>
@@ -76,6 +75,11 @@ public:
   std::shared_ptr<NetworkPlayer> getCurrentTurn() {
     std::scoped_lock lock(mutex);
     return currentTurn;
+  }
+
+  std::vector<std::shared_ptr<NetworkPlayer>> getPlayers() const {
+    std::scoped_lock lock(mutex);
+    return playerList;
   }
 };
 } // namespace networking
