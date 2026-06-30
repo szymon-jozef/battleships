@@ -1,5 +1,6 @@
 #include "server.hpp"
 #include "connection.hpp"
+#include "messages.hpp"
 #include <boost/lexical_cast.hpp>
 #include <exception>
 #include <spdlog/spdlog.h>
@@ -81,9 +82,16 @@ void Server::broadcast(const Message &msg) {
   }
 }
 
-void Server::update(size_t maxMessages, bool) {
+void Server::update(size_t maxMessages, bool wait) {
   if (wait) {
     queIn.wait();
+  }
+
+  size_t messageCount = 0;
+  while (messageCount < maxMessages && !queIn.empty()) {
+    auto msg = queIn.pop_front();
+    onMessage(msg.remote, msg.msg);
+    messageCount++;
   }
 }
 

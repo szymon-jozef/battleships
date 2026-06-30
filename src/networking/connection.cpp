@@ -49,7 +49,7 @@ bool Connection::isConnected() const {
 void Connection::send(const Message &msg) {
   boost::asio::post(context, [this, msg]() {
     bool writingMessage = !queOut.empty();
-    queOut.push_back(msg);
+    queOut.push_back({nullptr, msg});
     if (!writingMessage) {
       writeHeader();
     }
@@ -62,13 +62,13 @@ void Connection::startListening() {
 
 void Connection::writeHeader() {
   boost::asio::async_write(socket,
-                           boost::asio::buffer(&queOut.front().header, sizeof(MessageHeader)),
+                           boost::asio::buffer(&queOut.front().msg.header, sizeof(MessageHeader)),
                            [this, self = shared_from_this()](std::error_code ec, size_t length) {
                              if (ec) {
                                socket.close();
                                return;
                              }
-                             if (queOut.front().body.size() > 0) {
+                             if (queOut.front().msg.body.size() > 0) {
                                writeBody();
                              } else {
                                queOut.pop_front();
@@ -81,7 +81,7 @@ void Connection::writeHeader() {
 
 void Connection::writeBody() {
   boost::asio::async_write(socket,
-                           boost::asio::buffer(queOut.front().body.msg.data(), queOut.front().body.size()),
+                           boost::asio::buffer(queOut.front().msg.body.msg.data(), queOut.front().msg.body.size()),
                            [this, self = shared_from_this()](std::error_code ec, size_t length) {
                              if (ec) {
                                spdlog::error("[Network] {} Write body fail", boost::uuids::to_string(id));
@@ -129,7 +129,14 @@ void Connection::readBody() {
 }
 
 void Connection::addIncomingMessageQueue() {
-  queIn.push_back(temporaryMessage);
+  switch (owner) {
+  case Owner::SERVER:
+    queIn.push_back({shared_from_this(), temporaryMessage});
+    break;
+  case Owner::CLIENT:
+    queIn.push_back({nullptr, temporaryMessage});
+    break;
+  }
   readHeader();
 }
 

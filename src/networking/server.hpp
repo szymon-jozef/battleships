@@ -7,6 +7,7 @@
 
 namespace battleship {
 namespace networking {
+
 class Server {
   MessageQueue queIn;
   PlayerList playerList;

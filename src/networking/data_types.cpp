@@ -2,13 +2,15 @@
 
 namespace battleship {
 namespace networking {
-void MessageQueue::push_back(const Message &item) {
+void MessageQueue::push_back(const OwnedMessage &item) {
   std::scoped_lock lock(mutex);
   queue.push_back(item);
+  cvBlock.notify_one();
 }
-void MessageQueue::push_front(const Message &item) {
+void MessageQueue::push_front(const OwnedMessage &item) {
   std::scoped_lock lock(mutex);
   queue.push_front(item);
+  cvBlock.notify_one();
 }
 
 bool MessageQueue::empty() const {
@@ -16,26 +18,26 @@ bool MessageQueue::empty() const {
   return queue.empty();
 }
 
-Message MessageQueue::pop_back() {
+OwnedMessage MessageQueue::pop_back() {
   std::scoped_lock lock(mutex);
-  Message msg = std::move(queue.back());
+  OwnedMessage msg = std::move(queue.back());
   queue.pop_back();
   return msg;
 }
 
-const Message &MessageQueue::back() {
+const OwnedMessage &MessageQueue::back() {
   std::scoped_lock lock(mutex);
   return queue.back();
 }
 
-Message MessageQueue::pop_front() {
+OwnedMessage MessageQueue::pop_front() {
   std::scoped_lock lock(mutex);
-  Message msg = std::move(queue.front());
+  OwnedMessage msg = std::move(queue.front());
   queue.pop_front();
   return msg;
 }
 
-const Message &MessageQueue::front() {
+const OwnedMessage &MessageQueue::front() {
   std::scoped_lock lock(mutex);
   return queue.front();
 }
@@ -43,6 +45,11 @@ const Message &MessageQueue::front() {
 size_t MessageQueue::size() const {
   std::scoped_lock lock(mutex);
   return queue.size();
+}
+
+void MessageQueue::wait() {
+  std::unique_lock<std::mutex> lock(mutex);
+  cvBlock.wait(lock, [this]() { return !queue.empty(); });
 }
 } // namespace networking
 } // namespace battleship

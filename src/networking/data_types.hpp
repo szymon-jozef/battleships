@@ -1,26 +1,37 @@
 #pragma once
 #include "messages.hpp"
 #include <boost/uuid.hpp>
+#include <condition_variable>
 #include <deque>
 #include <mutex>
 
 namespace battleship {
 namespace networking {
+class Connection;
+class OwnedMessage;
+
 class MessageQueue {
-  std::deque<Message> queue;
+  std::deque<OwnedMessage> queue;
   mutable std::mutex mutex;
+  std::condition_variable cvBlock;
 
 public:
-  void push_back(const Message &item);
-  void push_front(const Message &item);
-  Message pop_back();
-  Message pop_front();
-  const Message &back();
-  const Message &front();
+  void push_back(const OwnedMessage &item);
+  void push_front(const OwnedMessage &item);
+  OwnedMessage pop_back();
+  OwnedMessage pop_front();
+  const OwnedMessage &back();
+  const OwnedMessage &front();
   size_t size() const;
   bool empty() const;
+  void wait();
 
   MessageQueue() = default;
+};
+
+struct OwnedMessage {
+  std::shared_ptr<Connection> remote;
+  Message msg;
 };
 } // namespace networking
 } // namespace battleship
