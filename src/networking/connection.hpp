@@ -10,7 +10,19 @@ namespace battleship {
 namespace networking {
 
 class Connection : public std::enable_shared_from_this<Connection> {
+public:
   enum class Owner { SERVER, CLIENT };
+  Connection(Owner owner, boost::asio::io_context &context, boost::asio::ip::tcp::socket socket, MessageQueue &qIn);
+  boost::uuids::uuid getId() const {
+    return id;
+  };
+  void connectToServer(const boost::asio::ip::tcp::resolver::results_type &endpoints);
+  void disconnect();
+  bool isConnected() const;
+  void startListening();
+  void send(const Message &msg);
+
+private:
   boost::asio::ip::tcp::socket socket;
   boost::asio::io_context &context;
   MessageQueue &queIn, queOut;
@@ -23,17 +35,6 @@ class Connection : public std::enable_shared_from_this<Connection> {
   void readHeader();
   void readBody();
   void addIncomingMessageQueue();
-
-public:
-  Connection(Owner owner, boost::asio::io_context &context, boost::asio::ip::tcp::socket socket, MessageQueue &qIn);
-  boost::uuids::uuid getId() const {
-    return id;
-  };
-  void connectToServer(const boost::asio::ip::tcp::resolver::results_type &endpoints);
-  void disconnect();
-  bool isConnected() const;
-  void startListening();
-  void send(const Message &msg);
 };
 } // namespace networking
 } // namespace battleship
