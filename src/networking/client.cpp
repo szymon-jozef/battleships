@@ -28,5 +28,16 @@ bool Client::connect(const std::string &host, const uint16_t port) {
   return true;
 }
 
+void Client::disconnect() {
+  if (isConnected()) {
+    connection->disconnect();
+  }
+
+  context.stop();
+  if (thread.joinable()) {
+    thread.join();
+  }
+}
+
 } // namespace networking
 } // namespace battleship
