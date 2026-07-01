@@ -26,6 +26,7 @@ class Server {
   bool onClientConnect(std::shared_ptr<Connection> client);
   void onClientDisconnect(std::shared_ptr<Connection> client);
   void onMessage(std::shared_ptr<Connection> client, Message &msg);
+  void handleConnectionStatus(std::shared_ptr<Connection> client, Message &msg);
 
 public:
   Server(uint16_t port);

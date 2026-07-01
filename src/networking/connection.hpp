@@ -16,6 +16,7 @@ public:
   boost::uuids::uuid getId() const {
     return id;
   };
+  void setId(boost::uuids::uuid id);
   void connectToServer(const boost::asio::ip::tcp::resolver::results_type &endpoints);
   void disconnect();
   bool isConnected() const;

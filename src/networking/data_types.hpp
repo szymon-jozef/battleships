@@ -33,5 +33,9 @@ struct OwnedMessage {
   std::shared_ptr<Connection> remote;
   Message msg;
 };
+
+struct PlayerNameMessage {
+  char name[32]{};
+};
 } // namespace networking
 } // namespace battleship

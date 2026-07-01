@@ -1,6 +1,7 @@
 #include "connection.hpp"
 #include <boost/uuid.hpp>
 #include <memory>
+#include <mutex>
 #include <spdlog/spdlog.h>
 #include <string>
 
@@ -80,6 +81,16 @@ public:
   std::vector<std::shared_ptr<NetworkPlayer>> getPlayers() const {
     std::scoped_lock lock(mutex);
     return playerList;
+  }
+
+  std::shared_ptr<NetworkPlayer> getPlayerById(boost::uuids::uuid id) const {
+    std::scoped_lock lock(mutex);
+    for (auto &player : playerList) {
+      if (player->connection->getId() == id) {
+        return player;
+      }
+    }
+    return nullptr;
   }
 };
 } // namespace networking

@@ -2,6 +2,7 @@
 #include "connection.hpp"
 #include "messages.hpp"
 #include <boost/lexical_cast.hpp>
+#include <boost/uuid/uuid.hpp>
 #include <exception>
 #include <spdlog/spdlog.h>
 #include <system_error>
@@ -56,7 +57,6 @@ void Server::waitForConnection() {
       return;
     }
 
-    // TODO! change this example name to name from message when implemented
     playerList.push(std::make_shared<NetworkPlayer>("example_name", conn));
     conn->startListening();
     spdlog::info("[Server] Connection approved!");
@@ -68,8 +68,6 @@ void Server::waitForConnection() {
 void Server::messageClient(std::shared_ptr<NetworkPlayer> player, const Message &msg) {
   if (!player->connection || !player->connection->isConnected()) {
     onClientDisconnect(player->connection);
-    player->connection.reset();
-    playerList.remove(player);
     return;
   }
 
@@ -99,8 +97,38 @@ void Server::update(size_t maxMessages, bool wait) {
 bool Server::onClientConnect(std::shared_ptr<Connection> client) {
   return true;
 }
-void Server::onClientDisconnect(std::shared_ptr<Connection> client) {}
-void Server::onMessage(std::shared_ptr<Connection> client, Message &msg) {}
+void Server::onClientDisconnect(std::shared_ptr<Connection> client) {
+  auto player = playerList.getPlayerById(client->getId());
+  player->connection.reset();
+  playerList.remove(player);
+}
+void Server::onMessage(std::shared_ptr<Connection> client, Message &msg) {
+  switch (msg.header.id) {
+  case MessageType::CLIENT_CONNECTION_STATUS:
+    handleConnectionStatus(client, msg);
+    break;
+  case MessageType::CLIENT_RECEIVE_ATTACK:
+    break;
+  case MessageType::CLIENT_GAME_STATUS:
+    break;
+  case MessageType::CLIENT_SEND_ATTACK:
+    break;
+  case MessageType::SERVER_GAME_END:
+    break;
+  case MessageType::SERVER_GAME_STATUS:
+    break;
+  }
+}
+
+void Server::handleConnectionStatus(std::shared_ptr<Connection> client, Message &msg) {
+  auto newtworkPlayer = playerList.getPlayerById(client->getId());
+  if (!newtworkPlayer) {
+    spdlog::error("[Server] player not on playerlist sent connnection status!");
+    return;
+  }
+  auto name = msg.body.pop<PlayerNameMessage>();
+  newtworkPlayer->name = std::string(name.name);
+}
 
 } // namespace networking
 } // namespace battleship
