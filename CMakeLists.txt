@@ -18,6 +18,9 @@ find_package(Boost REQUIRED)
 find_package(Catch2 3 REQUIRED)
 find_package(spdlog  REQUIRED)
 find_package(fmt  REQUIRED)
+find_package(Threads REQUIRED)
+
+set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 add_executable(battleships)
 target_sources(battleships
@@ -57,9 +60,12 @@ target_sources(networking
     BASE_DIRS
         src/networking
     FILES
-        src/networking/messages.hpp
+        src/networking/client.hpp
         src/networking/connection.hpp
         src/networking/data_types.hpp
+        src/networking/messages.hpp
+        src/networking/network_player.hpp
+        src/networking/server.hpp
 
 )
 
@@ -68,6 +74,19 @@ target_link_libraries(networking
     spdlog::spdlog
     fmt::fmt
     Boost::headers
+    Threads::Threads
+)
+
+add_executable(server_main)
+target_sources(server_main
+    PRIVATE
+        src/apps/server_main.cpp
+)
+
+add_executable(client_main)
+target_sources(client_main
+    PRIVATE
+        src/apps/client_main.cpp
 )
 
 # === Linking ===
@@ -77,6 +96,15 @@ target_link_libraries(battleships
         networking
 )
 
+target_link_libraries(server_main
+    PRIVATE
+        networking
+)
+
+target_link_libraries(client_main
+    PRIVATE
+        networking
+)
 
 
 # === Tests ===

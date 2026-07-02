@@ -60,5 +60,9 @@ void Client::sendHandshake(std::string name) {
   send(msg);
 }
 
+bool Client::isConnected() const {
+  return connection ? connection->isConnected() : false;
+}
+
 } // namespace networking
 } // namespace battleship

@@ -24,7 +24,7 @@ struct NetworkPlayer {
 
 /// @brief Container for storing players
 class PlayerList {
-  std::mutex mutex;
+  mutable std::mutex mutex;
   std::vector<std::shared_ptr<NetworkPlayer>> playerList;
   std::shared_ptr<NetworkPlayer> currentTurn = nullptr;
 
