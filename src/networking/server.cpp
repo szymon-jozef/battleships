@@ -99,13 +99,19 @@ bool Server::onClientConnect(std::shared_ptr<Connection> client) {
 }
 void Server::onClientDisconnect(std::shared_ptr<Connection> client) {
   auto player = playerList.getPlayerById(client->getId());
+  if (!player) {
+    return;
+  }
+
   player->connection.reset();
   playerList.remove(player);
 }
 void Server::onMessage(std::shared_ptr<Connection> client, Message &msg) {
   switch (msg.header.id) {
+  case MessageType::CLIENT_HANDSHAKE:
+    handleHandshake(client, msg);
+    break;
   case MessageType::CLIENT_CONNECTION_STATUS:
-    handleConnectionStatus(client, msg);
     break;
   case MessageType::CLIENT_RECEIVE_ATTACK:
     break;
@@ -120,7 +126,7 @@ void Server::onMessage(std::shared_ptr<Connection> client, Message &msg) {
   }
 }
 
-void Server::handleConnectionStatus(std::shared_ptr<Connection> client, Message &msg) {
+void Server::handleHandshake(std::shared_ptr<Connection> client, Message &msg) {
   auto newtworkPlayer = playerList.getPlayerById(client->getId());
   if (!newtworkPlayer) {
     spdlog::error("[Server] player not on playerlist sent connnection status!");

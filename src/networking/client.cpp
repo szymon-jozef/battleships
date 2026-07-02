@@ -1,4 +1,5 @@
 #include "client.hpp"
+#include "data_types.hpp"
 #include <boost/asio/ip/basic_resolver.hpp>
 #include <exception>
 #include <memory>
@@ -43,6 +44,20 @@ void Client::send(const Message &msg) {
   if (isConnected()) {
     connection->send(msg);
   }
+}
+
+void Client::sendHandshake(std::string name) {
+  Message msg;
+  msg.header.id = MessageType::CLIENT_HANDSHAKE;
+  PlayerNameMessage pname;
+
+  std::strncpy(pname.name, name.c_str(), sizeof(pname.name) - 1);
+  if (sizeof(pname.name) < name.length()) {
+    spdlog::warn("[Client] Given username is longer than {}, so it will be cut short!", sizeof(pname.name));
+  }
+
+  msg.body.push(pname);
+  send(msg);
 }
 
 } // namespace networking
