@@ -12,6 +12,7 @@ int main() {
     while (true) {
       server.update();
     }
+
   } else {
     spdlog::error("Server didn't run, you stupid fuck!");
   }

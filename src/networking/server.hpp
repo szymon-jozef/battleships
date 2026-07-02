@@ -37,7 +37,7 @@ public:
   void messageClient(std::shared_ptr<NetworkPlayer> player, const Message &msg);
   void broadcast(const Message &msg);
   void update(size_t maxMessages = -1,
-              bool wait = false); // since size_t is unsigned -1 will be changed to max int value
+              bool wait = true); // since size_t is unsigned -1 will be changed to max int value
 };
 } // namespace networking
 } // namespace battleship

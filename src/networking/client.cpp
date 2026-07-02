@@ -40,6 +40,10 @@ void Client::disconnect() {
   }
 }
 
+bool Client::isConnected() const {
+  return connection ? connection->isConnected() : false;
+}
+
 void Client::send(const Message &msg) {
   if (isConnected()) {
     connection->send(msg);
@@ -57,11 +61,9 @@ void Client::sendHandshake(std::string name) {
   }
 
   msg.body.push(pname);
-  send(msg);
-}
+  msg.header.size = msg.body.size();
 
-bool Client::isConnected() const {
-  return connection ? connection->isConnected() : false;
+  send(msg);
 }
 
 } // namespace networking

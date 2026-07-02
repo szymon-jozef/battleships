@@ -1,14 +1,18 @@
 #include "connection.hpp"
 #include <boost/asio/connect.hpp>
+#include <boost/asio/error.hpp>
 #include <boost/asio/post.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/random_generator.hpp>
+#include <boost/uuid/uuid_io.hpp>
 #include <spdlog/spdlog.h>
 
 namespace battleship {
 namespace networking {
+using boost::system::error_code;
+
 Connection::Connection(Owner owner,
                        boost::asio::io_context &context,
                        boost::asio::ip::tcp::socket socket,
@@ -98,9 +102,13 @@ void Connection::writeBody() {
 void Connection::readHeader() {
   boost::asio::async_read(socket,
                           boost::asio::buffer(&temporaryMessage.header, sizeof(MessageHeader)),
-                          [this, self = shared_from_this()](std::error_code ec, size_t length) {
+                          [this, self = shared_from_this()](boost::system::error_code ec, size_t length) {
                             if (ec) {
-                              spdlog::error("[Network] {} Read header fail.", boost::uuids::to_string(id));
+                              if (ec == boost::asio::error::eof || ec == boost::asio::error::connection_reset) {
+                                spdlog::info("[Network] {} disconnected", boost::uuids::to_string(id));
+                              } else {
+                                spdlog::error("[Network] {} Read header fail.", boost::uuids::to_string(id));
+                              }
                               socket.close();
                               return;
                             }

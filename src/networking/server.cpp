@@ -134,6 +134,9 @@ void Server::handleHandshake(std::shared_ptr<Connection> client, Message &msg) {
   }
   auto name = msg.body.pop<PlayerNameMessage>();
   newtworkPlayer->name = std::string(name.name);
+  spdlog::info("[Server] >>> Player {} sent a handshake :D (ID: {})",
+               newtworkPlayer->name,
+               boost::lexical_cast<std::string>(newtworkPlayer->connection->getId()));
 }
 
 } // namespace networking
