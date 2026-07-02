@@ -39,5 +39,11 @@ void Client::disconnect() {
   }
 }
 
+void Client::send(const Message &msg) {
+  if (isConnected()) {
+    connection->send(msg);
+  }
+}
+
 } // namespace networking
 } // namespace battleship
