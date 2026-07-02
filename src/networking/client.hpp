@@ -13,6 +13,7 @@ class Client {
   std::thread thread;
   std::shared_ptr<Connection> connection;
   MessageQueue queIn;
+  GameStatus currentGameStatus;
 
 public:
   Client() = default;
@@ -22,9 +23,11 @@ public:
   void disconnect();
   bool isConnected() const;
   void send(const Message &msg);
+  void update(size_t maxMessages = -1, bool wait = true);
+  void onMessage(Message &msg);
 
   void sendHandshake(std::string name);
-  void sendConnectionStatus(ConnectionStatus status);
+  void sendGameStatus(GameStatus status);
   void sendAttack(unsigned short int row, unsigned short int column);
   void recieveAttack();
 };

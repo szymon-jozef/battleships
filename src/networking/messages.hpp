@@ -8,7 +8,7 @@ namespace battleship {
 namespace networking {
 enum class MessageType {
   CLIENT_HANDSHAKE,
-  CLIENT_CONNECTION_STATUS,
+  CLIENT_GAME_STATUS,
   CLIENT_SEND_ATTACK,
   CLIENT_RECEIVE_ATTACK,
 

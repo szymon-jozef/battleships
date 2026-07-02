@@ -11,6 +11,7 @@ namespace networking {
 /// @brief Class made for the server to store it's players
 struct NetworkPlayer {
   std::string name;
+  GameStatus currentGameStatus;
   std::shared_ptr<Connection> connection;
 
   NetworkPlayer(std::string name, std::shared_ptr<Connection> connection)
@@ -91,6 +92,28 @@ public:
       }
     }
     return nullptr;
+  }
+
+  /// @brief Check if every player has the same gameStatus and act accordingly
+  /// @return GameStatus::PLACING_SHIPS when every player is ready, etc.
+  std::optional<GameStatus> updateGameStatus() {
+    std::scoped_lock lock(mutex);
+
+    if (playerList.size() != 2) {
+      return std::nullopt;
+    }
+
+    if (playerList[0]->currentGameStatus == playerList[1]->currentGameStatus) {
+      switch (playerList[0]->currentGameStatus) {
+      case GameStatus::LOBBY:
+        return GameStatus::PLACING_SHIPS;
+      case GameStatus::PLACING_SHIPS:
+        return GameStatus::WAR;
+      default:
+        return std::nullopt;
+      }
+    }
+    return std::nullopt;
   }
 };
 } // namespace networking

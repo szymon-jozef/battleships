@@ -16,6 +16,7 @@ class Server {
   std::thread thread;
   /// Handles new incoming connections
   boost::asio::ip::tcp::acceptor acceptor;
+  GameStatus globalGameStatus = GameStatus::LOBBY;
 
   /// Stop function is private since server should stop itself, when the game is ended.
   void stop();
@@ -26,7 +27,11 @@ class Server {
   bool onClientConnect(std::shared_ptr<Connection> client);
   void onClientDisconnect(std::shared_ptr<Connection> client);
   void onMessage(std::shared_ptr<Connection> client, Message &msg);
+
+  /// @brief Set player name
   void handleHandshake(std::shared_ptr<Connection> client, Message &msg);
+  /// @brief Receives new game status from the player, updates global and notifies players about it
+  void handleGameStatusChange(std::shared_ptr<Connection> client, Message &msg);
 
 public:
   Server(uint16_t port);

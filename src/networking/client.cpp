@@ -1,5 +1,6 @@
 #include "client.hpp"
 #include "data_types.hpp"
+#include "messages.hpp"
 #include <boost/asio/ip/basic_resolver.hpp>
 #include <exception>
 #include <memory>
@@ -50,6 +51,33 @@ void Client::send(const Message &msg) {
   }
 }
 
+void Client::update(size_t maxMessages, bool wait) {
+  if (wait) {
+    queIn.wait();
+  }
+
+  size_t messageCount = 0;
+  while (messageCount < maxMessages && !queIn.empty()) {
+    auto msg = queIn.pop_front();
+    onMessage(msg.msg);
+  }
+}
+
+void Client::onMessage(Message &msg) {
+  switch (msg.header.id) {
+  case battleship::networking::MessageType::SERVER_GAME_STATUS: {
+    GameStatus newGameStatus = msg.body.pop<GameStatus>();
+    spdlog::info("[Client] server decided that current game status is {}", static_cast<int>(newGameStatus));
+    currentGameStatus = newGameStatus;
+    break;
+  }
+  case battleship::networking::MessageType::SERVER_GAME_END:
+    break;
+  default:
+    break;
+  }
+}
+
 void Client::sendHandshake(std::string name) {
   Message msg;
   msg.header.id = MessageType::CLIENT_HANDSHAKE;
@@ -62,6 +90,14 @@ void Client::sendHandshake(std::string name) {
 
   msg.push(pname);
 
+  send(msg);
+}
+
+void Client::sendGameStatus(GameStatus status) {
+  spdlog::info("[Client] sending {} game status to the server...", static_cast<int>(status));
+  Message msg;
+  msg.header.id = MessageType::CLIENT_GAME_STATUS;
+  msg.push(status);
   send(msg);
 }
 

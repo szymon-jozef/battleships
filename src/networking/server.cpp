@@ -111,15 +111,14 @@ void Server::onMessage(std::shared_ptr<Connection> client, Message &msg) {
   case MessageType::CLIENT_HANDSHAKE:
     handleHandshake(client, msg);
     break;
-  case MessageType::CLIENT_CONNECTION_STATUS:
+  case MessageType::CLIENT_GAME_STATUS:
+    handleGameStatusChange(client, msg);
     break;
   case MessageType::CLIENT_RECEIVE_ATTACK:
     break;
   case MessageType::CLIENT_SEND_ATTACK:
     break;
-  case MessageType::SERVER_GAME_END:
-    break;
-  case MessageType::SERVER_GAME_STATUS:
+  default:
     break;
   }
 }
@@ -135,6 +134,27 @@ void Server::handleHandshake(std::shared_ptr<Connection> client, Message &msg) {
   spdlog::info("[Server] >>> Player {} sent a handshake :D (ID: {})",
                newtworkPlayer->name,
                boost::lexical_cast<std::string>(newtworkPlayer->connection->getId()));
+}
+
+void Server::handleGameStatusChange(std::shared_ptr<Connection> client, Message &msg) {
+  auto networkPlayer = playerList.getPlayerById(client->getId());
+  GameStatus status = msg.pop<GameStatus>();
+  networkPlayer->currentGameStatus = status;
+  spdlog::info("[Server] Player {} sent his new game status is {}",
+               boost::uuids::to_string(networkPlayer->getId()),
+               static_cast<int>(status));
+
+  auto newGameStatus = playerList.updateGameStatus();
+  if (newGameStatus) {
+    globalGameStatus = newGameStatus.value();
+    spdlog::info("[Server] Global game status was updated to {}. Notifying players...",
+                 static_cast<int>(globalGameStatus));
+
+    Message msg;
+    msg.header.id = MessageType::SERVER_GAME_STATUS;
+    msg.push(globalGameStatus);
+    broadcast(msg);
+  }
 }
 
 } // namespace networking
