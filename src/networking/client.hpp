@@ -22,7 +22,11 @@ public:
   void disconnect();
   bool isConnected() const;
   void send(const Message &msg);
+
   void sendHandshake(std::string name);
+  void sendConnectionStatus(ConnectionStatus status);
+  void sendAttack(unsigned short int row, unsigned short int column);
+  void recieveAttack();
 };
 } // namespace networking
 } // namespace battleship

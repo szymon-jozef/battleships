@@ -9,7 +9,6 @@ namespace networking {
 enum class MessageType {
   CLIENT_HANDSHAKE,
   CLIENT_CONNECTION_STATUS,
-  CLIENT_GAME_STATUS,
   CLIENT_SEND_ATTACK,
   CLIENT_RECEIVE_ATTACK,
 
@@ -63,6 +62,17 @@ struct Message {
 
   Message() = default;
   Message(MessageHeader header, MessageBody body);
+
+  template <typename T> void push(const T &data) {
+    body.push(data);
+    header.size = body.size();
+  }
+
+  template <typename T> T pop() {
+    T data = body.template pop<T>();
+    header.size = body.size();
+    return data;
+  }
 };
 
 } // namespace networking

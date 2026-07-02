@@ -37,5 +37,7 @@ struct OwnedMessage {
 struct PlayerNameMessage {
   char name[32]{};
 };
+
+enum class ConnectionStatus { LOBBY, PLACING_SHIPS, WAR, GAME_FINISH };
 } // namespace networking
 } // namespace battleship

@@ -60,8 +60,7 @@ void Client::sendHandshake(std::string name) {
     spdlog::warn("[Client] Given username is longer than {}, so it will be cut short!", sizeof(pname.name));
   }
 
-  msg.body.push(pname);
-  msg.header.size = msg.body.size();
+  msg.push(pname);
 
   send(msg);
 }

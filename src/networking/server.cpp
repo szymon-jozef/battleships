@@ -115,8 +115,6 @@ void Server::onMessage(std::shared_ptr<Connection> client, Message &msg) {
     break;
   case MessageType::CLIENT_RECEIVE_ATTACK:
     break;
-  case MessageType::CLIENT_GAME_STATUS:
-    break;
   case MessageType::CLIENT_SEND_ATTACK:
     break;
   case MessageType::SERVER_GAME_END:
@@ -132,7 +130,7 @@ void Server::handleHandshake(std::shared_ptr<Connection> client, Message &msg) {
     spdlog::error("[Server] player not on playerlist sent connnection status!");
     return;
   }
-  auto name = msg.body.pop<PlayerNameMessage>();
+  auto name = msg.pop<PlayerNameMessage>();
   newtworkPlayer->name = std::string(name.name);
   spdlog::info("[Server] >>> Player {} sent a handshake :D (ID: {})",
                newtworkPlayer->name,
