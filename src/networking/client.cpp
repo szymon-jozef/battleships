@@ -8,6 +8,7 @@
 
 namespace battleship {
 namespace networking {
+// === General use methods ===
 Client::~Client() {
   disconnect();
 }
@@ -73,10 +74,22 @@ void Client::onMessage(Message &msg) {
   }
   case battleship::networking::MessageType::SERVER_GAME_END:
     break;
+  case battleship::networking::MessageType::CLIENT_SEND_ATTACK: {
+    // we were attacked here
+    handleIncomingAttack(msg);
+    break;
+  }
+  case battleship::networking::MessageType::CLIENT_RECEIVE_ATTACK: {
+    // we received the result of our attack here
+    handleShotResult(msg);
+    break;
+  }
   default:
     break;
   }
 }
+
+// === Sending messages ===
 
 void Client::sendHandshake(std::string name) {
   Message msg;
@@ -99,6 +112,60 @@ void Client::sendGameStatus(GameStatus status) {
   msg.header.id = MessageType::CLIENT_GAME_STATUS;
   msg.push(status);
   send(msg);
+}
+
+void Client::sendAttack(unsigned short int row, unsigned short int column) {
+  spdlog::info("[Client] sending attack at ({},{})", row, column);
+  Message msg;
+  msg.header.id = MessageType::CLIENT_SEND_ATTACK;
+  msg.push(row);
+  msg.push(column);
+  send(msg);
+}
+
+// === Handling responses ===
+
+void Client::handleIncomingAttack(Message &msg) {
+  if (!recieveAttackFunc) {
+    spdlog::error("[Client] recieveAttackFunc is not set!!!!");
+    return;
+  }
+  unsigned short int column = msg.pop<unsigned short int>();
+  unsigned short int row = msg.pop<unsigned short int>();
+  FieldState result = recieveAttackFunc(row, column);
+  spdlog::info("[Client] We were attacked at ({},{}) and the result was {}", row, column, static_cast<int>(result));
+
+  Message resultMsg;
+  resultMsg.header.id = MessageType::CLIENT_RECEIVE_ATTACK;
+  resultMsg.push(result);
+  resultMsg.push(row);
+  resultMsg.push(column);
+  send(resultMsg);
+}
+
+void Client::handleShotResult(Message &msg) {
+  if (!markResultFunc) {
+    spdlog::error("[Client] markResultFunc not set!!!");
+    return;
+  }
+  FieldState result;
+  unsigned short int row, column;
+
+  column = msg.pop<unsigned short int>();
+  row = msg.pop<unsigned short int>();
+  result = msg.pop<FieldState>();
+
+  markResultFunc(result, row, column);
+}
+
+// === Setters ===
+
+void Client::setRecievingAttackFunc(std::function<FieldState(unsigned short int, unsigned short int)> func) {
+  recieveAttackFunc = func;
+}
+
+void Client::setMarkResultFunc(std::function<void(FieldState, unsigned short int, unsigned short int)> func) {
+  markResultFunc = func;
 }
 
 } // namespace networking

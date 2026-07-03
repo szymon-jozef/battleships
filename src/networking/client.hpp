@@ -1,8 +1,10 @@
+#include "../game_logic/logic_models.hpp"
 #include "connection.hpp"
 #include "data_types.hpp"
 #include "messages.hpp"
 #include <boost/asio/io_context.hpp>
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <thread>
 
@@ -14,6 +16,14 @@ class Client {
   std::shared_ptr<Connection> connection;
   MessageQueue queIn;
   GameStatus currentGameStatus;
+  std::function<FieldState(unsigned short int, unsigned short int)> recieveAttackFunc;
+  std::function<void(FieldState, unsigned short int, unsigned short int)> markResultFunc;
+
+  void send(const Message &msg);
+  void onMessage(Message &msg);
+
+  void handleIncomingAttack(Message &msg);
+  void handleShotResult(Message &msg);
 
 public:
   Client() = default;
@@ -22,14 +32,17 @@ public:
   bool connect(const std::string &host, const uint16_t port);
   void disconnect();
   bool isConnected() const;
-  void send(const Message &msg);
   void update(size_t maxMessages = -1, bool wait = true);
-  void onMessage(Message &msg);
 
   void sendHandshake(std::string name);
   void sendGameStatus(GameStatus status);
   void sendAttack(unsigned short int row, unsigned short int column);
-  void recieveAttack();
+
+  /// @brief Function that handles being attacked by the other player. It takes a function from game_logic that should
+  /// return the state of attacked field. This __needs__ to be set
+  void setRecievingAttackFunc(std::function<FieldState(unsigned short int, unsigned short int)> func);
+  /// @brief Function that handles marking player radar.
+  void setMarkResultFunc(std::function<void(FieldState, unsigned short int, unsigned short int)> func);
 };
 } // namespace networking
 } // namespace battleship
