@@ -32,6 +32,11 @@ class Server {
   void handleHandshake(std::shared_ptr<Connection> client, Message &msg);
   /// @brief Receives new game status from the player, updates global and notifies players about it
   void handleGameStatusChange(std::shared_ptr<Connection> client, Message &msg);
+  /// @brief Validate message and route it
+  void handleClientSendingAttack(std::shared_ptr<Connection> client, Message &msg);
+  /// @brief Validate message and route it
+  void handleClientRecievingAttack(std::shared_ptr<Connection> client, Message &msg);
+  void broadcastCurrentTurn();
 
 public:
   Server(uint16_t port);

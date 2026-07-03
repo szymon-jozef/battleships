@@ -13,7 +13,8 @@ enum class MessageType {
   CLIENT_RECEIVE_ATTACK,
 
   SERVER_GAME_STATUS,
-  SERVER_GAME_END
+  SERVER_GAME_END,
+  SERVER_CURRENT_TURN
 };
 
 struct MessageHeader {

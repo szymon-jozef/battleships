@@ -79,6 +79,16 @@ public:
     return currentTurn;
   }
 
+  std::shared_ptr<NetworkPlayer> getPassivePlayer() {
+    std::scoped_lock lock(mutex);
+    for (auto &player : playerList) {
+      if (player != currentTurn) {
+        return player;
+      }
+    }
+    return nullptr;
+  }
+
   std::vector<std::shared_ptr<NetworkPlayer>> getPlayers() const {
     std::scoped_lock lock(mutex);
     return playerList;

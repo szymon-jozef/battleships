@@ -115,8 +115,10 @@ void Server::onMessage(std::shared_ptr<Connection> client, Message &msg) {
     handleGameStatusChange(client, msg);
     break;
   case MessageType::CLIENT_RECEIVE_ATTACK:
+    handleClientRecievingAttack(client, msg);
     break;
   case MessageType::CLIENT_SEND_ATTACK:
+    handleClientSendingAttack(client, msg);
     break;
   default:
     break;
@@ -155,6 +157,39 @@ void Server::handleGameStatusChange(std::shared_ptr<Connection> client, Message 
     msg.push(globalGameStatus);
     broadcast(msg);
   }
+}
+
+void Server::handleClientSendingAttack(std::shared_ptr<Connection> client, Message &msg) {
+  auto attacker = playerList.getPlayerById(client->getId());
+  if (attacker != playerList.getCurrentTurn()) {
+    spdlog::warn("[Server] player whose turn it is not tried to attack. Ignoring...");
+    return;
+  }
+
+  auto victim = playerList.getPassivePlayer();
+  if (!victim) {
+    spdlog::error("[Server] victim in sending attack is nullptr...");
+    return;
+  }
+  victim->connection->send(msg);
+}
+
+void Server::handleClientRecievingAttack(std::shared_ptr<Connection> client, Message &msg) {
+  auto attacker = playerList.getCurrentTurn();
+  if (!attacker) {
+    spdlog::error("[Server] attacker in recieving attack is nullptr...");
+    return;
+  }
+  attacker->connection->send(msg);
+  playerList.switchTurn();
+  broadcastCurrentTurn();
+}
+
+void Server::broadcastCurrentTurn() {
+  Message msg;
+  msg.header.id = MessageType::SERVER_CURRENT_TURN;
+  msg.push(playerList.getCurrentTurn()->getId());
+  broadcast(msg);
 }
 
 } // namespace networking
