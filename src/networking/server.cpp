@@ -120,6 +120,9 @@ void Server::onMessage(std::shared_ptr<Connection> client, Message &msg) {
   case MessageType::CLIENT_SEND_ATTACK:
     handleClientSendingAttack(client, msg);
     break;
+  case MessageType::CLIENT_LOST:
+    handleGameEnd(client, msg);
+    break;
   default:
     break;
   }
@@ -183,6 +186,19 @@ void Server::handleClientRecievingAttack(std::shared_ptr<Connection> client, Mes
   attacker->connection->send(msg);
   playerList.switchTurn();
   broadcastCurrentTurn();
+}
+
+void Server::handleGameEnd(std::shared_ptr<Connection> client, Message &msg) {
+  Message endMsg;
+  auto loser = client->getId();
+
+  spdlog::info("[Server] GAME FINISHED! Broadcasting GAME_END message...");
+  endMsg.header.id = MessageType::SERVER_GAME_END;
+  endMsg.body.push(loser);
+  broadcast(endMsg);
+
+  spdlog::info("[Server] Players notified. Closing the server now...");
+  stop();
 }
 
 void Server::broadcastCurrentTurn() {
