@@ -139,6 +139,10 @@ void Server::handleHandshake(std::shared_ptr<Connection> client, Message &msg) {
   spdlog::info("[Server] >>> Player {} sent a handshake :D (ID: {})",
                newtworkPlayer->name,
                boost::lexical_cast<std::string>(newtworkPlayer->connection->getId()));
+  Message newMsg;
+  newMsg.header.id = MessageType::SERVER_HANDSHAKE;
+  newMsg.push(newtworkPlayer->getId());
+  messageClient(newtworkPlayer, newMsg);
 }
 
 void Server::handleGameStatusChange(std::shared_ptr<Connection> client, Message &msg) {

@@ -12,6 +12,7 @@ namespace battleship {
 namespace networking {
 class Client {
   boost::asio::io_context context;
+  boost::uuids::uuid id;
   std::thread thread;
   std::shared_ptr<Connection> connection;
   MessageQueue queIn;
@@ -24,6 +25,7 @@ class Client {
 
   void handleIncomingAttack(Message &msg);
   void handleShotResult(Message &msg);
+  void handleServerHandshake(Message &msg);
 
 public:
   Client() = default;

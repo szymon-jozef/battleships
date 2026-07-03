@@ -37,6 +37,8 @@ class Server {
   /// @brief Validate message and route it
   void handleClientRecievingAttack(std::shared_ptr<Connection> client, Message &msg);
   void broadcastCurrentTurn();
+  /// @brief Broadcasts that one player has lost the game and closes up the server
+  void handleGameEnd(std::shared_ptr<Connection> client, Message &msg);
 
 public:
   Server(uint16_t port);

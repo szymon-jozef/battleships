@@ -2,6 +2,7 @@
 #include "data_types.hpp"
 #include "messages.hpp"
 #include <boost/asio/ip/basic_resolver.hpp>
+#include <boost/lexical_cast.hpp>
 #include <exception>
 #include <memory>
 #include <spdlog/spdlog.h>
@@ -84,6 +85,10 @@ void Client::onMessage(Message &msg) {
     handleShotResult(msg);
     break;
   }
+  case battleship::networking::MessageType::SERVER_HANDSHAKE: {
+    handleServerHandshake(msg);
+    break;
+  }
   default:
     break;
   }
@@ -156,6 +161,12 @@ void Client::handleShotResult(Message &msg) {
   result = msg.pop<FieldState>();
 
   markResultFunc(result, row, column);
+}
+
+void Client::handleServerHandshake(Message &msg) {
+  auto id = msg.pop<boost::uuids::uuid>();
+  spdlog::info("[Client] got id {} from the server", boost::uuids::to_string(id));
+  this->id = id;
 }
 
 // === Setters ===
