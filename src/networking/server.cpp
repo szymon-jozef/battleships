@@ -96,6 +96,9 @@ void Server::update(size_t maxMessages, bool wait) {
 
 // === Event handlers ===
 bool Server::onClientConnect(std::shared_ptr<Connection> client) {
+  if (playerList.isFull()) {
+    return false;
+  }
   return true;
 }
 void Server::onClientDisconnect(std::shared_ptr<Connection> client) {
