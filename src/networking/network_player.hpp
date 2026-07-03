@@ -10,13 +10,12 @@ namespace networking {
 
 /// @brief Class made for the server to store it's players
 struct NetworkPlayer {
-  std::string name;
+  std::optional<std::string> name;
   GameStatus currentGameStatus;
   std::shared_ptr<Connection> connection;
 
-  NetworkPlayer(std::string name, std::shared_ptr<Connection> connection)
-      : name(name)
-      , connection(connection) {}
+  NetworkPlayer(std::shared_ptr<Connection> connection)
+      : connection(connection) {}
 
   boost::uuids::uuid getId() const {
     return connection->getId();
@@ -124,6 +123,11 @@ public:
       }
     }
     return std::nullopt;
+  }
+
+  bool isLobbyReady() const {
+    std::scoped_lock lock(mutex);
+    return playerList.size() >= 2 && playerList[0]->name.has_value() && playerList[1]->name.has_value();
   }
 
   bool isFull() const {

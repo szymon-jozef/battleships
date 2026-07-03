@@ -58,7 +58,7 @@ void Server::waitForConnection() {
       return;
     }
 
-    playerList.push(std::make_shared<NetworkPlayer>("example_name", conn));
+    playerList.push(std::make_shared<NetworkPlayer>(conn));
     conn->startListening();
     spdlog::info("[Server] Connection approved!");
 
@@ -101,6 +101,7 @@ bool Server::onClientConnect(std::shared_ptr<Connection> client) {
   }
   return true;
 }
+
 void Server::onClientDisconnect(std::shared_ptr<Connection> client) {
   auto player = playerList.getPlayerById(client->getId());
   if (!player) {
@@ -141,14 +142,14 @@ void Server::handleHandshake(std::shared_ptr<Connection> client, Message &msg) {
   auto name = msg.pop<PlayerNameMessage>();
   newtworkPlayer->name = std::string(name.name);
   spdlog::info("[Server] >>> Player {} sent a handshake :D (ID: {})",
-               newtworkPlayer->name,
+               newtworkPlayer->name.value(),
                boost::lexical_cast<std::string>(newtworkPlayer->connection->getId()));
   Message newMsg;
   newMsg.header.id = MessageType::SERVER_HANDSHAKE;
   newMsg.push(newtworkPlayer->getId());
   messageClient(newtworkPlayer, newMsg);
 
-  if (playerList.isFull()) {
+  if (playerList.isLobbyReady()) {
     handleGameBeginning();
   }
 }
@@ -159,12 +160,12 @@ void Server::handleGameBeginning() {
   auto player1 = playerList.getCurrentTurn();
   auto player1Id = player1->getId();
   PlayerNameMessage player1Name;
-  std::strncpy(player1Name.name, player1->name.c_str(), sizeof(player1Name.name) - 1);
+  std::strncpy(player1Name.name, player1->name->c_str(), sizeof(player1Name.name) - 1);
 
   auto player2 = playerList.getPassivePlayer();
   auto player2Id = player2->getId();
   PlayerNameMessage player2Name;
-  std::strncpy(player2Name.name, player2->name.c_str(), sizeof(player2Name.name) - 1);
+  std::strncpy(player2Name.name, player2->name->c_str(), sizeof(player2Name.name) - 1);
 
   msg.push(player1Id);
   msg.push(player1Name);

@@ -3,6 +3,8 @@
 #include "messages.hpp"
 #include <boost/asio/ip/basic_resolver.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/uuid/name_generator.hpp>
+#include <boost/uuid/nil_generator.hpp>
 #include <exception>
 #include <memory>
 #include <spdlog/spdlog.h>
@@ -103,7 +105,10 @@ void Client::onMessage(Message &msg) {
 void Client::sendHandshake(std::string name) {
   Message msg;
   this->name = name;
+
   msg.header.id = MessageType::CLIENT_HANDSHAKE;
+  msg.header.receiver = boost::uuids::nil_uuid();
+
   PlayerNameMessage pname;
 
   std::strncpy(pname.name, name.c_str(), sizeof(pname.name) - 1);
@@ -120,6 +125,8 @@ void Client::sendGameStatus(GameStatus status) {
   spdlog::info("[Client] sending {} game status to the server...", static_cast<int>(status));
   Message msg;
   msg.header.id = MessageType::CLIENT_GAME_STATUS;
+  msg.header.sender = id;
+  msg.header.receiver = boost::uuids::nil_uuid();
   msg.push(status);
   send(msg);
 }
@@ -128,6 +135,8 @@ void Client::sendAttack(unsigned short int row, unsigned short int column) {
   spdlog::info("[Client] sending attack at ({},{})", row, column);
   Message msg;
   msg.header.id = MessageType::CLIENT_SEND_ATTACK;
+  msg.header.sender = id;
+  msg.header.receiver = enemyId;
   msg.push(row);
   msg.push(column);
   send(msg);
@@ -147,6 +156,9 @@ void Client::handleIncomingAttack(Message &msg) {
 
   Message resultMsg;
   resultMsg.header.id = MessageType::CLIENT_RECEIVE_ATTACK;
+  resultMsg.header.sender = id;
+  resultMsg.header.receiver = enemyId;
+
   resultMsg.push(result);
   resultMsg.push(row);
   resultMsg.push(column);
