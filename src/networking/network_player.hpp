@@ -125,6 +125,11 @@ public:
     }
     return std::nullopt;
   }
+
+  bool isFull() const {
+    std::scoped_lock lock(mutex);
+    return playerList.size() >= 2;
+  }
 };
 } // namespace networking
 } // namespace battleship

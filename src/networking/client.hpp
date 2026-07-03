@@ -12,11 +12,12 @@ namespace battleship {
 namespace networking {
 class Client {
   boost::asio::io_context context;
-  boost::uuids::uuid id;
+
   std::thread thread;
   std::shared_ptr<Connection> connection;
   MessageQueue queIn;
   GameStatus currentGameStatus;
+
   std::function<FieldState(unsigned short int, unsigned short int)> recieveAttackFunc;
   std::function<void(FieldState, unsigned short int, unsigned short int)> markResultFunc;
 
@@ -26,8 +27,14 @@ class Client {
   void handleIncomingAttack(Message &msg);
   void handleShotResult(Message &msg);
   void handleServerHandshake(Message &msg);
+  void handleBroadcastingPlayers(Message &msg);
 
 public:
+  boost::uuids::uuid id;
+  std::string name;
+  boost::uuids::uuid enemyId;
+  std::string enemyName;
+
   Client() = default;
   ~Client();
 

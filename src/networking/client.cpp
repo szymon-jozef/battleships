@@ -89,6 +89,10 @@ void Client::onMessage(Message &msg) {
     handleServerHandshake(msg);
     break;
   }
+  case battleship::networking::MessageType::SERVER_BROADCAST_PLAYERS: {
+    handleBroadcastingPlayers(msg);
+    break;
+  }
   default:
     break;
   }
@@ -98,6 +102,7 @@ void Client::onMessage(Message &msg) {
 
 void Client::sendHandshake(std::string name) {
   Message msg;
+  this->name = name;
   msg.header.id = MessageType::CLIENT_HANDSHAKE;
   PlayerNameMessage pname;
 
@@ -167,6 +172,22 @@ void Client::handleServerHandshake(Message &msg) {
   auto id = msg.pop<boost::uuids::uuid>();
   spdlog::info("[Client] got id {} from the server", boost::uuids::to_string(id));
   this->id = id;
+}
+
+void Client::handleBroadcastingPlayers(Message &msg) {
+  auto name1 = msg.pop<PlayerNameMessage>();
+  auto id1 = msg.pop<boost::uuids::uuid>();
+  auto name2 = msg.pop<PlayerNameMessage>();
+  auto id2 = msg.pop<boost::uuids::uuid>();
+
+  // we are the first player
+  if (id1 == this->id) {
+    enemyName = std::string(name2.name);
+    enemyId = id2;
+  } else { // we are the second player
+    enemyName = std::string(name1.name);
+    enemyId = id1;
+  }
 }
 
 // === Setters ===

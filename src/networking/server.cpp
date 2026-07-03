@@ -1,5 +1,6 @@
 #include "server.hpp"
 #include "connection.hpp"
+#include "data_types.hpp"
 #include "messages.hpp"
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid.hpp>
@@ -143,6 +144,30 @@ void Server::handleHandshake(std::shared_ptr<Connection> client, Message &msg) {
   newMsg.header.id = MessageType::SERVER_HANDSHAKE;
   newMsg.push(newtworkPlayer->getId());
   messageClient(newtworkPlayer, newMsg);
+
+  if (playerList.isFull()) {
+    handleGameBeginning();
+  }
+}
+
+void Server::handleGameBeginning() {
+  Message msg;
+  msg.header.id = MessageType::SERVER_BROADCAST_PLAYERS;
+  auto player1 = playerList.getCurrentTurn();
+  auto player1Id = player1->getId();
+  PlayerNameMessage player1Name;
+  std::strncpy(player1Name.name, player1->name.c_str(), sizeof(player1Name.name) - 1);
+
+  auto player2 = playerList.getPassivePlayer();
+  auto player2Id = player2->getId();
+  PlayerNameMessage player2Name;
+  std::strncpy(player2Name.name, player2->name.c_str(), sizeof(player2Name.name) - 1);
+
+  msg.push(player1Id);
+  msg.push(player1Name);
+  msg.push(player2Id);
+  msg.push(player2Name);
+  broadcast(msg);
 }
 
 void Server::handleGameStatusChange(std::shared_ptr<Connection> client, Message &msg) {
