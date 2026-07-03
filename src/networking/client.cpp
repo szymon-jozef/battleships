@@ -76,6 +76,7 @@ void Client::onMessage(Message &msg) {
     break;
   }
   case battleship::networking::MessageType::SERVER_GAME_END:
+    handleGameEnd(msg);
     break;
   case battleship::networking::MessageType::CLIENT_SEND_ATTACK: {
     // we were attacked here
@@ -199,6 +200,18 @@ void Client::handleBroadcastingPlayers(Message &msg) {
   } else { // we are the second player
     enemyName = std::string(name1.name);
     enemyId = id1;
+  }
+}
+
+void Client::handleGameEnd(Message &msg) {
+  auto loserId = msg.pop<boost::uuids::uuid>();
+
+  if (loserId == id) {
+    spdlog::info("[Client] we lost!");
+    loserName = name;
+  } else {
+    spdlog::info("[Client] we won!");
+    loserName = enemyName;
   }
 }
 

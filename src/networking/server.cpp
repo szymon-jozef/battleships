@@ -222,10 +222,12 @@ void Server::handleClientRecievingAttack(std::shared_ptr<Connection> client, Mes
 }
 
 void Server::handleGameEnd(std::shared_ptr<Connection> client, Message &msg) {
+  globalGameStatus = GameStatus::GAME_FINISH;
+
   Message endMsg;
   auto loser = client->getId();
-
   spdlog::info("[Server] GAME FINISHED! Broadcasting GAME_END message...");
+
   endMsg.header.id = MessageType::SERVER_GAME_END;
   endMsg.body.push(loser);
   broadcast(endMsg);
