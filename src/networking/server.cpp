@@ -2,6 +2,7 @@
 #include "connection.hpp"
 #include "data_types.hpp"
 #include "messages.hpp"
+#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/system/detail/error_code.hpp>
 #include <boost/uuid/uuid.hpp>
@@ -168,7 +169,13 @@ void Server::handleHandshake(std::shared_ptr<Connection> client, Message &msg) {
     return;
   }
   auto name = msg.pop<PlayerNameMessage>();
-  newtworkPlayer->name = std::string(name.name);
+
+  // trim name from both sides, for readability
+
+  std::string playerName(name.name);
+  boost::trim(playerName);
+
+  newtworkPlayer->name = playerName;
   spdlog::info("[Server] >>> Player {} sent a handshake :D (ID: {})",
                newtworkPlayer->name.value(),
                boost::lexical_cast<std::string>(newtworkPlayer->connection->getId()));

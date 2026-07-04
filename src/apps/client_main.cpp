@@ -31,8 +31,6 @@ int main() {
       }
     });
 
-    clientUpdateThread.detach();
-
     std::this_thread::sleep_for(std::chrono::seconds(2));
     spdlog::info("My name and id: {} - {}", boost::uuids::to_string(client.id), client.name);
     spdlog::info("Current game state is: {}", static_cast<int>(client.currentGameStatus));
@@ -42,8 +40,9 @@ int main() {
 
     if (input == 2) {
       client.sendLost();
-      std::this_thread::sleep_for(std::chrono::seconds(2));
     }
+
+    clientUpdateThread.join();
   } else {
     spdlog::error("Server no respondy :(");
   }

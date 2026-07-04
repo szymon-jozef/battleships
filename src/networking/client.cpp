@@ -1,6 +1,7 @@
 #include "client.hpp"
 #include "data_types.hpp"
 #include "messages.hpp"
+#include <boost/algorithm/string.hpp>
 #include <boost/asio/ip/basic_resolver.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/name_generator.hpp>
@@ -18,6 +19,8 @@ Client::~Client() {
 
 bool Client::connect(const std::string &playerName, const std::string &host, const uint16_t port) {
   name = playerName;
+  boost::trim(name);
+
   currentGameStatus = GameStatus::LOBBY;
   try {
     boost::asio::ip::tcp::resolver resolver(context);
