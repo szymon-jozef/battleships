@@ -26,10 +26,7 @@ public:
   }
 
   void connect() {
-    // TODO! Server should send handshake request and then client should respond with it on its own
-    if (client.connect(serverUrl, serverPort)) {
-      client.sendHandshake(player.getName());
-    }
+    client.connect(player.getName(), serverUrl, serverPort);
   }
 
   void updateClient() {

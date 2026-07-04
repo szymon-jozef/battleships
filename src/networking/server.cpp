@@ -69,9 +69,14 @@ void Server::waitForConnection() {
       return;
     }
 
-    playerList.push(std::make_shared<NetworkPlayer>(conn));
+    auto newPlayer = std::make_shared<NetworkPlayer>(conn);
+    playerList.push(newPlayer);
     conn->startListening();
     spdlog::info("[Server] Connection approved!");
+
+    Message msg;
+    msg.header.id = MessageType::SERVER_REQUEST_HANDSHAKE;
+    messageClient(newPlayer, msg);
 
     waitForConnection();
   });
@@ -118,7 +123,6 @@ bool Server::onClientConnect(std::shared_ptr<Connection> client) {
 }
 
 void Server::onClientDisconnect(std::shared_ptr<Connection> client) {
-  spdlog::info("[Server] on client disconnect run");
   auto player = playerList.getPlayerById(client->getId());
   if (!player) {
     return;

@@ -22,6 +22,7 @@ class Client {
 
   void send(const Message &msg);
   void onMessage(Message &msg);
+  void sendHandshake(std::string name);
 
   void handleIncomingAttack(Message &msg);
   void handleShotResult(Message &msg);
@@ -43,12 +44,11 @@ public:
   Client() = default;
   ~Client();
 
-  bool connect(const std::string &host, const uint16_t port);
+  bool connect(const std::string &playerName, const std::string &host, const uint16_t port);
   void disconnect();
   bool isConnected() const;
   void update(size_t maxMessages = -1, bool wait = true);
 
-  void sendHandshake(std::string name);
   void sendGameStatus(GameStatus status);
   void sendAttack(unsigned short int row, unsigned short int column);
   void sendLost();

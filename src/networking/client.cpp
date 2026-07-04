@@ -16,7 +16,9 @@ Client::~Client() {
   disconnect();
 }
 
-bool Client::connect(const std::string &host, const uint16_t port) {
+bool Client::connect(const std::string &playerName, const std::string &host, const uint16_t port) {
+  name = playerName;
+  currentGameStatus = GameStatus::LOBBY;
   try {
     boost::asio::ip::tcp::resolver resolver(context);
     boost::asio::ip::tcp::resolver::results_type endpoints = resolver.resolve(host, std::to_string(port));
@@ -74,6 +76,10 @@ void Client::update(size_t maxMessages, bool wait) {
 
 void Client::onMessage(Message &msg) {
   switch (msg.header.id) {
+  case battleship::networking::MessageType::SERVER_REQUEST_HANDSHAKE: {
+    sendHandshake(name);
+    break;
+  }
   case battleship::networking::MessageType::SERVER_GAME_STATUS: {
     GameStatus newGameStatus = msg.body.pop<GameStatus>();
     spdlog::info("[Client] server decided that current game status is {}", static_cast<int>(newGameStatus));
@@ -110,7 +116,6 @@ void Client::onMessage(Message &msg) {
 
 void Client::sendHandshake(std::string name) {
   Message msg;
-  this->name = name;
 
   msg.header.id = MessageType::CLIENT_HANDSHAKE;
   msg.header.receiver = boost::uuids::nil_uuid();
