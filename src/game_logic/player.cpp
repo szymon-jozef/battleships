@@ -6,6 +6,9 @@
 #include <spdlog/spdlog.h>
 #include <string>
 
+namespace battleship {
+namespace logic {
+
 Player::Player(std::string name, unsigned short int width, unsigned short int height)
     : name(std::move(name))
     , id(boost::uuids::random_generator()())
@@ -97,3 +100,6 @@ std::string Player::boardAsString() {
 std::string Player::radarAsString() {
   return radar.asString();
 }
+
+} // namespace logic
+} // namespace battleship

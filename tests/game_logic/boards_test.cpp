@@ -3,6 +3,8 @@
 #include <memory>
 #include <stdexcept>
 
+using namespace battleship::logic;
+
 TEST_CASE("Board logic: Ship placement and shooting", "[board]") {
 
   Board board;

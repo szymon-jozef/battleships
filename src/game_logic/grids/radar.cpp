@@ -2,6 +2,9 @@
 #include <spdlog/spdlog.h>
 #include <stdexcept>
 
+namespace battleship {
+namespace logic {
+
 Radar::Radar()
     : BaseGrid(10, 10) {}
 
@@ -25,3 +28,6 @@ void Radar::markShotResult(FieldState shotResult, unsigned short int row, unsign
   spdlog::info("[Logic] Field at ({}, {}) was {}", row, column, static_cast<char>(shotResult));
   grid[row][column].setState(shotResult);
 }
+
+} // namespace logic
+} // namespace battleship

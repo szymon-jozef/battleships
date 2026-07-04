@@ -2,6 +2,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <iostream>
 
+using namespace battleship::logic;
+
 TEST_CASE("Player tests", "[player]") {
   std::string name = "morbius";
   std::vector<std::shared_ptr<Ship>> ships;

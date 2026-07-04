@@ -1,6 +1,8 @@
 #include "logic_models.hpp"
 #include <catch2/catch_test_macros.hpp>
 
+using namespace battleship::logic;
+
 TEST_CASE("Create field and tests it parameters") {
   Field f = Field();
   REQUIRE(f.getState() == FieldState::EMPTY);

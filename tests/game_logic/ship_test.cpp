@@ -1,6 +1,8 @@
 #include "logic_models.hpp"
 #include <catch2/catch_test_macros.hpp>
 
+using namespace battleship::logic;
+
 TEST_CASE("Ship sunking test") {
   Ship four = Ship(ShipType::FourMaster);
   REQUIRE(!four.isSunk());

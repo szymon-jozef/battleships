@@ -2,6 +2,8 @@
 #include <sstream>
 #include <tuple>
 
+namespace battleship {
+namespace logic {
 BaseGrid::BaseGrid(const unsigned short int width, const unsigned short int height)
     : WIDTH(width)
     , HEIGHT(height)
@@ -55,3 +57,6 @@ void BaseGrid::markNearbyAsSunk(unsigned short int row, unsigned short int colum
     }
   }
 }
+
+} // namespace logic
+} // namespace battleship

@@ -167,7 +167,7 @@ void Client::handleIncomingAttack(Message &msg) {
   }
   unsigned short int column = msg.pop<unsigned short int>();
   unsigned short int row = msg.pop<unsigned short int>();
-  FieldState result = recieveAttackFunc(row, column);
+  battleship::logic::FieldState result = recieveAttackFunc(row, column);
   spdlog::info("[Client] We were attacked at ({},{}) and the result was {}", row, column, static_cast<int>(result));
 
   Message resultMsg;
@@ -186,12 +186,12 @@ void Client::handleShotResult(Message &msg) {
     spdlog::error("[Client] markResultFunc not set!!!");
     return;
   }
-  FieldState result;
+  battleship::logic::FieldState result;
   unsigned short int row, column;
 
   column = msg.pop<unsigned short int>();
   row = msg.pop<unsigned short int>();
-  result = msg.pop<FieldState>();
+  result = msg.pop<battleship::logic::FieldState>();
 
   markResultFunc(result, row, column);
 }
@@ -233,11 +233,13 @@ void Client::handleGameEnd(Message &msg) {
 
 // === Setters ===
 
-void Client::setRecievingAttackFunc(std::function<FieldState(unsigned short int, unsigned short int)> func) {
+void Client::setRecievingAttackFunc(
+    std::function<battleship::logic::FieldState(unsigned short int, unsigned short int)> func) {
   recieveAttackFunc = func;
 }
 
-void Client::setMarkResultFunc(std::function<void(FieldState, unsigned short int, unsigned short int)> func) {
+void Client::setMarkResultFunc(
+    std::function<void(battleship::logic::FieldState, unsigned short int, unsigned short int)> func) {
   markResultFunc = func;
 }
 

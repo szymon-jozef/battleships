@@ -5,6 +5,9 @@
 #include <string>
 #include <vector>
 
+namespace battleship {
+namespace logic {
+
 /* --- Ships --- */
 
 /// @brief ShipType defines how many field the ship takes
@@ -152,3 +155,7 @@ public:
   std::string boardAsString();
   std::string radarAsString();
 };
+
+} // namespace logic
+
+} // namespace battleship

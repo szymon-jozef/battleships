@@ -3,6 +3,9 @@
 #include <spdlog/spdlog.h>
 #include <stdexcept>
 
+namespace battleship {
+namespace logic {
+
 Board::Board()
     : BaseGrid(10, 10) {
   spdlog::info("[Logic] creating default 10x10 board");
@@ -93,3 +96,6 @@ FieldState Board::recieveShot(unsigned short int row, unsigned short int column)
   grid[row][column].setState(FieldState::MISSED);
   return FieldState::MISSED;
 }
+
+} // namespace logic
+} // namespace battleship

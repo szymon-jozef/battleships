@@ -1,12 +1,28 @@
 #include <logic_models.hpp>
 #include <memory>
 
-Field::Field() : state(FieldState::EMPTY), morred_ship(nullptr) {}
+namespace battleship {
+namespace logic {
 
-void Field::placeShip(std::shared_ptr<Ship> ship) { morred_ship = ship; }
+Field::Field()
+    : state(FieldState::EMPTY)
+    , morred_ship(nullptr) {}
 
-void Field::setState(FieldState new_state) { state = new_state; }
+void Field::placeShip(std::shared_ptr<Ship> ship) {
+  morred_ship = ship;
+}
 
-FieldState Field::getState() const { return state; }
+void Field::setState(FieldState new_state) {
+  state = new_state;
+}
 
-Ship *Field::getShip() const { return morred_ship.get(); }
+FieldState Field::getState() const {
+  return state;
+}
+
+Ship *Field::getShip() const {
+  return morred_ship.get();
+}
+
+} // namespace logic
+} // namespace battleship

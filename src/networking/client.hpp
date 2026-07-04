@@ -17,8 +17,8 @@ class Client {
   std::shared_ptr<Connection> connection;
   MessageQueue queIn;
 
-  std::function<FieldState(unsigned short int, unsigned short int)> recieveAttackFunc;
-  std::function<void(FieldState, unsigned short int, unsigned short int)> markResultFunc;
+  std::function<battleship::logic::FieldState(unsigned short int, unsigned short int)> recieveAttackFunc;
+  std::function<void(battleship::logic::FieldState, unsigned short int, unsigned short int)> markResultFunc;
 
   void send(const Message &msg);
   void onMessage(Message &msg);
@@ -55,9 +55,11 @@ public:
 
   /// @brief Function that handles being attacked by the other player. It takes a function from game_logic that should
   /// return the state of attacked field. This __needs__ to be set
-  void setRecievingAttackFunc(std::function<FieldState(unsigned short int, unsigned short int)> func);
+  void
+  setRecievingAttackFunc(std::function<battleship::logic::FieldState(unsigned short int, unsigned short int)> func);
   /// @brief Function that handles marking player radar.
-  void setMarkResultFunc(std::function<void(FieldState, unsigned short int, unsigned short int)> func);
+  void
+  setMarkResultFunc(std::function<void(battleship::logic::FieldState, unsigned short int, unsigned short int)> func);
 };
 } // namespace networking
 } // namespace battleship
