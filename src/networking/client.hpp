@@ -16,7 +16,6 @@ class Client {
   std::thread thread;
   std::shared_ptr<Connection> connection;
   MessageQueue queIn;
-  GameStatus currentGameStatus;
 
   std::function<FieldState(unsigned short int, unsigned short int)> recieveAttackFunc;
   std::function<void(FieldState, unsigned short int, unsigned short int)> markResultFunc;
@@ -39,6 +38,8 @@ public:
   // TODO! Change  player and enemy id,name to some more sensible data structure
   std::string loserName;
 
+  GameStatus currentGameStatus;
+
   Client() = default;
   ~Client();
 
@@ -50,6 +51,7 @@ public:
   void sendHandshake(std::string name);
   void sendGameStatus(GameStatus status);
   void sendAttack(unsigned short int row, unsigned short int column);
+  void sendLost();
 
   /// @brief Function that handles being attacked by the other player. It takes a function from game_logic that should
   /// return the state of attacked field. This __needs__ to be set

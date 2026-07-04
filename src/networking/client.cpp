@@ -143,6 +143,16 @@ void Client::sendAttack(unsigned short int row, unsigned short int column) {
   send(msg);
 }
 
+void Client::sendLost() {
+  spdlog::info("[Client] game lost, sending message to the server...");
+  Message msg;
+  msg.header.id = MessageType::CLIENT_LOST;
+  msg.header.sender = id;
+  msg.header.receiver = boost::uuids::nil_uuid();
+  // we don't add body since server gets id by the connection
+  send(msg);
+}
+
 // === Handling responses ===
 
 void Client::handleIncomingAttack(Message &msg) {
