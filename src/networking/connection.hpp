@@ -4,6 +4,7 @@
 #include <boost/asio.hpp>
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid.hpp>
+#include <functional>
 #include <memory>
 
 namespace battleship {
@@ -11,6 +12,8 @@ namespace networking {
 
 class Connection : public std::enable_shared_from_this<Connection> {
 public:
+  std::function<void(std::shared_ptr<Connection>)> onDisconnect;
+
   enum class Owner { SERVER, CLIENT };
   Connection(Owner owner, boost::asio::io_context &context, boost::asio::ip::tcp::socket socket, MessageQueue &qIn);
   boost::uuids::uuid getId() const {

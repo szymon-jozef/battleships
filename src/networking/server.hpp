@@ -41,17 +41,18 @@ class Server {
   void handleGameBeginning();
   /// @brief Broadcasts that one player has lost the game and closes up the server
   void handleGameEnd(std::shared_ptr<Connection> client, Message &msg);
+  void waitForConnection();
+  void messageClient(std::shared_ptr<NetworkPlayer> player, const Message &msg);
+  void broadcast(const Message &msg);
 
 public:
   Server(uint16_t port);
   ~Server();
 
   bool start();
-  void waitForConnection();
-  void messageClient(std::shared_ptr<NetworkPlayer> player, const Message &msg);
-  void broadcast(const Message &msg);
   void update(size_t maxMessages = -1,
               bool wait = true); // since size_t is unsigned -1 will be changed to max int value
+  bool isGameEnd() const;
 };
 } // namespace networking
 } // namespace battleship

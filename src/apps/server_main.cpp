@@ -11,6 +11,10 @@ int main() {
 
     while (true) {
       server.update();
+
+      if (server.isGameEnd()) {
+        break;
+      }
     }
 
   } else {

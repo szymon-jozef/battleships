@@ -134,6 +134,11 @@ public:
     std::scoped_lock lock(mutex);
     return playerList.size() >= 2;
   }
+
+  bool isEmpty() const {
+    std::scoped_lock lock(mutex);
+    return playerList.size() <= 0;
+  }
 };
 } // namespace networking
 } // namespace battleship

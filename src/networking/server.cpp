@@ -3,10 +3,12 @@
 #include "data_types.hpp"
 #include "messages.hpp"
 #include <boost/lexical_cast.hpp>
+#include <boost/system/detail/error_code.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <exception>
 #include <spdlog/spdlog.h>
 #include <system_error>
+#include <thread>
 
 namespace battleship {
 namespace networking {
@@ -30,11 +32,18 @@ bool Server::start() {
 }
 
 void Server::stop() {
+  acceptor.close();
+
   context.stop();
 
   if (thread.joinable()) {
-    thread.join();
+    if (thread.get_id() != std::this_thread::get_id()) {
+      thread.join();
+    } else {
+      thread.detach();
+    }
   }
+  playerList.clear();
 
   spdlog::info("[Server] Stopped!");
 }
@@ -50,6 +59,8 @@ void Server::waitForConnection() {
 
     std::shared_ptr<Connection> conn =
         std::make_shared<Connection>(Connection::Owner::SERVER, context, std::move(socket), queIn);
+
+    conn->onDisconnect = [this](auto c) { this->onClientDisconnect(c); };
 
     if (!onClientConnect(conn)) {
       spdlog::warn("[Server] New connection refused!");
@@ -94,6 +105,10 @@ void Server::update(size_t maxMessages, bool wait) {
   }
 }
 
+bool Server::isGameEnd() const {
+  return playerList.isEmpty() && globalGameStatus == GameStatus::GAME_FINISH;
+}
+
 // === Event handlers ===
 bool Server::onClientConnect(std::shared_ptr<Connection> client) {
   if (playerList.isFull()) {
@@ -103,6 +118,7 @@ bool Server::onClientConnect(std::shared_ptr<Connection> client) {
 }
 
 void Server::onClientDisconnect(std::shared_ptr<Connection> client) {
+  spdlog::info("[Server] on client disconnect run");
   auto player = playerList.getPlayerById(client->getId());
   if (!player) {
     return;
@@ -110,7 +126,15 @@ void Server::onClientDisconnect(std::shared_ptr<Connection> client) {
 
   player->connection.reset();
   playerList.remove(player);
+
+  if (isGameEnd()) {
+    stop();
+    Message msg;
+    msg.header.id = MessageType::SERVER_GAME_END;
+    queIn.push_front({nullptr, msg});
+  }
 }
+
 void Server::onMessage(std::shared_ptr<Connection> client, Message &msg) {
   switch (msg.header.id) {
   case MessageType::CLIENT_HANDSHAKE:
@@ -229,11 +253,10 @@ void Server::handleGameEnd(std::shared_ptr<Connection> client, Message &msg) {
   spdlog::info("[Server] GAME FINISHED! Broadcasting GAME_END message...");
 
   endMsg.header.id = MessageType::SERVER_GAME_END;
-  endMsg.body.push(loser);
+  endMsg.push(loser);
   broadcast(endMsg);
 
-  spdlog::info("[Server] Players notified. Closing the server now...");
-  stop();
+  spdlog::info("[Server] Players notified. Waiting for players to leave...");
 }
 
 void Server::broadcastCurrentTurn() {

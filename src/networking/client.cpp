@@ -41,8 +41,13 @@ void Client::disconnect() {
 
   context.stop();
   if (thread.joinable()) {
-    thread.join();
+    if (std::this_thread::get_id() != thread.get_id()) {
+      thread.join();
+    } else {
+      thread.detach();
+    }
   }
+  connection.reset();
 }
 
 bool Client::isConnected() const {
@@ -223,6 +228,7 @@ void Client::handleGameEnd(Message &msg) {
     spdlog::info("[Client] we won!");
     loserName = enemyName;
   }
+  disconnect();
 }
 
 // === Setters ===

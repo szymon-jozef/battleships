@@ -11,7 +11,6 @@
 
 namespace battleship {
 namespace networking {
-using boost::system::error_code;
 
 Connection::Connection(Owner owner,
                        boost::asio::io_context &context,
@@ -42,7 +41,13 @@ void Connection::connectToServer(const boost::asio::ip::tcp::resolver::results_t
 
 void Connection::disconnect() {
   if (isConnected()) {
-    boost::asio::post(context, [this]() { socket.close(); });
+    boost::asio::post(context, [this]() {
+      if (onDisconnect) {
+        onDisconnect(shared_from_this());
+      } else {
+        socket.close();
+      }
+    });
   }
 }
 
@@ -69,7 +74,7 @@ void Connection::writeHeader() {
                            boost::asio::buffer(&queOut.front().msg.header, sizeof(MessageHeader)),
                            [this, self = shared_from_this()](std::error_code ec, size_t length) {
                              if (ec) {
-                               socket.close();
+                               disconnect();
                                return;
                              }
                              if (queOut.front().msg.body.size() > 0) {
@@ -89,7 +94,7 @@ void Connection::writeBody() {
                            [this, self = shared_from_this()](std::error_code ec, size_t length) {
                              if (ec) {
                                spdlog::error("[Network] {} Write body fail", boost::uuids::to_string(id));
-                               socket.close();
+                               disconnect();
                                return;
                              }
                              queOut.pop_front();
@@ -109,7 +114,7 @@ void Connection::readHeader() {
                               } else {
                                 spdlog::error("[Network] {} Read header fail.", boost::uuids::to_string(id));
                               }
-                              socket.close();
+                              disconnect();
                               return;
                             }
 
@@ -128,7 +133,7 @@ void Connection::readBody() {
                           [this, self = shared_from_this()](std::error_code ec, size_t length) {
                             if (ec) {
                               spdlog::error("[Network] {} Read body fail.", boost::uuids::to_string(id));
-                              socket.close();
+                              disconnect();
                               return;
                             }
 
