@@ -50,9 +50,9 @@ bool GameManager::placeShip(unsigned short int row, unsigned short int column, b
 // TODO! Change client so it puts FieldStates on some kind of queue, so we can play sounds, etc... (GUI_EVENTS)
 
 void GameManager::makeShot(unsigned short int row, unsigned short int column) {
-  // TODO! Server should send to the clients which turn it is and client shouldn't be able to shoot when it's not its
-  // turn
-  client.sendAttack(row, column);
+  if (client.isMyTurn) {
+    client.sendAttack(row, column);
+  }
 }
 
 networking::GameStatus GameManager::getCurrentGameStatus() const {

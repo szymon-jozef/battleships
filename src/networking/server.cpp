@@ -208,6 +208,7 @@ void Server::handleGameBeginning() {
   msg.push(player2Id);
   msg.push(player2Name);
   broadcast(msg);
+  broadcastCurrentTurn();
 }
 
 void Server::handleGameStatusChange(std::shared_ptr<Connection> client, Message &msg) {

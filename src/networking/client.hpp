@@ -30,12 +30,14 @@ class Client {
   void handleServerHandshake(Message &msg);
   void handleBroadcastingPlayers(Message &msg);
   void handleGameEnd(Message &msg);
+  void handleTurnChange(Message &msg);
 
 public:
   boost::uuids::uuid id;
   std::string name;
   boost::uuids::uuid enemyId;
   std::string enemyName;
+  bool isMyTurn = false;
 
   // TODO! Change  player and enemy id,name to some more sensible data structure
   std::string loserName;

@@ -106,6 +106,10 @@ void Client::onMessage(Message &msg) {
     handleServerHandshake(msg);
     break;
   }
+  case battleship::networking::MessageType::SERVER_CURRENT_TURN: {
+    handleTurnChange(msg);
+    break;
+  }
   case battleship::networking::MessageType::SERVER_BROADCAST_PLAYERS: {
     handleBroadcastingPlayers(msg);
     break;
@@ -241,6 +245,11 @@ void Client::handleGameEnd(Message &msg) {
     loserName = enemyName;
   }
   disconnect();
+}
+
+void Client::handleTurnChange(Message &msg) {
+  auto currentTurnId = msg.pop<boost::uuids::uuid>();
+  isMyTurn = currentTurnId == id;
 }
 
 // === Setters ===
