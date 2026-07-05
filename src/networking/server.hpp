@@ -3,6 +3,7 @@
 #include "network_player.hpp"
 #include <boost/asio.hpp>
 #include <boost/asio/io_context.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <thread>
 
 namespace battleship {
@@ -17,6 +18,7 @@ class Server {
   /// Handles new incoming connections
   boost::asio::ip::tcp::acceptor acceptor;
   GameStatus globalGameStatus = GameStatus::LOBBY;
+  boost::asio::steady_timer shutdownTimer;
 
   // Event handlers
 

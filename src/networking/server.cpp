@@ -4,10 +4,13 @@
 #include "data_types.hpp"
 #include "messages.hpp"
 #include <boost/algorithm/string.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/system/detail/error_code.hpp>
 #include <boost/uuid/uuid.hpp>
+#include <chrono>
 #include <exception>
+#include <memory>
 #include <spdlog/spdlog.h>
 #include <system_error>
 #include <thread>
@@ -15,7 +18,8 @@
 namespace battleship {
 namespace networking {
 Server::Server(uint16_t port)
-    : acceptor(context, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port)) {}
+    : acceptor(context, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port))
+    , shutdownTimer(context) {}
 
 Server::~Server() {
   stop();
@@ -133,6 +137,7 @@ bool Server::onClientConnect(std::shared_ptr<Connection> client) {
 void Server::onClientDisconnect(std::shared_ptr<Connection> client) {
   auto player = playerList.getPlayerById(client->getId());
   if (!player) {
+    spdlog::error("[Server] player does not exist while disconnecting");
     return;
   }
 
@@ -294,6 +299,14 @@ void Server::handleGameEnd(std::shared_ptr<Connection> client, Message &msg) {
   broadcast(endMsg);
 
   spdlog::info("[Server] Players notified. Waiting for players to leave...");
+
+  shutdownTimer.expires_after(std::chrono::seconds(10));
+  shutdownTimer.async_wait([this](const boost::system::error_code &ec) {
+    if (!ec) {
+      spdlog::info("[Server] shutdown timer reached. Forcing shutdown...");
+      stop();
+    }
+  });
 }
 
 void Server::broadcastCurrentTurn() {
