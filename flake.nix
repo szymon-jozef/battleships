@@ -26,6 +26,7 @@
           spdlog
           clang-tools
           clang-analyzer
+          raylib
         ];
 
         battleships = (
