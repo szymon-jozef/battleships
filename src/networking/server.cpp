@@ -34,6 +34,7 @@ bool Server::start() {
 }
 
 void Server::stop() {
+  queIn.stop();
   acceptor.close();
 
   context.stop();
@@ -208,7 +209,14 @@ void Server::handleGameBeginning() {
   msg.push(player2Id);
   msg.push(player2Name);
   broadcast(msg);
+
   broadcastCurrentTurn();
+
+  Message gameStatusMsg;
+  globalGameStatus = GameStatus::PLACING_SHIPS;
+  gameStatusMsg.header.id = MessageType::SERVER_GAME_STATUS;
+  gameStatusMsg.push(globalGameStatus);
+  broadcast(gameStatusMsg);
 }
 
 void Server::handleGameStatusChange(std::shared_ptr<Connection> client, Message &msg) {
@@ -249,7 +257,8 @@ void Server::handleClientSendingAttack(std::shared_ptr<Connection> client, Messa
 
 void Server::handleClientRecievingAttack(std::shared_ptr<Connection> client, Message &msg) {
   Message msgCpy = msg;
-  auto attacker = playerList.getCurrentTurn();
+  auto attackerId = msgCpy.header.receiver;
+  auto attacker = playerList.getPlayerById(attackerId);
   if (!attacker) {
     spdlog::error("[Server] attacker in recieving attack is nullptr...");
     return;

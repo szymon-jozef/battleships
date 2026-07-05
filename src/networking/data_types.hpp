@@ -14,6 +14,7 @@ class MessageQueue {
   std::deque<OwnedMessage> queue;
   mutable std::mutex mutex;
   std::condition_variable cvBlock;
+  bool stopped = false;
 
 public:
   void push_back(const OwnedMessage &item);
@@ -25,6 +26,7 @@ public:
   size_t size() const;
   bool empty() const;
   void wait();
+  void stop();
 
   MessageQueue() = default;
 };

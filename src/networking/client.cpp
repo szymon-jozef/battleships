@@ -40,6 +40,7 @@ bool Client::connect(const std::string &playerName, const std::string &host, con
 }
 
 void Client::disconnect() {
+  queIn.stop();
   if (isConnected()) {
     connection->disconnect();
   }
@@ -84,7 +85,7 @@ void Client::onMessage(Message &msg) {
     break;
   }
   case battleship::networking::MessageType::SERVER_GAME_STATUS: {
-    GameStatus newGameStatus = msg.body.pop<GameStatus>();
+    GameStatus newGameStatus = msg.pop<GameStatus>();
     spdlog::info("[Client] server decided that current game status is {}", static_cast<int>(newGameStatus));
     currentGameStatus = newGameStatus;
     break;

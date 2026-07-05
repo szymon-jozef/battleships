@@ -89,11 +89,32 @@ target_sources(client_main
         src/apps/client_main.cpp
 )
 
+# === Game Manager ===
+add_library(game_manager)
+target_sources(
+    game_manager
+    PRIVATE
+        src/game_manager/game_manager.cpp
+    PUBLIC
+        FILE_SET HEADERS
+    BASE_DIRS
+        src/game_manager
+    FILES
+        src/game_manager/game_manager.hpp
+)
+
+target_link_libraries(game_manager
+    PUBLIC
+    game_logic
+    networking
+)
+
 # === Linking ===
 target_link_libraries(battleships
     PRIVATE
         game_logic
         networking
+        game_manager
 )
 
 target_link_libraries(server_main
@@ -117,9 +138,26 @@ target_link_libraries(LogicTests
         game_logic
 )
 
+file(GLOB TEST_INTEGRATION_SOURCES CONFIGURE_DEPENDS "tests/integration_tests/*.cpp")
+add_executable(IntegrationTests ${TEST_INTEGRATION_SOURCES})
+
+target_link_libraries(IntegrationTests
+    PRIVATE
+        Catch2::Catch2WithMain
+        spdlog::spdlog
+        networking
+        game_manager
+        game_logic
+)
+
+
 target_compile_options(LogicTests PRIVATE -fsanitize=address -g)
 target_link_options(LogicTests PRIVATE -fsanitize=address)
+
+target_compile_options(IntegrationTests PRIVATE -fsanitize=address -g)
+target_link_options(IntegrationTests PRIVATE -fsanitize=address)
 
 include(CTest)
 include(Catch)
 catch_discover_tests(LogicTests)
+catch_discover_tests(IntegrationTests)

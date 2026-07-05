@@ -116,7 +116,7 @@ public:
       switch (playerList[0]->currentGameStatus) {
       case GameStatus::LOBBY:
         return GameStatus::PLACING_SHIPS;
-      case GameStatus::PLACING_SHIPS:
+      case GameStatus::WAR:
         return GameStatus::WAR;
       default:
         return std::nullopt;

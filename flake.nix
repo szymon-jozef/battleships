@@ -20,6 +20,7 @@
           clang
           gcc
           cmake
+          ninja
           boost
           catch2_3
           spdlog

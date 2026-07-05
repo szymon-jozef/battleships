@@ -11,10 +11,9 @@ namespace logic {
 
 Player::Player(std::string name, unsigned short int width, unsigned short int height)
     : name(std::move(name))
-    , id(boost::uuids::random_generator()())
     , board(Board(width, height))
     , radar(Radar(width, height)) {
-  spdlog::info("[Logic] Player named {} with ID: {} was created!", name, boost::uuids::to_string(id));
+  spdlog::info("[Logic] Player named {} was created!", this->name);
   // there are 10 ships at total
   shipsBay.reserve(10);
   for (int i = 0; i < 4; ++i)
@@ -33,7 +32,6 @@ Player::Player(std::string name)
 
 Player::Player(std::string name, std::vector<std::shared_ptr<Ship>> ships)
     : name(std::move(name))
-    , id(boost::uuids::random_generator()())
     , board()
     , radar()
     , shipsBay(std::move(ships))

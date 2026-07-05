@@ -18,9 +18,6 @@ class Server {
   boost::asio::ip::tcp::acceptor acceptor;
   GameStatus globalGameStatus = GameStatus::LOBBY;
 
-  /// Stop function is private since server should stop itself, when the game is ended.
-  void stop();
-
   // Event handlers
 
   /// Allows to veto a connection or do something with it __before__ it's added to playerList
@@ -50,6 +47,7 @@ public:
   ~Server();
 
   bool start();
+  void stop();
   void update(size_t maxMessages = -1,
               bool wait = true); // since size_t is unsigned -1 will be changed to max int value
   bool isGameEnd() const;

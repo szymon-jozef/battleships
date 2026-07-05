@@ -15,10 +15,11 @@ class GameManager {
   const uint16_t serverPort;
 
 public:
-  GameManager(std::string playerName, const std::string &serverUrl, const uint16_t serverPort = 6767);
+  GameManager(const std::string &playerName, const std::string &serverUrl, const uint16_t serverPort = 6767);
 
   void connect();
-  void updateClient();
+  void disconnect();
+  void updateClient(bool wait = true);
   bool placeShip(unsigned short int row, unsigned short int column, bool isHorizontal);
   void makeShot(unsigned short int row, unsigned short int column);
 

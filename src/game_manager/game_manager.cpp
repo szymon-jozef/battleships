@@ -1,12 +1,14 @@
 #include "game_manager.hpp"
+#include "data_types.hpp"
 #include <../game_logic/logic_models.hpp>
 #include <cstdint>
+#include <spdlog/spdlog.h>
 
 namespace battleship {
 namespace gameManager {
 
 // TODO! Server should verify that both players boards are of the same size.
-GameManager::GameManager(std::string playerName, const std::string &serverUrl, const uint16_t serverPort)
+GameManager::GameManager(const std::string &playerName, const std::string &serverUrl, const uint16_t serverPort)
     : player(playerName)
     , serverUrl(serverUrl)
     , serverPort(serverPort) {
@@ -27,11 +29,17 @@ GameManager::GameManager(std::string playerName, const std::string &serverUrl, c
 }
 
 void GameManager::connect() {
-  client.connect(player.getName(), serverUrl, serverPort);
+  if (!client.connect(player.getName(), serverUrl, serverPort)) {
+    spdlog::error("[GameManager] couldn't connect to the server!");
+  }
 }
 
-void GameManager::updateClient() {
-  client.update();
+void GameManager::disconnect() {
+  client.disconnect();
+}
+
+void GameManager::updateClient(bool wait) {
+  client.update(-1, wait);
 }
 
 bool GameManager::placeShip(unsigned short int row, unsigned short int column, bool isHorizontal) {

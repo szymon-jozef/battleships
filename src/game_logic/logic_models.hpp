@@ -121,7 +121,6 @@ public:
 /// - `getName`
 class Player {
   std::string name;
-  boost::uuids::uuid id;
   Board board;
   Radar radar;
   /// ShipsBay is a vector of pointer to the ships that will be placed on the board.

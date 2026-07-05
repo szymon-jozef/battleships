@@ -47,9 +47,15 @@ size_t MessageQueue::size() const {
   return queue.size();
 }
 
+void MessageQueue::stop() {
+  std::scoped_lock lock(mutex);
+  stopped = true;
+  cvBlock.notify_all();
+}
+
 void MessageQueue::wait() {
   std::unique_lock<std::mutex> lock(mutex);
-  cvBlock.wait(lock, [this]() { return !queue.empty(); });
+  cvBlock.wait(lock, [this]() { return !queue.empty() || stopped; });
 }
 } // namespace networking
 } // namespace battleship
