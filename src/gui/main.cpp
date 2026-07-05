@@ -1,6 +1,6 @@
-#include "game_context.hpp"
 #include "main_menu.hpp"
 #include "scene.hpp"
+#include "settings.hpp"
 #include <memory>
 #include <raylib.h>
 
@@ -14,13 +14,14 @@ int main() {
   InitWindow(screenWidth, screenHeight, "Battleships");
   SetTargetFPS(60);
 
-  GuiState currentState = GuiState::MAIN_MENU;
+  GuiState &currentState = gameContext.guiState;
   GuiState previousState = currentState;
+  bool shouldClose = false;
 
   std::unique_ptr<Scene> currentScene;
   currentScene = std::make_unique<MainMenu>(gameContext);
 
-  while (!WindowShouldClose()) {
+  while (!WindowShouldClose() && !shouldClose) {
     if (currentState != previousState) {
       previousState = currentState;
 
@@ -29,7 +30,10 @@ int main() {
         currentScene = std::make_unique<MainMenu>(gameContext);
         break;
       case GuiState::SETTINGS:
+        currentScene = std::make_unique<Settings>(gameContext);
         break;
+      case GuiState::QUIT:
+        shouldClose = true;
       }
     }
 

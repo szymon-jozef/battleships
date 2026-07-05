@@ -1,6 +1,6 @@
 #pragma once
 
-#include "game_context.hpp"
+#include "gui_models.hpp"
 #include <raylib.h>
 
 namespace battleship {
@@ -10,7 +10,6 @@ class Scene {
 
 protected:
   GameContext &gameContext;
-  Vector2 mousePos = {0.0f, 0.0f};
 
 public:
   Scene(GameContext &gameContext)

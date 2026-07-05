@@ -1,4 +1,5 @@
-#include "game_context.hpp"
+#pragma once
+
 #include "gui_models.hpp"
 #include "scene.hpp"
 #include <raylib.h>
@@ -19,8 +20,11 @@ public:
     const int fontSize = 12;
 
     buttons.push_back("Play", width, height, fontSize, []() { spdlog::info("I want to play!"); });
-    buttons.push_back("Settings", width, height, fontSize, []() { spdlog::info("I was clicked"); });
-    buttons.push_back("Quit", width, height, fontSize, []() { CloseWindow(); });
+    buttons.push_back("Settings", width, height, fontSize, [&gameContext]() {
+      spdlog::info("I was clicked");
+      gameContext.guiState = GuiState::SETTINGS;
+    });
+    buttons.push_back("Quit", width, height, fontSize, [&gameContext]() { gameContext.guiState = GuiState::QUIT; });
   }
 
   ~MainMenu() {
@@ -28,7 +32,6 @@ public:
   }
 
   void update() override {
-    mousePos = GetMousePosition();
     buttons.update_all();
   }
 

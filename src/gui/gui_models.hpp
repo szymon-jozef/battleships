@@ -1,9 +1,22 @@
+#pragma once
 #include <functional>
 #include <raylib.h>
 #include <string>
 
 namespace battleship {
 namespace gui {
+
+enum class GuiState {
+  MAIN_MENU,
+  SETTINGS,
+  QUIT,
+};
+
+struct GameContext {
+  std::string playerName;
+  GuiState guiState = GuiState::MAIN_MENU;
+};
+
 struct Button {
   std::string label;
   float pos_x, pos_y, width, height;
