@@ -151,6 +151,9 @@ target_link_libraries(IntegrationTests
 )
 
 
+target_compile_options(server_main PRIVATE -fsanitize=address -g)
+target_link_options(server_main PRIVATE -fsanitize=address)
+
 target_compile_options(LogicTests PRIVATE -fsanitize=address -g)
 target_link_options(LogicTests PRIVATE -fsanitize=address)
 

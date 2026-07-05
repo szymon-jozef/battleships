@@ -35,8 +35,13 @@ bool Server::start() {
 
 void Server::stop() {
   queIn.stop();
-  acceptor.close();
 
+  boost::system::error_code ec;
+  if (ec) {
+    spdlog::warn("[Server] error while stopping: {}", ec.message());
+  }
+
+  acceptor.close(ec);
   context.stop();
 
   if (thread.joinable()) {
