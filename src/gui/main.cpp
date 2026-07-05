@@ -22,6 +22,7 @@ int main() {
   currentScene = std::make_unique<MainMenu>(gameContext);
 
   while (!WindowShouldClose() && !shouldClose) {
+    // === Switching or dominating ===
     if (currentState != previousState) {
       previousState = currentState;
 
@@ -37,10 +38,15 @@ int main() {
       }
     }
 
+    // === Updating ===
     currentScene->update();
 
+    // === Drawing ===
     BeginDrawing();
+    ClearBackground(BLACK);
+
     currentScene->draw();
+
     EndDrawing();
   }
 
