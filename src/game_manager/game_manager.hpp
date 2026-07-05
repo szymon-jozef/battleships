@@ -31,7 +31,8 @@ public:
   std::string getEnemyName() const;
   std::string getLoserName() const;
 
-  bool isGameWon();
+  bool isGameWon() const;
+  bool isConnected() const;
 };
 } // namespace gameManager
 } // namespace battleship

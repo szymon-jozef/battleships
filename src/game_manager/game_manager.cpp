@@ -87,8 +87,12 @@ std::string GameManager::getLoserName() const {
   return client.loserName;
 }
 
-bool GameManager::isGameWon() {
+bool GameManager::isGameWon() const {
   return client.enemyName == client.loserName;
+}
+
+bool GameManager::isConnected() const {
+  return client.isConnected();
 }
 } // namespace gameManager
 } // namespace battleship

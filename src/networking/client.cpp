@@ -40,6 +40,7 @@ bool Client::connect(const std::string &playerName, const std::string &host, con
 }
 
 void Client::disconnect() {
+  spdlog::info("[Client] started disconnecting");
   queIn.stop();
   if (isConnected()) {
     connection->disconnect();

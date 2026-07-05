@@ -12,9 +12,13 @@ TEST_CASE("Full integration test") {
   battleship::gameManager::GameManager player1("Morbius", "127.0.0.1", port);
   battleship::gameManager::GameManager player2("Spider-mid", "127.0.0.1", port);
 
-  std::jthread serverUpdate([&server](std::stop_token token) {
-    while (!token.stop_requested()) {
-      server.update(-1, true);
+  std::thread serverUpdate([&server]() {
+    while (true) {
+      server.update();
+      if (server.isGameEnd()) {
+        break;
+      }
+      std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
   });
 
@@ -23,15 +27,21 @@ TEST_CASE("Full integration test") {
   player1.connect();
   player2.connect();
 
-  std::jthread p1Thread([&](std::stop_token token) {
-    while (!token.stop_requested()) {
+  std::thread p1Thread([&]() {
+    while (true) {
       player1.updateClient();
+      if (!player1.isConnected()) {
+        break;
+      }
     }
   });
 
-  std::jthread p2Thread([&](std::stop_token token) {
-    while (!token.stop_requested()) {
+  std::thread p2Thread([&]() {
+    while (true) {
       player2.updateClient();
+      if (!player2.isConnected()) {
+        break;
+      }
     }
   });
 
@@ -116,9 +126,8 @@ TEST_CASE("Full integration test") {
   REQUIRE(player1.isGameWon() == false);
   REQUIRE(player2.isGameWon() == true);
 
+  p1Thread.join();
+  p2Thread.join();
   server.stop();
-
-  p1Thread.request_stop();
-  p2Thread.request_stop();
-  serverUpdate.request_stop();
+  serverUpdate.join();
 }
