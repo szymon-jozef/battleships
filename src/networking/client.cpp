@@ -187,6 +187,10 @@ void Client::handleIncomingAttack(Message &msg) {
   resultMsg.push(row);
   resultMsg.push(column);
   send(resultMsg);
+
+  if (onShotRecieve) {
+    onShotRecieve();
+  }
 }
 
 void Client::handleShotResult(Message &msg) {
@@ -249,6 +253,10 @@ void Client::setRecievingAttackFunc(
 void Client::setMarkResultFunc(
     std::function<void(battleship::logic::FieldState, unsigned short int, unsigned short int)> func) {
   markResultFunc = func;
+}
+
+void Client::setOnShotRecieve(std::function<void()> func) {
+  onShotRecieve = func;
 }
 
 } // namespace networking

@@ -23,6 +23,14 @@ public:
     client.setMarkResultFunc([this](logic::FieldState state, unsigned short int row, unsigned short int column) {
       return this->player.markShotResult(state, row, column);
     });
+
+    client.setOnShotRecieve([this]() {
+      if (player.isDead()) {
+        client.sendLost();
+        return true;
+      }
+      return false;
+    });
   }
 
   void connect() {
@@ -48,19 +56,10 @@ public:
 
   // TODO! Change client so it puts FieldStates on some kind of queue, so we can play sounds, etc... (GUI_EVENTS)
 
-  // TODO! Add some onShotRecieve method so we can change if we lost only then, so we don't have to do it every single
-  // frame and waste resources
-
   void makeShot(unsigned short int row, unsigned short int column) {
     // TODO! Server should send to the clients which turn it is and client shouldn't be able to shoot when it's not its
     // turn
     client.sendAttack(row, column);
-  }
-
-  void checkGameLost() {
-    if (player.isDead()) {
-      client.sendLost();
-    }
   }
 
   networking::GameStatus getCurrentGameStatus() const {

@@ -19,6 +19,7 @@ class Client {
 
   std::function<battleship::logic::FieldState(unsigned short int, unsigned short int)> recieveAttackFunc;
   std::function<void(battleship::logic::FieldState, unsigned short int, unsigned short int)> markResultFunc;
+  std::function<void()> onShotRecieve;
 
   void send(const Message &msg);
   void onMessage(Message &msg);
@@ -60,6 +61,7 @@ public:
   /// @brief Function that handles marking player radar.
   void
   setMarkResultFunc(std::function<void(battleship::logic::FieldState, unsigned short int, unsigned short int)> func);
+  void setOnShotRecieve(std::function<void()> func);
 };
 } // namespace networking
 } // namespace battleship
