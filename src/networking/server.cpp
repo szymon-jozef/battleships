@@ -1,4 +1,5 @@
 #include "server.hpp"
+#include "../game_logic/logic_models.hpp"
 #include "connection.hpp"
 #include "data_types.hpp"
 #include "messages.hpp"
@@ -246,12 +247,22 @@ void Server::handleClientSendingAttack(std::shared_ptr<Connection> client, Messa
 }
 
 void Server::handleClientRecievingAttack(std::shared_ptr<Connection> client, Message &msg) {
+  Message msgCpy = msg;
   auto attacker = playerList.getCurrentTurn();
   if (!attacker) {
     spdlog::error("[Server] attacker in recieving attack is nullptr...");
     return;
   }
+  auto column = msgCpy.pop<unsigned short int>();
+  auto row = msgCpy.pop<unsigned short int>();
+  auto result = msgCpy.pop<battleship::logic::FieldState>();
+
   attacker->connection->send(msg);
+
+  if (result == logic::FieldState::HIT || result == logic::FieldState::SUNK) {
+    return;
+  }
+
   playerList.switchTurn();
   broadcastCurrentTurn();
 }
