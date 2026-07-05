@@ -19,6 +19,7 @@ find_package(Catch2 3 REQUIRED)
 find_package(spdlog  REQUIRED)
 find_package(fmt  REQUIRED)
 find_package(Threads REQUIRED)
+find_package(raylib REQUIRED)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
@@ -125,6 +126,40 @@ target_link_libraries(server_main
 target_link_libraries(client_main
     PRIVATE
         networking
+)
+
+# === GUI ===
+add_library(gui_lib)
+file(GLOB GUI_HEADERS CONFIGURE_DEPENDS "src/gui/*.hpp")
+
+target_sources(
+    gui_lib
+    PUBLIC
+        FILE_SET HEADERS
+    BASE_DIRS
+        src/gui
+    FILES
+        ${GUI_HEADERS}
+)
+target_link_libraries(gui_lib
+    PRIVATE
+        raylib
+        networking
+        game_manager
+        game_logic
+        spdlog::spdlog
+)
+
+add_executable(gui)
+
+target_link_libraries(gui
+    PRIVATE
+        gui_lib
+)
+
+target_sources(gui
+    PRIVATE
+        src/gui/main.cpp
 )
 
 
