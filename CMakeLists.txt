@@ -23,10 +23,18 @@ find_package(raylib REQUIRED)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
+# === Entry point ===
 add_executable(battleships)
 target_sources(battleships
     PRIVATE
-        main.cpp
+        src/main.cpp
+)
+
+target_link_libraries(battleships
+    PRIVATE
+    game_logic
+    networking
+    gui
 )
 
 # === Game logic ===
@@ -129,11 +137,11 @@ target_link_libraries(client_main
 )
 
 # === GUI ===
-add_library(gui_lib)
+add_library(gui)
 file(GLOB GUI_HEADERS CONFIGURE_DEPENDS "src/gui/*.hpp")
 
 target_sources(
-    gui_lib
+    gui
     PUBLIC
         FILE_SET HEADERS
     BASE_DIRS
@@ -141,25 +149,13 @@ target_sources(
     FILES
         ${GUI_HEADERS}
 )
-target_link_libraries(gui_lib
+target_link_libraries(gui
     PRIVATE
         raylib
         networking
         game_manager
         game_logic
         spdlog::spdlog
-)
-
-add_executable(gui)
-
-target_link_libraries(gui
-    PRIVATE
-        gui_lib
-)
-
-target_sources(gui
-    PRIVATE
-        src/gui/main.cpp
 )
 
 

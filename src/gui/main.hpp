@@ -5,13 +5,16 @@
 #include <memory>
 #include <raylib.h>
 
-using namespace battleship::gui;
+namespace battleship {
+namespace gui {
 
-int main() {
-  const int screenWidth = 800;
-  const int screenHeight = 450;
+inline int run() {
+  const int screenWidth = 720;
+  const int screenHeight = 480;
   GameContext gameContext = {std::string("Szymon")};
 
+  // TODO! Uncomment this when updating elements pos is implemented
+  // SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(screenWidth, screenHeight, "Battleships");
   SetTargetFPS(60);
 
@@ -57,3 +60,6 @@ int main() {
   CloseWindow();
   return 0;
 }
+
+} // namespace gui
+} // namespace battleship
