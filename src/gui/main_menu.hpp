@@ -9,20 +9,20 @@ namespace battleship {
 namespace gui {
 class MainMenu : public Scene {
   Texture2D background;
-  ButtonVector buttons;
+  WidgetsVector widgets;
 
 public:
   MainMenu(GameContext &gameContext)
       : Scene(gameContext)
-      , buttons(10, 10, GetScreenWidth() / 3.0f, 20, 12) {
+      , widgets(10, 10, GetScreenWidth() / 3.0f, 20, 12) {
     background = LoadTexture("assets/gfx/bg1.jpg");
 
-    buttons.push_back("Play", []() { spdlog::info("I want to play!"); });
-    buttons.push_back("Settings", [&gameContext]() {
+    widgets.push_back_button("Play", []() { spdlog::info("I want to play!"); });
+    widgets.push_back_button("Settings", [&gameContext]() {
       spdlog::info("I was clicked");
       gameContext.guiState = GuiState::SETTINGS;
     });
-    buttons.push_back("Quit", [&gameContext]() { gameContext.guiState = GuiState::QUIT; });
+    widgets.push_back_button("Quit", [&gameContext]() { gameContext.guiState = GuiState::QUIT; });
   }
 
   ~MainMenu() {
@@ -30,12 +30,12 @@ public:
   }
 
   void update() override {
-    buttons.update_all();
+    widgets.update_all();
   }
 
   void draw() override {
     DrawTexture(background, 0, 0, WHITE);
-    buttons.draw_all();
+    widgets.draw_all();
   }
 };
 

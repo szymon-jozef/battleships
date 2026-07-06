@@ -8,18 +8,16 @@ namespace gui {
 
 class Settings : public Scene {
   Texture2D background;
-  ButtonVector buttons;
-  TextInput nameInput;
+  WidgetsVector widgets;
 
 public:
   Settings(GameContext &gameContext)
       : Scene(gameContext)
-      , buttons(10, 10, GetScreenWidth() / 3.0f, GetScreenHeight() / 5.0f, 12)
-      , nameInput(
-            GetScreenWidth() / 2.0f, 3 * GetScreenHeight() / 5.0f, GetScreenWidth() / 4.0f, 100, "Podaj swe imie", 12) {
+      , widgets(10, 10, GetScreenWidth() / 3.0f, GetScreenHeight() / 5.0f, 12) {
     background = LoadTexture("assets/gfx/bg1.jpg");
-    buttons.push_back("idk", []() {});
-    buttons.push_back("Go back", [&]() { gameContext.guiState = GuiState::MAIN_MENU; });
+    widgets.push_back_button("idk", []() { spdlog::info("I was clicked and idk"); });
+    widgets.push_back_textInput(gameContext.playerName);
+    widgets.push_back_button("Go back", [&gameContext]() { gameContext.guiState = GuiState::MAIN_MENU; });
   }
 
   ~Settings() {
@@ -30,14 +28,12 @@ public:
     if (GetKeyPressed() == KEY_ESCAPE) {
       gameContext.guiState = GuiState::MAIN_MENU;
     }
-    buttons.update_all();
-    nameInput.update();
+    widgets.update_all();
   }
 
   void draw() override {
     DrawTexture(background, 0, 0, LIGHTGRAY);
-    buttons.draw_all();
-    nameInput.draw();
+    widgets.draw_all();
   }
 };
 } // namespace gui

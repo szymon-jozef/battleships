@@ -1,6 +1,8 @@
 #pragma once
 #include <functional>
+#include <memory>
 #include <raylib.h>
+#include <spdlog/spdlog.h>
 #include <string>
 
 namespace battleship {
@@ -17,14 +19,17 @@ struct GameContext {
   GuiState guiState = GuiState::MAIN_MENU;
 };
 
-struct Button {
+// === Widgets and stuff ===
+
+class Widget {
+protected:
   std::string label;
   float pos_x, pos_y, width, height;
   int fontSize;
   Rectangle rect;
-  std::function<void()> onClick;
 
-  Button(std::string label, float pos_x, float pos_y, float width, float height, int fontSize = 12)
+public:
+  Widget(std::string label, float pos_x, float pos_y, float width, float height, int fontSize = 12)
       : label(label)
       , pos_x(pos_x - width / 2)
       , pos_y(pos_y)
@@ -32,10 +37,21 @@ struct Button {
       , height(height)
       , rect({this->pos_x, pos_y, width, height})
       , fontSize(fontSize) {}
+  virtual ~Widget() = default;
+
+  virtual void draw() = 0;
+  virtual void update() = 0;
+};
+
+class Button : public Widget {
+  std::function<void()> onClick;
+
+public:
+  Button(std::string label, float pos_x, float pos_y, float width, float height, int fontSize = 12)
+      : Widget(label, pos_x, pos_y, width, height, fontSize) {}
 
   void draw() {
     DrawRectangleRec(rect, WHITE);
-
     int textWidth = MeasureText(label.c_str(), fontSize);
     float text_x = (pos_x + width / 2.0f) - (textWidth / 2.0f);
     float text_y = (pos_y + height / 2.0f) - (fontSize / 2.0f);
@@ -49,61 +65,27 @@ struct Button {
       onClick();
     }
   }
-};
 
-class ButtonVector {
-  std::vector<Button> buttons;
-  int margin, start_y, fontSize;
-  float width, height;
-
-public:
-  ButtonVector(int start_y, int margin, float width, float height, int fontSize)
-      : start_y(start_y)
-      , margin(margin)
-      , width(width)
-      , height(height)
-      , fontSize(fontSize) {}
-
-  void push_back(std::string label, std::function<void()> onClick) {
-    Button btn =
-        Button(label, GetScreenWidth() / 2.0f, start_y + (margin + height) * buttons.size(), width, height, fontSize);
-    btn.onClick = onClick;
-    buttons.push_back(btn);
-  }
-
-  void update_all() {
-    for (auto &btn : buttons) {
-      btn.update();
-    }
-  }
-
-  void draw_all() {
-    for (auto &btn : buttons) {
-      btn.draw();
-    }
+  void setOnClick(std::function<void()> onClick) {
+    this->onClick = onClick;
   }
 };
 
-class TextInput {
+class TextInput : public Widget {
   // 31 chars, because 32 is the max we can send through the network
-  const static int MAX_INPUT = 31;
 
-  char buffer[MAX_INPUT + 1];
+  const static int MAX_INPUT_CHARS = 31;
+  char buffer[MAX_INPUT_CHARS + 1];
   int letterCount = 0;
-  Rectangle textBox;
   std::string prompt;
   bool isMouseOnText = false;
-  int fontSize;
 
 public:
-  TextInput(float pos_x, float pos_y, float width, float height, std::string prompt, int fontSize)
-      : textBox({pos_x, pos_y, width, height})
-      , prompt(prompt)
-      , fontSize(fontSize)
-      , buffer() {}
+  TextInput(std::string prompt, float pos_x, float pos_y, float width, float height, int fontSize)
+      : Widget(prompt, pos_x, pos_y, width, height) {}
 
-  void update() {
-    isMouseOnText = CheckCollisionPointRec(GetMousePosition(), textBox);
+  void update() override {
+    isMouseOnText = CheckCollisionPointRec(GetMousePosition(), rect);
     // input
 
     if (isMouseOnText) {
@@ -111,7 +93,7 @@ public:
       int key = GetCharPressed();
 
       while (key > 0) {
-        if ((key >= 32) && (key <= 125) && (letterCount < MAX_INPUT)) {
+        if ((key >= 32) && (key <= 125) && (letterCount < MAX_INPUT_CHARS)) {
           buffer[letterCount] = (char)key;
           buffer[letterCount + 1] = '\0';
           letterCount++;
@@ -140,18 +122,18 @@ public:
     }
   }
 
-  void draw() {
+  void draw() override {
 
-    DrawRectangleRec(textBox, LIGHTGRAY);
+    DrawRectangleRec(rect, LIGHTGRAY);
     if (isMouseOnText) {
-      DrawRectangleLines(textBox.x, textBox.y, textBox.width, textBox.height, RED);
+      DrawRectangleLines(rect.x, rect.y, rect.width, rect.height, RED);
     } else {
-      DrawRectangleLines(textBox.x, textBox.y, textBox.width, textBox.height, DARKGRAY);
+      DrawRectangleLines(rect.x, rect.y, rect.width, rect.height, DARKGRAY);
     }
 
     int textWidth = MeasureText(prompt.c_str(), fontSize);
-    float text_x = (textBox.x + textBox.width / 2.0f) - (textWidth / 2.0f);
-    float text_y = (textBox.y + textBox.height / 2.0f) - (fontSize / 2.0f);
+    float text_x = (rect.x + rect.width / 2.0f) - (textWidth / 2.0f);
+    float text_y = (rect.y + rect.height / 2.0f) - (fontSize / 2.0f);
 
     if (prompt != "" && std::string(buffer).empty()) {
       DrawText(prompt.c_str(), text_x, text_y, fontSize, MAROON);
@@ -159,16 +141,65 @@ public:
       DrawText(buffer, text_x, text_y, fontSize, MAROON);
     }
 
-    DrawText(TextFormat("%i/%i", letterCount, MAX_INPUT),
-             textBox.x + textBox.width / 2,
-             textBox.y + textBox.height + 4,
+    DrawText(TextFormat("%i/%i", letterCount, MAX_INPUT_CHARS),
+             rect.x + rect.width / 2,
+             rect.y + rect.height + 4,
              fontSize / 2,
              DARKGRAY);
   }
 
-  std::string getInput() {
+  std::string getInput() const {
     return std::string(buffer);
   }
+};
+
+/// @brief A "layout manager" if you can call it that. It has a vector of widgets. It places one under the other in the
+/// order they were addded
+class WidgetsVector {
+  std::vector<std::unique_ptr<Widget>> widgets;
+  int margin, start_y, fontSize;
+  float width, height;
+  int pos_x = GetScreenWidth() / 2;
+
+  float getCurrentDistance() {
+    return start_y + (margin + height) * widgets.size();
+  }
+
+public:
+  WidgetsVector(int start_y, int margin, float width, float height, int fontSize)
+      : start_y(start_y)
+      , margin(margin)
+      , width(width)
+      , height(height)
+      , fontSize(fontSize) {}
+
+  void push_back_button(std::string label, std::function<void()> onClick) {
+    std::unique_ptr<Button> btn = std::make_unique<Button>(label, pos_x, getCurrentDistance(), width, height, fontSize);
+
+    btn->setOnClick(onClick);
+    widgets.push_back(std::move(btn));
+  }
+
+  void push_back_textInput(std::string prompt) {
+    std::unique_ptr<TextInput> input =
+        std::make_unique<TextInput>(prompt, pos_x, getCurrentDistance(), width, height, fontSize);
+    widgets.push_back(std::move(input));
+  }
+
+  void update_all() {
+    for (auto &widget : widgets) {
+      widget->update();
+    }
+  }
+
+  void draw_all() {
+    for (auto &widget : widgets) {
+      widget->draw();
+    }
+  }
+
+  // TODO! Save all the informations that's possible to file/GameContext whatever
+  void save() {}
 };
 
 } // namespace gui
