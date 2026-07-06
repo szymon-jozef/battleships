@@ -10,6 +10,9 @@ namespace gui {
 
 enum class GuiState {
   MAIN_MENU,
+  MODE_SELECTION,
+  GAME,
+  JOIN_SERVER,
   SETTINGS,
   QUIT,
 };
@@ -75,6 +78,7 @@ class TextInput : public Widget {
   // 31 chars, because 32 is the max we can send through the network
 
   const static int MAX_INPUT_CHARS = 31;
+  // TODO! Buffer should have players name ootb
   char buffer[MAX_INPUT_CHARS + 1];
   int letterCount = 0;
   std::string prompt;

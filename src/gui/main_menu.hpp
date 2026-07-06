@@ -17,11 +17,8 @@ public:
       , widgets(10, 10, GetScreenWidth() / 3.0f, 20, 12) {
     background = LoadTexture("assets/gfx/bg1.jpg");
 
-    widgets.push_back_button("Play", []() { spdlog::info("I want to play!"); });
-    widgets.push_back_button("Settings", [&gameContext]() {
-      spdlog::info("I was clicked");
-      gameContext.guiState = GuiState::SETTINGS;
-    });
+    widgets.push_back_button("Play", [&gameContext]() { gameContext.guiState = GuiState::MODE_SELECTION; });
+    widgets.push_back_button("Settings", [&gameContext]() { gameContext.guiState = GuiState::SETTINGS; });
     widgets.push_back_button("Quit", [&gameContext]() { gameContext.guiState = GuiState::QUIT; });
   }
 

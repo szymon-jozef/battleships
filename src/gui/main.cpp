@@ -1,4 +1,5 @@
 #include "main_menu.hpp"
+#include "mode_selection.hpp"
 #include "scene.hpp"
 #include "settings.hpp"
 #include <memory>
@@ -29,6 +30,9 @@ int main() {
       switch (currentState) {
       case GuiState::MAIN_MENU:
         currentScene = std::make_unique<MainMenu>(gameContext);
+        break;
+      case GuiState::MODE_SELECTION:
+        currentScene = std::make_unique<ModeSelection>(gameContext);
         break;
       case GuiState::SETTINGS:
         currentScene = std::make_unique<Settings>(gameContext);
