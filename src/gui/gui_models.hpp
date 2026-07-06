@@ -135,16 +135,18 @@ class TextInput : public Widget {
   // 31 chars, because 32 is the max we can send through the network
 
   const static int MAX_INPUT_CHARS = 31;
-  // TODO! Buffer should have players name ootb
+  std::string &target;
   char buffer[MAX_INPUT_CHARS + 1] = "";
   int letterCount = 0;
   std::string prompt;
   bool isMouseOnText = false;
 
-  void handleKeyboardInput() {
+  bool handleKeyboardInput() {
     isMouseOnText = CheckCollisionPointRec(GetMousePosition(), rect);
 
     if (isMouseOnText || isFocused) {
+
+      bool isEdited = false;
       if (isMouseOnText) {
         SetMouseCursor(MOUSE_CURSOR_IBEAM);
       } else {
@@ -160,6 +162,7 @@ class TextInput : public Widget {
           letterCount++;
         }
         key = GetCharPressed();
+        isEdited = true;
       }
 
       // delete one char
@@ -169,6 +172,7 @@ class TextInput : public Widget {
           letterCount = 0;
         }
         buffer[letterCount] = '\0';
+        isEdited = true;
       }
 
       // delete everything
@@ -176,21 +180,25 @@ class TextInput : public Widget {
           (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_BACKSPACE))) {
         letterCount = 0;
         buffer[letterCount] = '\0';
+        isEdited = true;
       }
+
+      return isEdited;
     }
+    return false;
   }
 
-  void handleClipboardInput() {
+  bool handleClipboardInput() {
     if ((IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL)) && IsKeyPressed(KEY_V)) {
       const char *clipboardText_c = GetClipboardText();
       if (!clipboardText_c) {
-        return;
+        return false;
       }
 
       std::string clipboardText(clipboardText_c);
 
       if (clipboardText.empty()) {
-        return;
+        return false;
       }
 
       clipboardText.erase(std::remove(clipboardText.begin(), clipboardText.end(), '\n'), clipboardText.end());
@@ -206,16 +214,30 @@ class TextInput : public Widget {
       std::copy(clipboardText.begin(), clipboardText.end(), buffer);
       letterCount = clipboardText.size();
       buffer[letterCount] = '\0';
+      return true;
     }
+    return false;
   }
 
 public:
-  TextInput(std::string prompt, float pos_x, float pos_y, float width, float height, int fontSize)
-      : Widget(prompt, pos_x, pos_y, width, height) {}
+  TextInput(std::string prompt, float pos_x, float pos_y, float width, float height, int fontSize, std::string &target)
+      : Widget(prompt, pos_x, pos_y, width, height)
+      , target(target) {
+    if (target.size() < MAX_INPUT_CHARS) {
+      std::copy(target.begin(), target.end(), buffer);
+      letterCount = target.size();
+      buffer[letterCount] = '\0';
+    } else {
+      spdlog::warn("[GUI] Loaded text was to long");
+    }
+  }
 
   void update() override {
-    handleKeyboardInput();
-    handleClipboardInput();
+    if (handleKeyboardInput() || handleClipboardInput()) {
+      target = std::string(buffer);
+      letterCount = target.size();
+      buffer[letterCount] = '\0';
+    }
   }
 
   void draw() override {
@@ -258,6 +280,8 @@ public:
 /// @brief A "layout manager" if you can call it that. It has a vector of widgets. It places one under the other in the
 /// order they were added
 class WidgetsVector {
+  GameContext &gameContext;
+
   std::vector<std::unique_ptr<Widget>> widgets;
   int margin, start_y, fontSize;
   float width, height;
@@ -268,52 +292,7 @@ class WidgetsVector {
     return start_y + (margin + height) * widgets.size();
   }
 
-public:
-  WidgetsVector(int start_y, int margin, float width, float height, int fontSize)
-      : start_y(start_y)
-      , margin(margin)
-      , width(width)
-      , height(height)
-      , fontSize(fontSize) {}
-
-  void push_back_button(std::string label, std::function<void()> onClick) {
-    std::unique_ptr<Button> btn = std::make_unique<Button>(label, pos_x, getCurrentDistance(), width, height, fontSize);
-
-    btn->setOnClick(onClick);
-    widgets.push_back(std::move(btn));
-  }
-
-  void push_back_textInput(std::string prompt) {
-    std::unique_ptr<TextInput> input =
-        std::make_unique<TextInput>(prompt, pos_x, getCurrentDistance(), width, height, fontSize);
-    widgets.push_back(std::move(input));
-  }
-
-  void push_back_label(std::string text, Color color) {
-    std::unique_ptr<TextLabel> label =
-        std::make_unique<TextLabel>(text, pos_x, getCurrentDistance(), width, height, fontSize, color);
-    widgets.push_back(std::move(label));
-  }
-
-  void push_back_textInput_with_label(std::string label, std::string prompt, Color color) {
-    std::unique_ptr<TextLabel> labelWidget =
-        std::make_unique<TextLabel>(label, pos_x, getCurrentDistance(), width, height, fontSize, color);
-
-    widgets.push_back(std::move(labelWidget));
-
-    std::unique_ptr<TextInput> input =
-        std::make_unique<TextInput>(prompt, pos_x, getCurrentDistance() - height / 2.0f, width, height, fontSize);
-
-    widgets.push_back(std::move(input));
-  }
-
-  void update_all() {
-    for (auto &widget : widgets) {
-      widget->update();
-      widget->unFocus();
-    }
-
-    // element focus
+  void handleFocus() {
     if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_TAB)) {
       do {
         currentFocus--;
@@ -333,14 +312,59 @@ public:
     widgets[currentFocus]->focus();
   }
 
+public:
+  WidgetsVector(GameContext &gameContext, int start_y, int margin, float width, float height, int fontSize)
+      : gameContext(gameContext)
+      , start_y(start_y)
+      , margin(margin)
+      , width(width)
+      , height(height)
+      , fontSize(fontSize) {}
+
+  void push_back_button(std::string label, std::function<void()> onClick) {
+    std::unique_ptr<Button> btn = std::make_unique<Button>(label, pos_x, getCurrentDistance(), width, height, fontSize);
+
+    btn->setOnClick(onClick);
+    widgets.push_back(std::move(btn));
+  }
+
+  void push_back_textInput(std::string prompt, std::string &target) {
+    std::unique_ptr<TextInput> input =
+        std::make_unique<TextInput>(prompt, pos_x, getCurrentDistance(), width, height, fontSize, target);
+    widgets.push_back(std::move(input));
+  }
+
+  void push_back_label(std::string text, Color color) {
+    std::unique_ptr<TextLabel> label =
+        std::make_unique<TextLabel>(text, pos_x, getCurrentDistance(), width, height, fontSize, color);
+    widgets.push_back(std::move(label));
+  }
+
+  void push_back_textInput_with_label(std::string label, std::string prompt, Color color, std::string &target) {
+    std::unique_ptr<TextLabel> labelWidget =
+        std::make_unique<TextLabel>(label, pos_x, getCurrentDistance(), width, height, fontSize, color);
+
+    widgets.push_back(std::move(labelWidget));
+
+    std::unique_ptr<TextInput> input = std::make_unique<TextInput>(
+        prompt, pos_x, getCurrentDistance() - height / 2.0f, width, height, fontSize, target);
+
+    widgets.push_back(std::move(input));
+  }
+
+  void update_all() {
+    for (auto &widget : widgets) {
+      widget->update();
+      widget->unFocus();
+    }
+    handleFocus();
+  }
+
   void draw_all() {
     for (auto &widget : widgets) {
       widget->draw();
     }
   }
-
-  // TODO! Save all the informations that's possible to file/GameContext whatever
-  void save() {}
 };
 
 } // namespace gui

@@ -16,7 +16,7 @@ class ModeSelection : public Scene {
 public:
   ModeSelection(GameContext &gameContext)
       : Scene(gameContext)
-      , widgets(10, 10, GetScreenWidth() / 3.0f, 20, 12) {
+      , widgets(gameContext, 10, 10, GetScreenWidth() / 3.0f, 20, 12) {
     background = LoadTexture("assets/gfx/bg2.jpg");
 
     widgets.push_back_button("Host Game", [&gameContext]() {
