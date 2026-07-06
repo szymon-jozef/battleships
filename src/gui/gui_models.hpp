@@ -1,4 +1,6 @@
 #pragma once
+#include <algorithm>
+#include <cctype>
 #include <functional>
 #include <memory>
 #include <raylib.h>
@@ -139,13 +141,8 @@ class TextInput : public Widget {
   std::string prompt;
   bool isMouseOnText = false;
 
-public:
-  TextInput(std::string prompt, float pos_x, float pos_y, float width, float height, int fontSize)
-      : Widget(prompt, pos_x, pos_y, width, height) {}
-
-  void update() override {
+  void handleKeyboardInput() {
     isMouseOnText = CheckCollisionPointRec(GetMousePosition(), rect);
-    // input
 
     if (isMouseOnText || isFocused) {
       if (isMouseOnText) {
@@ -181,6 +178,44 @@ public:
         buffer[letterCount] = '\0';
       }
     }
+  }
+
+  void handleClipboardInput() {
+    if ((IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL)) && IsKeyPressed(KEY_V)) {
+      const char *clipboardText_c = GetClipboardText();
+      if (!clipboardText_c) {
+        return;
+      }
+
+      std::string clipboardText(clipboardText_c);
+
+      if (clipboardText.empty()) {
+        return;
+      }
+
+      clipboardText.erase(std::remove(clipboardText.begin(), clipboardText.end(), '\n'), clipboardText.end());
+      clipboardText.erase(std::remove_if(clipboardText.begin(),
+                                         clipboardText.end(),
+                                         [](auto const &c) -> bool { return !std::isalnum(c); }),
+                          clipboardText.end());
+
+      if (clipboardText.size() >= MAX_INPUT_CHARS) {
+        clipboardText.resize(MAX_INPUT_CHARS);
+      }
+
+      std::copy(clipboardText.begin(), clipboardText.end(), buffer);
+      letterCount = clipboardText.size();
+      buffer[letterCount] = '\0';
+    }
+  }
+
+public:
+  TextInput(std::string prompt, float pos_x, float pos_y, float width, float height, int fontSize)
+      : Widget(prompt, pos_x, pos_y, width, height) {}
+
+  void update() override {
+    handleKeyboardInput();
+    handleClipboardInput();
   }
 
   void draw() override {
@@ -221,7 +256,7 @@ public:
 };
 
 /// @brief A "layout manager" if you can call it that. It has a vector of widgets. It places one under the other in the
-/// order they were addded
+/// order they were added
 class WidgetsVector {
   std::vector<std::unique_ptr<Widget>> widgets;
   int margin, start_y, fontSize;
