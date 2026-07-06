@@ -28,6 +28,7 @@ class Widget {
 protected:
   std::string label;
   float pos_x, pos_y, width, height;
+  bool isFocused = false;
   int fontSize;
   Rectangle rect;
 
@@ -48,18 +49,42 @@ protected:
   }
 
 public:
-  Widget(std::string label, float pos_x, float pos_y, float width, float height, int fontSize = 12)
+  bool isFocusable = false;
+
+  Widget(std::string label,
+         float pos_x,
+         float pos_y,
+         float width,
+         float height,
+         int fontSize = 12,
+         bool isFocusable = true)
       : label(label)
       , pos_x(pos_x - width / 2)
       , pos_y(pos_y)
       , width(width)
       , height(height)
       , rect({this->pos_x, pos_y, width, height})
-      , fontSize(fontSize) {}
+      , fontSize(fontSize)
+      , isFocusable(isFocusable) {}
   virtual ~Widget() = default;
 
-  virtual void draw() = 0;
+  virtual void draw() {
+    // focused border
+    // NOTE: should be called at the end of each draw function, so it's not covered
+    if (isFocusable && isFocused) {
+      DrawRectangleLines(rect.x, rect.y, rect.width, rect.height, GRAY);
+    }
+  }
+
   virtual void update() = 0;
+
+  void focus() {
+    isFocused = true;
+  }
+
+  void unFocus() {
+    isFocused = false;
+  }
 };
 
 class TextLabel : public Widget {
@@ -67,13 +92,14 @@ class TextLabel : public Widget {
 
 public:
   TextLabel(std::string text, float pos_x, float pos_y, float width, float height, int fontSize, Color color)
-      : Widget(text, pos_x, pos_y, width, height)
+      : Widget(text, pos_x, pos_y, width, height, fontSize, false)
       , color(color) {}
 
   void update() override {}
 
   void draw() override {
     drawLabelInTheMiddle(color);
+    Widget::draw();
   }
 };
 
@@ -87,11 +113,13 @@ public:
   void draw() {
     DrawRectangleRec(rect, WHITE);
     drawLabelInTheMiddle(BLACK);
+    Widget::draw();
   }
 
   void update() {
-    if (CheckCollisionPointRec(GetMousePosition(), rect) && IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT) &&
-        onClick) {
+    if (onClick &&
+        ((CheckCollisionPointRec(GetMousePosition(), rect) && IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT)) ||
+         (isFocused && IsKeyPressed(KEY_ENTER)))) {
       onClick();
     }
   }
@@ -119,8 +147,13 @@ public:
     isMouseOnText = CheckCollisionPointRec(GetMousePosition(), rect);
     // input
 
-    if (isMouseOnText) {
-      SetMouseCursor(MOUSE_CURSOR_IBEAM);
+    if (isMouseOnText || isFocused) {
+      if (isMouseOnText) {
+        SetMouseCursor(MOUSE_CURSOR_IBEAM);
+      } else {
+        SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+      }
+
       int key = GetCharPressed();
 
       while (key > 0) {
@@ -147,9 +180,6 @@ public:
         letterCount = 0;
         buffer[letterCount] = '\0';
       }
-
-    } else {
-      SetMouseCursor(MOUSE_CURSOR_DEFAULT);
     }
   }
 
@@ -182,6 +212,7 @@ public:
                                               fontSize / 2.0f,
                                               DARKGRAY);
     charactersLeftLabel.draw();
+    Widget::draw();
   }
 
   std::string getInput() const {
@@ -196,6 +227,7 @@ class WidgetsVector {
   int margin, start_y, fontSize;
   float width, height;
   int pos_x = GetScreenWidth() / 2;
+  int currentFocus = 0;
 
   float getCurrentDistance() {
     return start_y + (margin + height) * widgets.size();
@@ -243,7 +275,27 @@ public:
   void update_all() {
     for (auto &widget : widgets) {
       widget->update();
+      widget->unFocus();
     }
+
+    // element focus
+    if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_TAB)) {
+      do {
+        currentFocus--;
+
+        if (currentFocus < 0) {
+          currentFocus = widgets.size() - 1;
+        };
+
+      } while (!widgets[currentFocus]->isFocusable);
+
+    } else if (IsKeyPressed(KEY_TAB)) {
+      do {
+        currentFocus = (currentFocus + 1) % widgets.size();
+      } while (!widgets[currentFocus]->isFocusable);
+    }
+
+    widgets[currentFocus]->focus();
   }
 
   void draw_all() {
