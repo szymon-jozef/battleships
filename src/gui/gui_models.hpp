@@ -84,5 +84,92 @@ public:
   }
 };
 
+class TextInput {
+  // 31 chars, because 32 is the max we can send through the network
+  const static int MAX_INPUT = 31;
+
+  char buffer[MAX_INPUT + 1];
+  int letterCount = 0;
+  Rectangle textBox;
+  std::string prompt;
+  bool isMouseOnText = false;
+  int fontSize;
+
+public:
+  TextInput(float pos_x, float pos_y, float width, float height, std::string prompt, int fontSize)
+      : textBox({pos_x, pos_y, width, height})
+      , prompt(prompt)
+      , fontSize(fontSize)
+      , buffer() {}
+
+  void update() {
+    isMouseOnText = CheckCollisionPointRec(GetMousePosition(), textBox);
+    // input
+
+    if (isMouseOnText) {
+      SetMouseCursor(MOUSE_CURSOR_IBEAM);
+      int key = GetCharPressed();
+
+      while (key > 0) {
+        if ((key >= 32) && (key <= 125) && (letterCount < MAX_INPUT)) {
+          buffer[letterCount] = (char)key;
+          buffer[letterCount + 1] = '\0';
+          letterCount++;
+        }
+        key = GetCharPressed();
+      }
+
+      // delete one char
+      if (IsKeyPressed(KEY_BACKSPACE)) {
+        letterCount--;
+        if (letterCount < 0) {
+          letterCount = 0;
+        }
+        buffer[letterCount] = '\0';
+      }
+
+      // delete everything
+      if ((IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_U)) ||
+          (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_BACKSPACE))) {
+        letterCount = 0;
+        buffer[letterCount] = '\0';
+      }
+
+    } else {
+      SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+    }
+  }
+
+  void draw() {
+
+    DrawRectangleRec(textBox, LIGHTGRAY);
+    if (isMouseOnText) {
+      DrawRectangleLines(textBox.x, textBox.y, textBox.width, textBox.height, RED);
+    } else {
+      DrawRectangleLines(textBox.x, textBox.y, textBox.width, textBox.height, DARKGRAY);
+    }
+
+    int textWidth = MeasureText(prompt.c_str(), fontSize);
+    float text_x = (textBox.x + textBox.width / 2.0f) - (textWidth / 2.0f);
+    float text_y = (textBox.y + textBox.height / 2.0f) - (fontSize / 2.0f);
+
+    if (prompt != "" && std::string(buffer).empty()) {
+      DrawText(prompt.c_str(), text_x, text_y, fontSize, MAROON);
+    } else {
+      DrawText(buffer, text_x, text_y, fontSize, MAROON);
+    }
+
+    DrawText(TextFormat("%i/%i", letterCount, MAX_INPUT),
+             textBox.x + textBox.width / 2,
+             textBox.y + textBox.height + 4,
+             fontSize / 2,
+             DARKGRAY);
+  }
+
+  std::string getInput() {
+    return std::string(buffer);
+  }
+};
+
 } // namespace gui
 } // namespace battleship
