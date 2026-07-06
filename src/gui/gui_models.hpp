@@ -31,6 +31,22 @@ protected:
   int fontSize;
   Rectangle rect;
 
+  void drawLabelInTheMiddle(Color color) {
+    int textWidth = MeasureText(label.c_str(), fontSize);
+    float text_x = (pos_x + width / 2.0f) - (textWidth / 2.0f);
+    float text_y = (pos_y + height / 2.0f) - (fontSize / 2.0f);
+
+    DrawText(label.c_str(), text_x, text_y, fontSize, color);
+  }
+
+  void drawTextInTheMiddle(char *text, Color color) {
+    int textWidth = MeasureText(text, fontSize);
+    float text_x = (pos_x + width / 2.0f) - (textWidth / 2.0f);
+    float text_y = (pos_y + height / 2.0f) - (fontSize / 2.0f);
+
+    DrawText(text, text_x, text_y, fontSize, color);
+  }
+
 public:
   Widget(std::string label, float pos_x, float pos_y, float width, float height, int fontSize = 12)
       : label(label)
@@ -46,6 +62,21 @@ public:
   virtual void update() = 0;
 };
 
+class TextLabel : public Widget {
+  Color color;
+
+public:
+  TextLabel(std::string text, float pos_x, float pos_y, float width, float height, int fontSize, Color color)
+      : Widget(text, pos_x, pos_y, width, height)
+      , color(color) {}
+
+  void update() override {}
+
+  void draw() override {
+    drawLabelInTheMiddle(color);
+  }
+};
+
 class Button : public Widget {
   std::function<void()> onClick;
 
@@ -55,11 +86,7 @@ public:
 
   void draw() {
     DrawRectangleRec(rect, WHITE);
-    int textWidth = MeasureText(label.c_str(), fontSize);
-    float text_x = (pos_x + width / 2.0f) - (textWidth / 2.0f);
-    float text_y = (pos_y + height / 2.0f) - (fontSize / 2.0f);
-
-    DrawText(label.c_str(), text_x, text_y, fontSize, BLACK);
+    drawLabelInTheMiddle(BLACK);
   }
 
   void update() {
@@ -79,7 +106,7 @@ class TextInput : public Widget {
 
   const static int MAX_INPUT_CHARS = 31;
   // TODO! Buffer should have players name ootb
-  char buffer[MAX_INPUT_CHARS + 1];
+  char buffer[MAX_INPUT_CHARS + 1] = "";
   int letterCount = 0;
   std::string prompt;
   bool isMouseOnText = false;
@@ -141,15 +168,20 @@ public:
 
     if (prompt != "" && std::string(buffer).empty()) {
       DrawText(prompt.c_str(), text_x, text_y, fontSize, MAROON);
+      drawLabelInTheMiddle(MAROON); // TODO! change to some other color maybe?
     } else {
-      DrawText(buffer, text_x, text_y, fontSize, MAROON);
+      drawTextInTheMiddle(buffer, MAROON);
     }
 
-    DrawText(TextFormat("%i/%i", letterCount, MAX_INPUT_CHARS),
-             rect.x + rect.width / 2,
-             rect.y + rect.height + 4,
-             fontSize / 2,
-             DARKGRAY);
+    std::string charactersLeft = std::string(TextFormat("%i/%i", letterCount, MAX_INPUT_CHARS));
+    TextLabel charactersLeftLabel = TextLabel(charactersLeft,
+                                              2 * rect.x,
+                                              rect.y + rect.height + rect.height / 10.0f,
+                                              rect.width,
+                                              rect.height / 4.0f,
+                                              fontSize / 2.0f,
+                                              DARKGRAY);
+    charactersLeftLabel.draw();
   }
 
   std::string getInput() const {
@@ -187,6 +219,24 @@ public:
   void push_back_textInput(std::string prompt) {
     std::unique_ptr<TextInput> input =
         std::make_unique<TextInput>(prompt, pos_x, getCurrentDistance(), width, height, fontSize);
+    widgets.push_back(std::move(input));
+  }
+
+  void push_back_label(std::string text, Color color) {
+    std::unique_ptr<TextLabel> label =
+        std::make_unique<TextLabel>(text, pos_x, getCurrentDistance(), width, height, fontSize, color);
+    widgets.push_back(std::move(label));
+  }
+
+  void push_back_textInput_with_label(std::string label, std::string prompt, Color color) {
+    std::unique_ptr<TextLabel> labelWidget =
+        std::make_unique<TextLabel>(label, pos_x, getCurrentDistance(), width, height, fontSize, color);
+
+    widgets.push_back(std::move(labelWidget));
+
+    std::unique_ptr<TextInput> input =
+        std::make_unique<TextInput>(prompt, pos_x, getCurrentDistance() - height / 2.0f, width, height, fontSize);
+
     widgets.push_back(std::move(input));
   }
 
