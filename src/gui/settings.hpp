@@ -13,10 +13,10 @@ class Settings : public Scene {
 public:
   Settings(GameContext &gameContext)
       : Scene(gameContext)
-      , buttons(10, 10, GetScreenWidth() / 3.0f, GetScreenHeight() / 5.0f) {
+      , buttons(10, 10, GetScreenWidth() / 3.0f, GetScreenHeight() / 5.0f, 12) {
     background = LoadTexture("assets/gfx/bg1.jpg");
-    buttons.push_back("idk", 12, []() {});
-    buttons.push_back("Go back", 12, [&]() { gameContext.guiState = GuiState::MAIN_MENU; });
+    buttons.push_back("idk", []() {});
+    buttons.push_back("Go back", [&]() { gameContext.guiState = GuiState::MAIN_MENU; });
   }
 
   ~Settings() {

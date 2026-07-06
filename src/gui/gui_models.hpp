@@ -53,17 +53,18 @@ struct Button {
 
 class ButtonVector {
   std::vector<Button> buttons;
-  int margin, start_y;
+  int margin, start_y, fontSize;
   float width, height;
 
 public:
-  ButtonVector(int start_y, int margin, float width, float height)
+  ButtonVector(int start_y, int margin, float width, float height, int fontSize)
       : start_y(start_y)
       , margin(margin)
       , width(width)
-      , height(height) {}
+      , height(height)
+      , fontSize(fontSize) {}
 
-  void push_back(std::string label, int fontSize, std::function<void()> onClick) {
+  void push_back(std::string label, std::function<void()> onClick) {
     Button btn =
         Button(label, GetScreenWidth() / 2.0f, start_y + (margin + height) * buttons.size(), width, height, fontSize);
     btn.onClick = onClick;

@@ -14,16 +14,15 @@ class MainMenu : public Scene {
 public:
   MainMenu(GameContext &gameContext)
       : Scene(gameContext)
-      , buttons(10, 10, GetScreenWidth() / 3.0f, 20) {
+      , buttons(10, 10, GetScreenWidth() / 3.0f, 20, 12) {
     background = LoadTexture("assets/gfx/bg1.jpg");
-    const int fontSize = 12;
 
-    buttons.push_back("Play", fontSize, []() { spdlog::info("I want to play!"); });
-    buttons.push_back("Settings", fontSize, [&gameContext]() {
+    buttons.push_back("Play", []() { spdlog::info("I want to play!"); });
+    buttons.push_back("Settings", [&gameContext]() {
       spdlog::info("I was clicked");
       gameContext.guiState = GuiState::SETTINGS;
     });
-    buttons.push_back("Quit", fontSize, [&gameContext]() { gameContext.guiState = GuiState::QUIT; });
+    buttons.push_back("Quit", [&gameContext]() { gameContext.guiState = GuiState::QUIT; });
   }
 
   ~MainMenu() {
