@@ -10,8 +10,8 @@ namespace battleship {
 namespace gui {
 
 inline int run() {
-  const int screenWidth = 720;
-  const int screenHeight = 480;
+  const int screenWidth = 1220;
+  const int screenHeight = 720;
   GameContext gameContext = {std::string("Szymon")};
 
   // TODO! Uncomment this when updating elements pos is implemented

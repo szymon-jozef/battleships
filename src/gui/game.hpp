@@ -4,6 +4,7 @@
 #include "game_manager.hpp"
 #include "gui_models.hpp"
 #include "scene.hpp"
+#include <algorithm>
 #include <raylib.h>
 #include <thread>
 
@@ -61,26 +62,46 @@ class GameGrid {
 
 public:
   enum class GridType { BOARD, RADAR };
-  GameGrid(gameManager::GameManager &gameManager, GridType type)
+  GameGrid(gameManager::GameManager &gameManager, GridType type, float grid_pos_x, float grid_pos_y)
       : gameManager(gameManager)
-      , gridType(type) {
+      , gridType(type)
+      , rect({grid_pos_x, grid_pos_y, GetScreenWidth() / 2.0f, static_cast<float>(GetScreenHeight())}) {
     spdlog::info("[GUI] GameGrid created. Size: {} by {}", gameManager.getBoardWidth(), gameManager.getBoardHeight());
 
-    float begin_y_pos = 10;
-    float current_x_pos = begin_y_pos, current_y_pos = begin_y_pos; // TODO! change this later
-    float width = 40, height = width;
+    float padding_y = GetScreenHeight() / 10.0f;
+    float padding_x = GetScreenWidth() / 10.0f;
 
-    float deltaPos = width + 10;
+    float multiplier = 1.2;
+
+    rect.x += padding_x;
+    rect.width -= padding_x * 2.0f;
+
+    rect.y += padding_y;
+    rect.height -= padding_y * 2.0f;
+
+    float begin_y_pos = rect.y;
+    float current_y_pos = begin_y_pos;
+    float current_x_pos = rect.x;
+
+    float columns = gameManager.getBoardWidth();
+    float rows = gameManager.getBoardHeight();
+
+    float calculatedWidth = rect.width / (((columns - 1.0f) * multiplier) + 1.0f);
+    float calculatedHeight = rect.height / (((rows - 1.0f) * multiplier) + 1.0f);
+
+    float fieldSize = std::min(calculatedWidth, calculatedHeight);
+
+    float delta = fieldSize * multiplier;
 
     fields.resize(gameManager.getBoardWidth());
 
     for (auto &column : fields) {
       for (int fieldIndex = 0; fieldIndex < gameManager.getBoardHeight(); fieldIndex++) {
-        column.emplace_back(current_x_pos, current_y_pos, width, height);
-        current_y_pos += deltaPos;
+        column.emplace_back(current_x_pos, current_y_pos, fieldSize, fieldSize);
+        current_y_pos += delta;
       }
       current_y_pos = begin_y_pos;
-      current_x_pos += deltaPos;
+      current_x_pos += delta;
     }
   }
 
@@ -90,6 +111,7 @@ public:
   }
 
   void draw() {
+    DrawRectangleRec(rect, BLACK);
     for (auto &column : fields) {
       for (auto &field : column) {
         field.draw();
@@ -164,8 +186,8 @@ public:
   Game(GameContext &gameContext)
       : Scene(gameContext)
       , gameManager(gameContext.playerName, gameContext.serverUrl, gameContext.serverPort)
-      , board(gameManager, GameGrid::GridType::BOARD)
-      , radar(gameManager, GameGrid::GridType::RADAR) {
+      , board(gameManager, GameGrid::GridType::BOARD, 0, 0)
+      , radar(gameManager, GameGrid::GridType::RADAR, GetScreenWidth() / 2.0f, 0) {
     spdlog::info("[GUI] Game constructor run");
 
     background = LoadTexture("assets/gfx/play_background.jpg");
@@ -235,8 +257,9 @@ public:
   }
 
   void draw() override {
-    DrawTexture(background, 0, 0, GRAY);
+    DrawTexture(background, 0, 0, WHITE);
     board.draw();
+    radar.draw();
   }
 };
 
