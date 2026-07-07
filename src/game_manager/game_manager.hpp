@@ -17,7 +17,7 @@ class GameManager {
 public:
   GameManager(const std::string &playerName, const std::string &serverUrl, const uint16_t serverPort = 6767);
 
-  void connect();
+  bool connect();
   void disconnect();
   void updateClient(bool wait = true);
   bool placeShip(unsigned short int row, unsigned short int column, bool isHorizontal);
@@ -30,6 +30,9 @@ public:
   std::string getPlayerName() const;
   std::string getEnemyName() const;
   std::string getLoserName() const;
+
+  unsigned short int getBoardWidth() const;
+  unsigned short int getBoardHeight() const;
 
   bool isGameWon() const;
   bool isConnected() const;

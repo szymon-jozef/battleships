@@ -76,6 +76,7 @@ void Client::update(size_t maxMessages, bool wait) {
   while (messageCount < maxMessages && !queIn.empty()) {
     auto msg = queIn.pop_front();
     onMessage(msg.msg);
+    messageCount++;
   }
 }
 

@@ -20,6 +20,8 @@ class Server {
   GameStatus globalGameStatus = GameStatus::LOBBY;
   boost::asio::steady_timer shutdownTimer;
 
+  bool isRunning = false;
+
   // Event handlers
 
   /// Allows to veto a connection or do something with it __before__ it's added to playerList
@@ -53,6 +55,7 @@ public:
   void update(size_t maxMessages = -1,
               bool wait = true); // since size_t is unsigned -1 will be changed to max int value
   bool isGameEnd() const;
+  bool isServerRunning() const;
 };
 } // namespace networking
 } // namespace battleship

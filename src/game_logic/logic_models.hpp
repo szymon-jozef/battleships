@@ -50,13 +50,13 @@ class BaseGrid {
   // we use short int, because no one wants to play with 23894723984723489
   // fields
 protected:
-  const unsigned short int WIDTH;
-  const unsigned short int HEIGHT;
   std::vector<std::vector<Field>> grid;
   /// @brief Uses BFS to mark all nearby Fields that are hit as sunk
   void markNearbyAsSunk(unsigned short int row, unsigned short int column);
 
 public:
+  const unsigned short int WIDTH;
+  const unsigned short int HEIGHT;
   BaseGrid(const unsigned short int width, const unsigned short int height);
   FieldState getFieldState(unsigned short int row, unsigned short int column) const;
 
@@ -153,6 +153,14 @@ public:
   std::string getName();
   std::string boardAsString();
   std::string radarAsString();
+
+  unsigned short int getBoardWidth() const {
+    return board.WIDTH;
+  }
+
+  unsigned short int getBoardHeight() const {
+    return board.HEIGHT;
+  }
 };
 
 } // namespace logic

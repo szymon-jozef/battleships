@@ -1,3 +1,4 @@
+#include "game.hpp"
 #include "main_menu.hpp"
 #include "mode_selection.hpp"
 #include "scene.hpp"
@@ -36,6 +37,9 @@ inline int run() {
         break;
       case GuiState::MODE_SELECTION:
         currentScene = std::make_unique<ModeSelection>(gameContext);
+        break;
+      case GuiState::GAME:
+        currentScene = std::make_unique<Game>(gameContext);
         break;
       case GuiState::SETTINGS:
         currentScene = std::make_unique<Settings>(gameContext);

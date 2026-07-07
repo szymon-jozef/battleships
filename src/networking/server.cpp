@@ -26,6 +26,7 @@ Server::~Server() {
 }
 
 bool Server::start() {
+  isRunning = true;
   try {
     waitForConnection();
     thread = std::thread([this]() { context.run(); });
@@ -38,14 +39,15 @@ bool Server::start() {
 }
 
 void Server::stop() {
+  isRunning = false;
   queIn.stop();
 
   boost::system::error_code ec;
+  acceptor.close(ec);
+
   if (ec) {
     spdlog::warn("[Server] error while stopping: {}", ec.message());
   }
-
-  acceptor.close(ec);
   context.stop();
 
   if (thread.joinable()) {
@@ -124,6 +126,10 @@ void Server::update(size_t maxMessages, bool wait) {
 
 bool Server::isGameEnd() const {
   return playerList.isEmpty() && globalGameStatus == GameStatus::GAME_FINISH;
+}
+
+bool Server::isServerRunning() const {
+  return isRunning;
 }
 
 // === Event handlers ===

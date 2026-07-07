@@ -12,6 +12,8 @@ GameManager::GameManager(const std::string &playerName, const std::string &serve
     : player(playerName)
     , serverUrl(serverUrl)
     , serverPort(serverPort) {
+  spdlog::info("[GameManager] constructor was run");
+
   client.setRecievingAttackFunc(
       [this](unsigned short int row, unsigned short int column) { return this->player.recieveShot(row, column); });
 
@@ -28,10 +30,8 @@ GameManager::GameManager(const std::string &playerName, const std::string &serve
   });
 }
 
-void GameManager::connect() {
-  if (!client.connect(player.getName(), serverUrl, serverPort)) {
-    spdlog::error("[GameManager] couldn't connect to the server!");
-  }
+bool GameManager::connect() {
+  return (client.connect(player.getName(), serverUrl, serverPort));
 }
 
 void GameManager::disconnect() {
@@ -93,6 +93,14 @@ bool GameManager::isGameWon() const {
 
 bool GameManager::isConnected() const {
   return client.isConnected();
+}
+
+unsigned short int GameManager::getBoardWidth() const {
+  return player.getBoardWidth();
+}
+
+unsigned short int GameManager::getBoardHeight() const {
+  return player.getBoardHeight();
 }
 } // namespace gameManager
 } // namespace battleship

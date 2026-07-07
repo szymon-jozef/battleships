@@ -22,6 +22,12 @@ enum class GuiState {
 struct GameContext {
   std::string playerName;
   GuiState guiState = GuiState::MAIN_MENU;
+
+  std::string serverUrl = "127.0.0.1";
+  uint16_t serverPort = 6767;
+
+  enum class GameMode { HOSTING, JOINING };
+  GameMode currentGameMode = GameMode::HOSTING;
 };
 
 // === Widgets and stuff ===

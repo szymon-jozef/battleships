@@ -7,7 +7,7 @@ namespace logic {
 BaseGrid::BaseGrid(const unsigned short int width, const unsigned short int height)
     : WIDTH(width)
     , HEIGHT(height)
-    , grid(HEIGHT, std::vector<Field>(WIDTH)) {}
+    , grid(height, std::vector<Field>(width)) {}
 
 FieldState BaseGrid::getFieldState(unsigned short int row, unsigned short int column) const {
   return grid[row][column].getState();

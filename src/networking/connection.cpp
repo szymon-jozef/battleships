@@ -119,6 +119,11 @@ void Connection::readHeader() {
                             }
 
                             if (temporaryMessage.header.size > 0) {
+                              if (temporaryMessage.header.size > 100000) {
+                                spdlog::error("[Network] {} Huge message size detected: {}, disconnecting.", boost::uuids::to_string(id), temporaryMessage.header.size);
+                                disconnect();
+                                return;
+                              }
                               temporaryMessage.body.msg.resize(temporaryMessage.header.size);
                               readBody();
                             } else {
