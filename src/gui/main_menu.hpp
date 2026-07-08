@@ -8,7 +8,6 @@
 namespace battleship {
 namespace gui {
 class MainMenu : public Scene {
-  Texture2D background;
   WidgetsVector widgets;
 
 public:
@@ -27,11 +26,12 @@ public:
   }
 
   void update() override {
+    Scene::update();
     widgets.update_all();
   }
 
   void draw() override {
-    DrawTexture(background, 0, 0, WHITE);
+    Scene::draw();
     widgets.draw_all();
   }
 };

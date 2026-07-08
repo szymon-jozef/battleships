@@ -175,6 +175,12 @@ private:
       }
       break;
     case GridType::RADAR:
+      for (size_t column = 0; column < gameManager.getBoardWidth(); column++) {
+        for (size_t row = 0; row < gameManager.getBoardHeight(); row++) {
+          fields[column][row].setState(gameManager.getRadarField(row, column));
+          fields[column][row].update();
+        }
+      }
       break;
     }
   }
@@ -205,7 +211,6 @@ private:
 };
 
 class Game : public Scene {
-  Texture2D background;
   gameManager::GameManager gameManager;
   GameGrid board, radar;
 
@@ -276,12 +281,13 @@ public:
   }
 
   void update() override {
+    Scene::update();
     board.update();
     radar.update();
   }
 
   void draw() override {
-    DrawTexture(background, 0, 0, WHITE);
+    Scene::draw();
     board.draw();
     radar.draw();
   }

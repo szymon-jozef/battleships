@@ -7,7 +7,6 @@ namespace battleship {
 namespace gui {
 
 class Settings : public Scene {
-  Texture2D background;
   WidgetsVector widgets;
 
 public:
@@ -15,6 +14,8 @@ public:
       : Scene(gameContext)
       , widgets(gameContext, 10, 10, GetScreenWidth() / 3.0f, GetScreenHeight() / 5.0f, 12) {
     background = LoadTexture("assets/gfx/bg1.jpg");
+    backgroundTint = LIGHTGRAY;
+
     widgets.push_back_label("Player options", BLACK);
     widgets.push_back_textInput_with_label("Player name: ", gameContext.playerName, BLACK, gameContext.playerName);
     widgets.push_back_button("Go back", [&gameContext]() { gameContext.guiState = GuiState::MAIN_MENU; });
@@ -25,6 +26,7 @@ public:
   }
 
   void update() override {
+    Scene::update();
     if (GetKeyPressed() == KEY_ESCAPE) {
       gameContext.guiState = GuiState::MAIN_MENU;
     }
@@ -32,7 +34,7 @@ public:
   }
 
   void draw() override {
-    DrawTexture(background, 0, 0, LIGHTGRAY);
+    Scene::draw();
     widgets.draw_all();
   }
 };

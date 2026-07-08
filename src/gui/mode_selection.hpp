@@ -6,7 +6,6 @@ namespace battleship {
 namespace gui {
 
 class ModeSelection : public Scene {
-  Texture2D background;
   WidgetsVector widgets;
 
   void goBack() {
@@ -37,6 +36,7 @@ public:
   }
 
   void update() override {
+    Scene::update();
     if (IsKeyPressed(KEY_ESCAPE)) {
       goBack();
     }
@@ -45,7 +45,7 @@ public:
   }
 
   void draw() override {
-    DrawTexture(background, 0, 0, GRAY);
+    Scene::draw();
     widgets.draw_all();
   }
 };
