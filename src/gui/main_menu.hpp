@@ -13,7 +13,7 @@ class MainMenu : public Scene {
 public:
   MainMenu(GameContext &gameContext)
       : Scene(gameContext)
-      , widgets(gameContext, 10, 10, GetScreenWidth() / 3.0f, 20, 12) {
+      , widgets(gameContext, 0.2f, 0.02f, 0.5f, 0.1f) {
     background = LoadTexture("assets/gfx/bg1.jpg");
 
     widgets.push_back_button("Play", [&gameContext]() { gameContext.guiState = GuiState::MODE_SELECTION; });

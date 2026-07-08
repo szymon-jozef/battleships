@@ -12,7 +12,7 @@ class Settings : public Scene {
 public:
   Settings(GameContext &gameContext)
       : Scene(gameContext)
-      , widgets(gameContext, 10, 10, GetScreenWidth() / 3.0f, GetScreenHeight() / 5.0f, 12) {
+      , widgets(gameContext, 0.1, 0.1, 0.4f, 0.1) {
     background = LoadTexture("assets/gfx/bg1.jpg");
     backgroundTint = LIGHTGRAY;
 

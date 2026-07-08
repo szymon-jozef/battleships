@@ -27,6 +27,7 @@
           clang-tools
           clang-analyzer
           raylib
+          valgrind
         ];
 
         battleships = (

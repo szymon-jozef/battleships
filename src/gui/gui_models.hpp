@@ -33,46 +33,48 @@ struct GameContext {
 // === Widgets and stuff ===
 
 class Widget {
+  Rectangle scaleRect;
+
+  void updateTextPos() {
+    fontSize = std::min(finalPositionRect.height, finalPositionRect.width) * fontScale;
+
+    textWidth = MeasureText(label.c_str(), fontSize);
+    text_x = (finalPositionRect.x + finalPositionRect.width / 2.0f) - (textWidth / 2.0f);
+    text_y = (finalPositionRect.y + finalPositionRect.height / 2.0f) - (fontSize / 2.0f);
+  }
+
+  void updatePos() {
+    finalPositionRect.width = GetScreenWidth() * scaleRect.width;
+    finalPositionRect.height = GetScreenHeight() * scaleRect.height;
+
+    finalPositionRect.x = GetScreenWidth() * scaleRect.x - finalPositionRect.width * scaleRect.x;
+  }
+
 protected:
   std::string label;
-  float pos_x, pos_y, width, height;
-  bool isFocused = false;
+  float text_x, text_y, textWidth, fontScale;
   int fontSize;
-  Rectangle rect;
+
+  bool isFocused = false;
+  /// @brief Rectangle that's used in calculating necessary space for the widget
+  Rectangle finalPositionRect;
 
   void drawLabelInTheMiddle(Color color) {
-    int textWidth = MeasureText(label.c_str(), fontSize);
-    float text_x = (pos_x + width / 2.0f) - (textWidth / 2.0f);
-    float text_y = (pos_y + height / 2.0f) - (fontSize / 2.0f);
-
     DrawText(label.c_str(), text_x, text_y, fontSize, color);
   }
 
   void drawTextInTheMiddle(char *text, Color color) {
-    int textWidth = MeasureText(text, fontSize);
-    float text_x = (pos_x + width / 2.0f) - (textWidth / 2.0f);
-    float text_y = (pos_y + height / 2.0f) - (fontSize / 2.0f);
-
     DrawText(text, text_x, text_y, fontSize, color);
   }
 
 public:
   bool isFocusable = false;
 
-  Widget(std::string label,
-         float pos_x,
-         float pos_y,
-         float width,
-         float height,
-         int fontSize = 12,
-         bool isFocusable = true)
+  Widget(std::string label, float pos_y, Rectangle scaleRect, float fontScale, bool isFocusable = true)
       : label(label)
-      , pos_x(pos_x - width / 2)
-      , pos_y(pos_y)
-      , width(width)
-      , height(height)
-      , rect({this->pos_x, pos_y, width, height})
-      , fontSize(fontSize)
+      , finalPositionRect({1, pos_y, 200, 200})
+      , scaleRect(scaleRect)
+      , fontScale(fontScale)
       , isFocusable(isFocusable) {}
   virtual ~Widget() = default;
 
@@ -80,11 +82,14 @@ public:
     // focused border
     // NOTE: should be called at the end of each draw function, so it's not covered
     if (isFocusable && isFocused) {
-      DrawRectangleLines(rect.x, rect.y, rect.width, rect.height, GRAY);
+      DrawRectangleLines(scaleRect.x, scaleRect.y, scaleRect.width, scaleRect.height, GRAY);
     }
   }
 
-  virtual void update() = 0;
+  virtual void update() {
+    updatePos();
+    updateTextPos();
+  };
 
   void focus() {
     isFocused = true;
@@ -93,17 +98,27 @@ public:
   void unFocus() {
     isFocused = false;
   }
+
+  void setY(float y) {
+    finalPositionRect.y = y;
+  }
+
+  Rectangle getRect() {
+    return finalPositionRect;
+  }
 };
 
 class TextLabel : public Widget {
   Color color;
 
 public:
-  TextLabel(std::string text, float pos_x, float pos_y, float width, float height, int fontSize, Color color)
-      : Widget(text, pos_x, pos_y, width, height, fontSize, false)
+  TextLabel(std::string text, float pos_y, Rectangle scaleRect, Color color)
+      : Widget(text, pos_y, scaleRect, 0.5f, false)
       , color(color) {}
 
-  void update() override {}
+  void update() override {
+    Widget::update();
+  }
 
   void draw() override {
     drawLabelInTheMiddle(color);
@@ -115,19 +130,20 @@ class Button : public Widget {
   std::function<void()> onClick;
 
 public:
-  Button(std::string label, float pos_x, float pos_y, float width, float height, int fontSize = 12)
-      : Widget(label, pos_x, pos_y, width, height, fontSize) {}
+  Button(std::string label, float pos_y, Rectangle rect)
+      : Widget(label, pos_y, rect, 0.8f) {}
 
   void draw() {
-    DrawRectangleRec(rect, WHITE);
+    DrawRectangleRec(finalPositionRect, WHITE);
     drawLabelInTheMiddle(BLACK);
     Widget::draw();
   }
 
   void update() {
-    if (onClick &&
-        ((CheckCollisionPointRec(GetMousePosition(), rect) && IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT)) ||
-         (isFocused && IsKeyPressed(KEY_ENTER)))) {
+    Widget::update();
+    if (onClick && ((CheckCollisionPointRec(GetMousePosition(), finalPositionRect) &&
+                     IsMouseButtonPressed(MouseButton::MOUSE_BUTTON_LEFT)) ||
+                    (isFocused && IsKeyPressed(KEY_ENTER)))) {
       onClick();
     }
   }
@@ -148,7 +164,7 @@ class TextInput : public Widget {
   bool isMouseOnText = false;
 
   bool handleKeyboardInput() {
-    isMouseOnText = CheckCollisionPointRec(GetMousePosition(), rect);
+    isMouseOnText = CheckCollisionPointRec(GetMousePosition(), finalPositionRect);
 
     if (isMouseOnText || isFocused) {
 
@@ -226,8 +242,8 @@ class TextInput : public Widget {
   }
 
 public:
-  TextInput(std::string prompt, float pos_x, float pos_y, float width, float height, int fontSize, std::string &target)
-      : Widget(prompt, pos_x, pos_y, width, height)
+  TextInput(std::string prompt, float pos_y, Rectangle scaleRect, std::string &target)
+      : Widget(prompt, pos_y, scaleRect, 0.8f)
       , target(target) {
     if (target.size() < MAX_INPUT_CHARS) {
       std::copy(target.begin(), target.end(), buffer);
@@ -239,41 +255,41 @@ public:
   }
 
   void update() override {
+    Widget::update();
     if (handleKeyboardInput() || handleClipboardInput()) {
       target = std::string(buffer);
       letterCount = target.size();
       buffer[letterCount] = '\0';
     }
+
+    // TODO! Move this to widget
+    int textWidth = MeasureText(prompt.c_str(), fontSize);
+    float text_x = (finalPositionRect.x + finalPositionRect.width / 2.0f) - (textWidth / 2.0f);
+    float text_y = (finalPositionRect.y + finalPositionRect.height / 2.0f) - (fontSize / 2.0f);
   }
 
   void draw() override {
 
-    DrawRectangleRec(rect, LIGHTGRAY);
+    DrawRectangleRec(finalPositionRect, LIGHTGRAY);
     if (isMouseOnText) {
-      DrawRectangleLines(rect.x, rect.y, rect.width, rect.height, RED);
+      DrawRectangleLines(
+          finalPositionRect.x, finalPositionRect.y, finalPositionRect.width, finalPositionRect.height, RED);
     } else {
-      DrawRectangleLines(rect.x, rect.y, rect.width, rect.height, DARKGRAY);
+      DrawRectangleLines(
+          finalPositionRect.x, finalPositionRect.y, finalPositionRect.width, finalPositionRect.height, DARKGRAY);
     }
-
-    int textWidth = MeasureText(prompt.c_str(), fontSize);
-    float text_x = (rect.x + rect.width / 2.0f) - (textWidth / 2.0f);
-    float text_y = (rect.y + rect.height / 2.0f) - (fontSize / 2.0f);
 
     if (prompt != "" && std::string(buffer).empty()) {
       DrawText(prompt.c_str(), text_x, text_y, fontSize, MAROON);
-      drawLabelInTheMiddle(MAROON); // TODO! change to some other color maybe?
+      drawLabelInTheMiddle(MAROON); // TODO! Change to some other color maybe?
     } else {
       drawTextInTheMiddle(buffer, MAROON);
     }
 
     std::string charactersLeft = std::string(TextFormat("%i/%i", letterCount, MAX_INPUT_CHARS));
-    TextLabel charactersLeftLabel = TextLabel(charactersLeft,
-                                              2 * rect.x,
-                                              rect.y + rect.height + rect.height / 10.0f,
-                                              rect.width,
-                                              rect.height / 4.0f,
-                                              fontSize / 2.0f,
-                                              DARKGRAY);
+
+    TextLabel charactersLeftLabel =
+        TextLabel(charactersLeft, finalPositionRect.y + finalPositionRect.height * 2, {2, 0.1f, 1, 0.4f}, DARKGRAY);
     charactersLeftLabel.draw();
     Widget::draw();
   }
@@ -289,13 +305,14 @@ class WidgetsVector {
   GameContext &gameContext;
 
   std::vector<std::unique_ptr<Widget>> widgets;
-  int margin, start_y, fontSize;
+  float margin, start_y, fontSize;
   float width, height;
-  int pos_x = GetScreenWidth() / 2;
   int currentFocus = 0;
 
+  const Rectangle scale;
+
   float getCurrentDistance() {
-    return start_y + (margin + height) * widgets.size();
+    return start_y + (GetScreenHeight() * margin + height) * widgets.size();
   }
 
   void handleFocus() {
@@ -319,49 +336,53 @@ class WidgetsVector {
   }
 
 public:
-  WidgetsVector(GameContext &gameContext, int start_y, int margin, float width, float height, int fontSize)
+  WidgetsVector(GameContext &gameContext, float start_y, float margin, float width, float height)
       : gameContext(gameContext)
       , start_y(start_y)
       , margin(margin)
       , width(width)
       , height(height)
-      , fontSize(fontSize) {}
+      , scale({0.5f, 1.0f, width, height}) {}
 
   void push_back_button(std::string label, std::function<void()> onClick) {
-    std::unique_ptr<Button> btn = std::make_unique<Button>(label, pos_x, getCurrentDistance(), width, height, fontSize);
+    std::unique_ptr<Button> btn = std::make_unique<Button>(label, getCurrentDistance(), scale);
 
     btn->setOnClick(onClick);
     widgets.push_back(std::move(btn));
   }
 
   void push_back_textInput(std::string prompt, std::string &target) {
-    std::unique_ptr<TextInput> input =
-        std::make_unique<TextInput>(prompt, pos_x, getCurrentDistance(), width, height, fontSize, target);
+    std::unique_ptr<TextInput> input = std::make_unique<TextInput>(prompt, getCurrentDistance(), scale, target);
     widgets.push_back(std::move(input));
   }
 
   void push_back_label(std::string text, Color color) {
-    std::unique_ptr<TextLabel> label =
-        std::make_unique<TextLabel>(text, pos_x, getCurrentDistance(), width, height, fontSize, color);
+    std::unique_ptr<TextLabel> label = std::make_unique<TextLabel>(text, getCurrentDistance(), scale, color);
     widgets.push_back(std::move(label));
   }
 
   void push_back_textInput_with_label(std::string label, std::string prompt, Color color, std::string &target) {
-    std::unique_ptr<TextLabel> labelWidget =
-        std::make_unique<TextLabel>(label, pos_x, getCurrentDistance(), width, height, fontSize, color);
+    std::unique_ptr<TextLabel> labelWidget = std::make_unique<TextLabel>(label, getCurrentDistance(), scale, color);
 
     widgets.push_back(std::move(labelWidget));
 
-    std::unique_ptr<TextInput> input = std::make_unique<TextInput>(
-        prompt, pos_x, getCurrentDistance() - height / 2.0f, width, height, fontSize, target);
+    std::unique_ptr<TextInput> input =
+        std::make_unique<TextInput>(prompt, getCurrentDistance() - height, scale, target);
 
     widgets.push_back(std::move(input));
   }
 
   void update_all() {
+    float absolute_y = GetScreenHeight() * start_y;
+    float absolute_margin = GetScreenHeight() * margin;
+
     for (auto &widget : widgets) {
+      widget->setY(absolute_y);
+
       widget->update();
       widget->unFocus();
+
+      absolute_y += widget->getRect().height + absolute_margin;
     }
     handleFocus();
   }
