@@ -56,6 +56,10 @@ public:
   void setState(logic::FieldState state) {
     this->state = state;
   }
+
+  void setOnClick(std::function<void()> onClick) {
+    this->onClick = onClick;
+  }
 };
 
 class GameGrid {
@@ -95,14 +99,32 @@ public:
 
     fields.resize(gameManager.getBoardWidth());
 
-    for (auto &column : fields) {
+    for (unsigned short int columnIndex = 0; columnIndex < gameManager.getBoardWidth(); columnIndex++) {
+      auto &column = fields[columnIndex];
+
       for (int fieldIndex = 0; fieldIndex < gameManager.getBoardHeight(); fieldIndex++) {
         column.emplace_back(current_x_pos, current_y_pos, fieldSize, fieldSize);
         current_y_pos += delta;
+
+        switch (gridType) {
+        case GridType::BOARD:
+          column.back().setOnClick([this, &gameManager, fieldIndex, columnIndex]() {
+            gameManager.placeShip(fieldIndex, columnIndex, isHorizontal);
+          });
+          break;
+        case GridType::RADAR:
+          column.back().setOnClick(
+              [this, &gameManager, fieldIndex, columnIndex]() { gameManager.makeShot(fieldIndex, columnIndex); });
+          break;
+        }
       }
       current_y_pos = begin_y_pos;
       current_x_pos += delta;
     }
+  }
+
+  void toggleHorizontal() {
+    isHorizontal = !isHorizontal;
   }
 
   void update() {
@@ -125,6 +147,8 @@ private:
   GridType gridType;
   Rectangle rect;
   std::vector<std::vector<GameField>> fields;
+
+  bool isHorizontal = false;
 
   void setFieldsClickable(bool isClickable) {
     for (auto &column : fields) {
