@@ -6,6 +6,7 @@
 #include "scene.hpp"
 #include <algorithm>
 #include <raylib.h>
+#include <stdexcept>
 #include <thread>
 
 namespace battleship {
@@ -109,7 +110,11 @@ public:
         switch (gridType) {
         case GridType::BOARD:
           column.back().setOnClick([this, &gameManager, fieldIndex, columnIndex]() {
-            gameManager.placeShip(fieldIndex, columnIndex, isHorizontal);
+            try {
+              gameManager.placeShip(fieldIndex, columnIndex, isHorizontal);
+            } catch (std::invalid_argument &e) {
+              spdlog::warn("[GUI] {}", e.what());
+            }
           });
           break;
         case GridType::RADAR:
@@ -123,6 +128,7 @@ public:
     }
   }
 
+  // TODO implement
   void toggleHorizontal() {
     isHorizontal = !isHorizontal;
   }
@@ -148,7 +154,7 @@ private:
   Rectangle rect;
   std::vector<std::vector<GameField>> fields;
 
-  bool isHorizontal = false;
+  bool isHorizontal = true;
 
   void setFieldsClickable(bool isClickable) {
     for (auto &column : fields) {
@@ -164,6 +170,7 @@ private:
       for (size_t column = 0; column < gameManager.getBoardWidth(); column++) {
         for (size_t row = 0; row < gameManager.getBoardHeight(); row++) {
           fields[column][row].setState(gameManager.getBoardField(row, column));
+          fields[column][row].update();
         }
       }
       break;
@@ -216,8 +223,8 @@ public:
 
     background = LoadTexture("assets/gfx/play_background.jpg");
 
-    switch (gameContext.currentGameMode) {
-    case GameContext::GameMode::HOSTING: {
+    std::string prevUrl = gameContext.serverUrl;
+    if (gameContext.currentGameMode == GameContext::GameMode::HOSTING) {
       server = std::make_unique<networking::Server>(gameContext.serverPort);
       if (!server->start()) {
         spdlog::error("[GUI] could not start the server...");
@@ -232,30 +239,22 @@ public:
         }
       });
       spdlog::info("[GUI] server thread initialized!");
-
-      std::string prevUrl = gameContext.serverUrl;
       gameContext.serverUrl = "127.0.0.1";
+    }
 
-      if (!gameManager.connect()) {
-        spdlog::error("[GUI] could not connect to the server!");
-        return;
+    if (!gameManager.connect()) {
+      spdlog::error("[GUI] could not connect to the server!");
+      return;
+    }
+    gameContext.serverUrl = prevUrl;
+
+    spdlog::info("[GUI] Initializing server client");
+    clientThread = std::thread([this]() {
+      while (gameManager.isConnected()) {
+        gameManager.updateClient();
       }
-      gameContext.serverUrl = prevUrl;
-
-      spdlog::info("[GUI] Initializing server client");
-      clientThread = std::thread([this]() {
-        while (gameManager.isConnected()) {
-          gameManager.updateClient();
-        }
-      });
-      spdlog::info("[GUI] client thread initialized!");
-
-      break;
-    }
-    case GameContext::GameMode::JOINING: {
-      break;
-    }
-    }
+    });
+    spdlog::info("[GUI] client thread initialized!");
   }
 
   ~Game() {
@@ -278,6 +277,7 @@ public:
 
   void update() override {
     board.update();
+    radar.update();
   }
 
   void draw() override {

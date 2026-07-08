@@ -20,14 +20,14 @@ public:
     background = LoadTexture("assets/gfx/bg2.jpg");
 
     widgets.push_back_button("Host Game", [&gameContext]() {
-      // TODO! all server enabling
       gameContext.currentGameMode = GameContext::GameMode::HOSTING;
       gameContext.guiState = GuiState::GAME;
     });
 
     widgets.push_back_button("Join Game", [&gameContext]() {
       gameContext.currentGameMode = GameContext::GameMode::JOINING;
-      gameContext.guiState = GuiState::JOIN_SERVER;
+      // TODO! Add a scene for setting server url
+      gameContext.guiState = GuiState::GAME;
     });
     widgets.push_back_button("Go back", [this]() { goBack(); });
   }
