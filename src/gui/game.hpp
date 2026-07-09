@@ -76,7 +76,6 @@ class GameGrid {
   std::vector<std::vector<GameField>> fields;
 
   Rectangle *lastFieldRect = nullptr;
-
   bool isHorizontal = true;
 
   float padding_x, padding_y, multiplier;
@@ -277,9 +276,12 @@ public:
     updateFieldsPos();
   }
 
-  // TODO implement
   void toggleHorizontal() {
     isHorizontal = !isHorizontal;
+  }
+
+  bool getIsHorizontal() {
+    return isHorizontal;
   }
 
   void update() {
@@ -316,7 +318,9 @@ class Game : public Scene {
 
   std::string gameStatusLabel;
   Color labelColor = WHITE;
-  float label_x, label_y, labelFontSize, labelWidth, labelBottomEdge, labelRemainingSpace;
+  float label_x, label_y, labelFontSize, labelWidth, labelBottomEdge, labelRemainingSpace, labelMaxTotalTextHeight,
+      labelActualTextHeight, defaultLabelSize;
+  int lineCount = 1;
 
   void updateLabels() {
     // set text
@@ -330,7 +334,10 @@ class Game : public Scene {
       if (shipType) {
         // TODO! Show how many ships of given type are left
         gameStatusLabel =
-            TextFormat("Place your ships! \nYour current ship has %d masters\n", static_cast<int>(shipType.value()));
+            TextFormat("Place your ships!\nYour current ship has %d masts\nShip will be placed %s\nPress space to turn",
+                       static_cast<int>(shipType.value()),
+                       board.getIsHorizontal() ? "horizontally" : "vertically");
+
         labelColor = GREEN;
       } else {
         gameStatusLabel = "No ships left!";
@@ -357,13 +364,25 @@ class Game : public Scene {
     // measure it and stuff
 
     Rectangle boardGrid = board.getGridRect();
-    labelFontSize = boardGrid.y * 0.6f;
-    labelWidth = MeasureText(gameStatusLabel.c_str(), labelFontSize);
-
-    label_x = (GetScreenWidth() - labelWidth) * 0.5f;
     labelBottomEdge = boardGrid.y + boardGrid.height;
     labelRemainingSpace = GetScreenHeight() - labelBottomEdge;
-    label_y = labelBottomEdge + (labelRemainingSpace - labelFontSize) * 0.5f;
+
+    lineCount = std::count(gameStatusLabel.begin(), gameStatusLabel.end(), '\n') + 1;
+    labelMaxTotalTextHeight = labelRemainingSpace * 0.8f;
+
+    defaultLabelSize = boardGrid.y * 0.6f;
+
+    labelFontSize = std::min(defaultLabelSize, (labelRemainingSpace / 0.8f) / lineCount);
+
+    labelWidth = MeasureText(gameStatusLabel.c_str(), labelFontSize);
+    if (labelWidth > GetScreenWidth()) {
+      labelFontSize *= GetScreenWidth() / labelWidth;
+      labelWidth = MeasureText(gameStatusLabel.c_str(), labelFontSize);
+    }
+
+    label_x = (GetScreenWidth() - labelWidth) * 0.5f;
+    labelActualTextHeight = labelFontSize * lineCount;
+    label_y = labelBottomEdge + (labelRemainingSpace - labelActualTextHeight) * 0.5f;
   }
 
   void drawLabels() {
@@ -435,6 +454,11 @@ public:
     board.update();
     radar.update();
     updateLabels();
+
+    // TODO! Move this somewhere more appropriate
+    if (gameManager.getCurrentGameStatus() == networking::GameStatus::PLACING_SHIPS && IsKeyPressed(KEY_SPACE)) {
+      board.toggleHorizontal();
+    }
   }
 
   void draw() override {
