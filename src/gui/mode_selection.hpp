@@ -13,10 +13,9 @@ class ModeSelection : public Scene {
   }
 
 public:
-  ModeSelection(GameContext &gameContext)
-      : Scene(gameContext)
+  ModeSelection(GameContext &gameContext, Texture2D &background)
+      : Scene(gameContext, background)
       , widgets(gameContext, 0.2f, 0.02f, 0.5f, 0.1f) {
-    background = LoadTexture("assets/gfx/bg2.jpg");
 
     widgets.push_back_button("Host Game", [&gameContext]() {
       gameContext.currentGameMode = GameContext::GameMode::HOSTING;
@@ -31,9 +30,7 @@ public:
     widgets.push_back_button("Go back", [this]() { goBack(); });
   }
 
-  ~ModeSelection() {
-    UnloadTexture(background);
-  }
+  ~ModeSelection() {}
 
   void update() override {
     Scene::update();

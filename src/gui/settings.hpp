@@ -10,10 +10,9 @@ class Settings : public Scene {
   WidgetsVector widgets;
 
 public:
-  Settings(GameContext &gameContext)
-      : Scene(gameContext)
+  Settings(GameContext &gameContext, Texture2D &background)
+      : Scene(gameContext, background)
       , widgets(gameContext, 0.1, 0.1, 0.4f, 0.1) {
-    background = LoadTexture("assets/gfx/bg1.jpg");
     backgroundTint = LIGHTGRAY;
 
     widgets.push_back_label("Player options", BLACK);
@@ -21,9 +20,7 @@ public:
     widgets.push_back_button("Go back", [&gameContext]() { gameContext.guiState = GuiState::MAIN_MENU; });
   }
 
-  ~Settings() {
-    UnloadTexture(background);
-  }
+  ~Settings() {}
 
   void update() override {
     Scene::update();

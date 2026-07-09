@@ -266,8 +266,8 @@ class Game : public Scene {
   std::thread serverThread, clientThread;
 
 public:
-  Game(GameContext &gameContext)
-      : Scene(gameContext)
+  Game(GameContext &gameContext, Texture2D &background)
+      : Scene(gameContext, background)
       , gameManager(gameContext.playerName, gameContext.serverUrl, gameContext.serverPort)
       , board(gameManager, GameGrid::GridType::BOARD)
       , radar(gameManager, GameGrid::GridType::RADAR) {
@@ -310,8 +310,6 @@ public:
   }
 
   ~Game() {
-    UnloadTexture(background);
-
     if (server) {
       server->stop();
     }

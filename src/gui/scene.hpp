@@ -13,15 +13,16 @@ class Scene {
 
 protected:
   GameContext &gameContext;
-  Texture2D background;
+  Texture2D &background;
   Color backgroundTint = WHITE;
   Rectangle sceneRect = {0, 0, static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())};
 
   NPatchInfo patchInfo = {sceneRect, 0, 0};
 
 public:
-  Scene(GameContext &gameContext)
-      : gameContext(gameContext) {}
+  Scene(GameContext &gameContext, Texture2D &background)
+      : gameContext(gameContext)
+      , background(background) {}
   virtual ~Scene() = default;
 
   virtual void update() {

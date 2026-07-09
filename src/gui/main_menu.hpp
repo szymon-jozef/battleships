@@ -11,19 +11,15 @@ class MainMenu : public Scene {
   WidgetsVector widgets;
 
 public:
-  MainMenu(GameContext &gameContext)
-      : Scene(gameContext)
+  MainMenu(GameContext &gameContext, Texture2D &background)
+      : Scene(gameContext, background)
       , widgets(gameContext, 0.2f, 0.02f, 0.5f, 0.1f) {
-    background = LoadTexture("assets/gfx/bg1.jpg");
-
     widgets.push_back_button("Play", [&gameContext]() { gameContext.guiState = GuiState::MODE_SELECTION; });
     widgets.push_back_button("Settings", [&gameContext]() { gameContext.guiState = GuiState::SETTINGS; });
     widgets.push_back_button("Quit", [&gameContext]() { gameContext.guiState = GuiState::QUIT; });
   }
 
-  ~MainMenu() {
-    UnloadTexture(background);
-  }
+  ~MainMenu() {}
 
   void update() override {
     Scene::update();
