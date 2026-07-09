@@ -34,9 +34,9 @@ inline int run() {
   const int screenHeight = 720;
   GameContext gameContext = {std::string("Szymon")};
 
-  SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+  SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
   InitWindow(screenWidth, screenHeight, "Battleships");
-  SetTargetFPS(60);
+  // SetTargetFPS(60);
 
   GuiState &currentState = gameContext.guiState;
   GuiState previousState = currentState;
