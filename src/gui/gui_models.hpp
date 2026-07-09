@@ -75,7 +75,9 @@ public:
       , finalPositionRect({1, pos_y, 200, 200})
       , scaleRect(scaleRect)
       , fontScale(fontScale)
-      , isFocusable(isFocusable) {}
+      , isFocusable(isFocusable) {
+    updateEveryPos(true);
+  }
   virtual ~Widget() = default;
 
   virtual void draw() {
@@ -87,9 +89,15 @@ public:
   }
 
   virtual void update() {
-    updatePos();
-    updateTextPos();
+    updateEveryPos();
   };
+
+  void updateEveryPos(bool force = false) {
+    if (force || IsWindowResized()) {
+      updatePos();
+      updateTextPos();
+    }
+  }
 
   void focus() {
     isFocused = true;
@@ -379,6 +387,7 @@ public:
     for (auto &widget : widgets) {
       widget->setY(absolute_y);
 
+      widget->updateEveryPos(true);
       widget->update();
       widget->unFocus();
 

@@ -78,7 +78,7 @@ class GameGrid {
   Rectangle *lastFieldRect = nullptr;
   bool isHorizontal = true;
 
-  float padding_x, padding_y, multiplier;
+  float padding_x, padding_y, multiplier = 1.2f;
   float begin_y_pos;
   float current_y_pos;
   float current_x_pos;
@@ -92,6 +92,7 @@ class GameGrid {
   float label_x, label_y, fontSize = 12, textWidth;
   std::string label;
 
+  /// @brief Update every field dependent on window size
   void updateData() {
     padding_y = GetScreenHeight() / 10.0f;
     padding_x = GetScreenWidth() / 10.0f;
@@ -119,8 +120,6 @@ class GameGrid {
       break;
     }
 
-    multiplier = 1.2;
-
     // rectangle beginning
     begin_y_pos = gridRect.y;
     current_y_pos = begin_y_pos;
@@ -134,6 +133,7 @@ class GameGrid {
     deltaSize = fieldSize * multiplier;
   }
 
+  /// @brief Update the position of grid rectangle, making it fit the last field.
   void updateGridRect() {
     if (!lastFieldRect) {
       spdlog::warn("[GUI] lastFieldRect is a nullptr?");
@@ -146,6 +146,7 @@ class GameGrid {
                          ((lastFieldRect->y + lastFieldRect->height) - gridRect.y)};
   }
 
+  /// @brief Update the position of label
   void updateLabel() {
     fontSize = gridRect.y * 0.5f;
     label_x = gridRect.x;
@@ -162,7 +163,8 @@ class GameGrid {
     }
   }
 
-  void updateFields() {
+  /// @brief Update the state of every field in the grid.
+  void updateFieldsState() {
     switch (gridType) {
     case GridType::BOARD:
       for (size_t column = 0; column < columns; column++) {
@@ -184,7 +186,8 @@ class GameGrid {
   }
 
   // TODO! Use this only on status change
-  void updateState() {
+  /// @brief Set the active grid clickable
+  void updateGridState() {
     switch (gameManager.getCurrentGameStatus()) {
     case battleship::networking::GameStatus::LOBBY:
       break;
@@ -208,6 +211,7 @@ class GameGrid {
     }
   }
 
+  /// @brief Update the position of every field in the grid
   void updateFieldsPos() {
     current_x_pos = gridRect.x;
     current_y_pos = gridRect.y;
@@ -273,7 +277,10 @@ public:
     gridRect.y += padding_y;
     gridRect.height -= padding_y * 2.0f;
 
+    updateData();
     updateFieldsPos();
+    updateGridRect();
+    updateLabel();
   }
 
   void toggleHorizontal() {
@@ -285,12 +292,14 @@ public:
   }
 
   void update() {
-    updateData();
-    updateState();
-    updateFields();
-    updateFieldsPos();
-    updateGridRect();
-    updateLabel();
+    if (IsWindowResized()) {
+      updateData();
+      updateFieldsPos();
+      updateGridRect();
+      updateLabel();
+    }
+    updateGridState();
+    updateFieldsState();
   }
 
   void draw() {
@@ -429,6 +438,7 @@ public:
       }
     });
     spdlog::info("[GUI] client thread initialized!");
+    updateLabels();
   }
 
   ~Game() {
@@ -451,7 +461,9 @@ public:
     Scene::update();
     board.update();
     radar.update();
-    updateLabels();
+    if (IsWindowResized()) {
+      updateLabels();
+    }
 
     // TODO! Move this somewhere more appropriate
     if (gameManager.getCurrentGameStatus() == networking::GameStatus::PLACING_SHIPS && IsKeyPressed(KEY_SPACE)) {
