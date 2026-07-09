@@ -397,8 +397,6 @@ public:
       , radar(gameManager, GameGrid::GridType::RADAR) {
     spdlog::info("[GUI] Game constructor run");
 
-    background = LoadTexture("assets/gfx/play_background.jpg");
-
     std::string prevUrl = gameContext.serverUrl;
     if (gameContext.currentGameMode == GameContext::GameMode::HOSTING) {
       server = std::make_unique<networking::Server>(gameContext.serverPort);
