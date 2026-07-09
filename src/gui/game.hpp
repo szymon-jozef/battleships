@@ -64,12 +64,18 @@ public:
   void setPos(Rectangle pos) {
     fieldRect = pos;
   }
+
+  Rectangle *getRect() {
+    return &fieldRect;
+  }
 };
 
 class GameGrid {
   gameManager::GameManager &gameManager;
-  Rectangle rect;
+  Rectangle gridRect;
   std::vector<std::vector<GameField>> fields;
+
+  Rectangle *lastFieldRect = nullptr;
 
   bool isHorizontal = true;
 
@@ -84,35 +90,69 @@ class GameGrid {
   float fieldSize;
   float deltaSize;
 
+  float label_x, label_y, fontSize = 12, textWidth;
+  std::string label;
+
   void updateData() {
     padding_y = GetScreenHeight() / 10.0f;
     padding_x = GetScreenWidth() / 10.0f;
 
-    rect.width = GetScreenWidth() * 0.5f - (2 * padding_x);
+    gridRect.width = GetScreenWidth() * 0.5f - (2 * padding_x);
 
-    rect.y = 0 + padding_y;
-    rect.height = GetScreenHeight() - (2 * padding_y);
+    gridRect.y = 0 + padding_y;
+    gridRect.height = GetScreenHeight() - (2 * padding_y);
 
     switch (gridType) {
     case GridType::BOARD:
-      rect.x = 0 + padding_x;
+      gridRect.x = 0 + padding_x;
+      label =
+          TextFormat("Player: %s",
+                     gameManager.getPlayerName().c_str()); // TODO! This could be set once - player name never changes
       break;
     case GridType::RADAR:
-      rect.x = GetScreenWidth() / 2.0f + padding_x;
+      gridRect.x = GetScreenWidth() / 2.0f + padding_x;
+
+      if (gameManager.getEnemyName().empty()) {
+        label = TextFormat("Waiting for the enemy");
+      } else {
+        label = TextFormat("Enemy: %s", gameManager.getEnemyName().c_str());
+      }
       break;
     }
 
     multiplier = 1.2;
 
-    begin_y_pos = rect.y;
+    // rectangle beginning
+    begin_y_pos = gridRect.y;
     current_y_pos = begin_y_pos;
-    current_x_pos = rect.x;
+    current_x_pos = gridRect.x;
 
-    calculatedFieldWidth = rect.width / (((columns - 1.0f) * multiplier) + 1.0f);
-    calculatedFieldHight = rect.height / (((rows - 1.0f) * multiplier) + 1.0f);
+    // fields size
+    calculatedFieldWidth = gridRect.width / (((columns - 1.0f) * multiplier) + 1.0f);
+    calculatedFieldHight = gridRect.height / (((rows - 1.0f) * multiplier) + 1.0f);
 
     fieldSize = std::min(calculatedFieldWidth, calculatedFieldHight);
     deltaSize = fieldSize * multiplier;
+  }
+
+  void updateGridRect() {
+    if (!lastFieldRect) {
+      spdlog::warn("[GUI] lastFieldRect is a nullptr?");
+      return;
+    }
+
+    gridRect = Rectangle{gridRect.x,
+                         gridRect.y,
+                         ((lastFieldRect->x + lastFieldRect->width) - gridRect.x),
+                         ((lastFieldRect->y + lastFieldRect->height) - gridRect.y)};
+  }
+
+  void updateLabel() {
+    fontSize = gridRect.y * 0.5f;
+    label_x = gridRect.x;
+    label_y = gridRect.y * 0.5;
+
+    textWidth = MeasureText(label.c_str(), fontSize);
   }
 
   void setFieldsClickable(bool isClickable) {
@@ -170,9 +210,8 @@ class GameGrid {
   }
 
   void updateFieldsPos() {
-
-    current_x_pos = rect.x;
-    current_y_pos = rect.y;
+    current_x_pos = gridRect.x;
+    current_y_pos = gridRect.y;
 
     for (unsigned short int columnIndex = 0; columnIndex < columns; columnIndex++) {
       auto &column = fields[columnIndex];
@@ -195,7 +234,7 @@ public:
       , gridType(type)
       , columns(gameManager.getBoardWidth())
       , rows(gameManager.getBoardWidth())
-      , rect({0, 0, GetScreenWidth() / 2.0f, GetScreenHeight() / 1.0f}) {
+      , gridRect({0, 0, GetScreenWidth() / 2.0f, GetScreenHeight() / 1.0f}) {
     spdlog::info("[GUI] GameGrid created. Size: {} by {}", rows, columns);
     updateData();
     fields.resize(columns);
@@ -222,15 +261,18 @@ public:
           break;
         }
       }
+
+      lastFieldRect = fields.back().back().getRect();
+
       current_y_pos = begin_y_pos;
       current_x_pos += deltaSize;
     }
 
-    rect.x += padding_x;
-    rect.width -= padding_x * 2.0f;
+    gridRect.x += padding_x;
+    gridRect.width -= padding_x * 2.0f;
 
-    rect.y += padding_y;
-    rect.height -= padding_y * 2.0f;
+    gridRect.y += padding_y;
+    gridRect.height -= padding_y * 2.0f;
 
     updateFieldsPos();
   }
@@ -245,15 +287,18 @@ public:
     updateState();
     updateFields();
     updateFieldsPos();
+    updateGridRect();
+    updateLabel();
   }
 
   void draw() {
-    DrawRectangleRec(rect, BLACK);
+    DrawRectangleRec(gridRect, WHITE);
     for (auto &column : fields) {
       for (auto &field : column) {
         field.draw();
       }
     }
+    DrawText(label.c_str(), label_x, label_y, fontSize, WHITE);
   }
 };
 

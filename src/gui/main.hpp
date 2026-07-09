@@ -34,7 +34,6 @@ inline int run() {
   const int screenHeight = 720;
   GameContext gameContext = {std::string("Szymon")};
 
-  // TODO! Uncomment this when updating elements pos is implemented
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(screenWidth, screenHeight, "Battleships");
   SetTargetFPS(60);
