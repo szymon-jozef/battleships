@@ -34,8 +34,11 @@ public:
   unsigned short int getBoardWidth() const;
   unsigned short int getBoardHeight() const;
 
+  std::optional<logic::ShipType> getCurrentShip();
+
   bool isGameWon() const;
   bool isConnected() const;
+  bool isMyTurn();
 };
 } // namespace gameManager
 } // namespace battleship

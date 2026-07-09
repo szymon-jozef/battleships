@@ -15,7 +15,7 @@ namespace gui {
 class GameField {
   Rectangle fieldRect;
   logic::FieldState state = logic::FieldState::EMPTY;
-  bool isClickable;
+  bool isClickable = false;
   std::function<void()> onClick;
 
 public:
@@ -262,11 +262,11 @@ public:
         }
       }
 
-      lastFieldRect = fields.back().back().getRect();
-
       current_y_pos = begin_y_pos;
       current_x_pos += deltaSize;
     }
+
+    lastFieldRect = fields.back().back().getRect();
 
     gridRect.x += padding_x;
     gridRect.width -= padding_x * 2.0f;
@@ -300,6 +300,10 @@ public:
     }
     DrawText(label.c_str(), label_x, label_y, fontSize, WHITE);
   }
+
+  Rectangle getGridRect() {
+    return gridRect;
+  }
 };
 
 class Game : public Scene {
@@ -309,6 +313,62 @@ class Game : public Scene {
   std::unique_ptr<networking::Server> server;
 
   std::thread serverThread, clientThread;
+
+  std::string gameStatusLabel;
+  Color labelColor = WHITE;
+  float label_x, label_y, labelFontSize, labelWidth, labelBottomEdge, labelRemainingSpace;
+
+  void updateLabels() {
+    // set text
+    switch (gameManager.getCurrentGameStatus()) {
+    case networking::GameStatus::LOBBY:
+      gameStatusLabel = "Waiting for players...\n";
+      labelColor = WHITE;
+      break;
+    case networking::GameStatus::PLACING_SHIPS: {
+      auto shipType = gameManager.getCurrentShip();
+      if (shipType) {
+        // TODO! Show how many ships of given type are left
+        gameStatusLabel =
+            TextFormat("Place your ships! \nYour current ship has %d masters\n", static_cast<int>(shipType.value()));
+        labelColor = GREEN;
+      } else {
+        gameStatusLabel = "No ships left!";
+        labelColor = GRAY;
+      }
+      break;
+    }
+    case networking::GameStatus::WAR:
+      if (gameManager.isMyTurn()) {
+        gameStatusLabel = "Shot captain!";
+        labelColor = BLUE;
+
+      } else {
+        gameStatusLabel = "Brace yourself!";
+        labelColor = RED;
+      }
+      break;
+    case networking::GameStatus::GAME_FINISH:
+      // we don't do anything since summary screen should show now
+      gameStatusLabel.clear();
+      break;
+    }
+
+    // measure it and stuff
+
+    Rectangle boardGrid = board.getGridRect();
+    labelFontSize = boardGrid.y * 0.6f;
+    labelWidth = MeasureText(gameStatusLabel.c_str(), labelFontSize);
+
+    label_x = (GetScreenWidth() - labelWidth) * 0.5f;
+    labelBottomEdge = boardGrid.y + boardGrid.height;
+    labelRemainingSpace = GetScreenHeight() - labelBottomEdge;
+    label_y = labelBottomEdge + (labelRemainingSpace - labelFontSize) * 0.5f;
+  }
+
+  void drawLabels() {
+    DrawText(gameStatusLabel.c_str(), label_x, label_y, labelFontSize, labelColor);
+  }
 
 public:
   Game(GameContext &gameContext, Texture2D &background)
@@ -374,12 +434,14 @@ public:
     Scene::update();
     board.update();
     radar.update();
+    updateLabels();
   }
 
   void draw() override {
     Scene::draw();
     board.draw();
     radar.draw();
+    drawLabels();
   }
 };
 

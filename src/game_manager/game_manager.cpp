@@ -102,5 +102,14 @@ unsigned short int GameManager::getBoardWidth() const {
 unsigned short int GameManager::getBoardHeight() const {
   return player.getBoardHeight();
 }
+
+std::optional<logic::ShipType> GameManager::getCurrentShip() {
+  return player.getShipType();
+}
+
+bool GameManager::isMyTurn() {
+  return client.isMyTurn;
+}
+
 } // namespace gameManager
 } // namespace battleship
