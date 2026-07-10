@@ -29,7 +29,7 @@ struct Backgrounds {
   }
 };
 
-inline int run() {
+int run() {
   const int screenWidth = 1220;
   const int screenHeight = 720;
   GameContext gameContext = {std::string("Szymon")};

@@ -1,4 +1,4 @@
-#include "gui/main.hpp"
+#include "gui/main.cpp"
 #include <spdlog/spdlog.h>
 
 using namespace battleship::gui;
