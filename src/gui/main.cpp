@@ -1,8 +1,4 @@
-#include "game.hpp"
-#include "main_menu.hpp"
-#include "mode_selection.hpp"
-#include "scene.hpp"
-#include "settings.hpp"
+#include "scenes/all_scenes.hpp"
 #include <memory>
 #include <raylib.h>
 

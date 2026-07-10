@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gui_models.hpp"
+#include "../models/gui_models.hpp"
 #include <raylib.h>
 
 namespace battleship {

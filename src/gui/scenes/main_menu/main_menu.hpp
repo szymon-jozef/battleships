@@ -1,7 +1,7 @@
 #pragma once
 
-#include "gui_models.hpp"
-#include "scene.hpp"
+#include "../../models/gui_models.hpp"
+#include "../scene.hpp"
 #include <raylib.h>
 #include <spdlog/spdlog.h>
 

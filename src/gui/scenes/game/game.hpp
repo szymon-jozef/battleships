@@ -1,11 +1,11 @@
 #pragma once
 
+#include "../../models/gui_models.hpp"
 #include "../game_logic/logic_models.hpp"
-#include "../networking/server.hpp"
+#include "../scene.hpp"
 #include "data_types.hpp"
 #include "game_manager.hpp"
-#include "gui_models.hpp"
-#include "scene.hpp"
+#include "server.hpp"
 #include <raylib.h>
 #include <thread>
 
