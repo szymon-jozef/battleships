@@ -118,6 +118,24 @@ target_link_libraries(game_manager
     networking
 )
 
+# === GUI ===
+add_library(gui)
+file(GLOB_RECURSE GUI_HEADERS CONFIGURE_DEPENDS "src/gui/*.hpp")
+file(GLOB_RECURSE GUI CONFIGURE_DEPENDS "src/gui/*.cpp")
+
+
+target_sources(
+    gui
+    PRIVATE
+        ${GUI}
+    PUBLIC
+        FILE_SET HEADERS
+    BASE_DIRS
+        src/gui
+    FILES
+        ${GUI_HEADERS}
+)
+
 # === Linking ===
 target_link_libraries(battleships
     PRIVATE
@@ -136,19 +154,6 @@ target_link_libraries(client_main
         networking
 )
 
-# === GUI ===
-add_library(gui)
-file(GLOB GUI_HEADERS CONFIGURE_DEPENDS "src/gui/*.hpp")
-
-target_sources(
-    gui
-    PUBLIC
-        FILE_SET HEADERS
-    BASE_DIRS
-        src/gui
-    FILES
-        ${GUI_HEADERS}
-)
 target_link_libraries(gui
     PRIVATE
         raylib

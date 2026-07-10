@@ -15,28 +15,19 @@ protected:
   GameContext &gameContext;
   Texture2D &background;
   Color backgroundTint = WHITE;
-  Rectangle sceneRect = {0, 0, static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())};
 
+  Rectangle sceneRect = {0, 0, static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())};
   NPatchInfo patchInfo = {sceneRect, 0, 0};
 
 public:
-  Scene(GameContext &gameContext, Texture2D &background)
-      : gameContext(gameContext)
-      , background(background) {}
+  Scene(GameContext &gameContext, Texture2D &background);
   virtual ~Scene() = default;
 
-  virtual void update() {
-    updateSceneRect();
-  }
+  /// @brief Updates scene data. Calls updateSceneRect which updates sceneRect with current screen size.
+  virtual void update();
 
-  virtual void draw() {
-    DrawTexturePro(background,
-                   {0.0f, 0.0f, static_cast<float>(background.width), static_cast<float>(background.height)},
-                   sceneRect,
-                   {0.0f, 0.0f},
-                   0.0f,
-                   backgroundTint);
-  }
+  /// @brief Draw background image scaled to the window size
+  virtual void draw();
 };
 } // namespace gui
 } // namespace battleship
