@@ -1,7 +1,7 @@
 #pragma once
 
-#include "text_label.hpp"
-#include "widget.hpp"
+#include "../text_label/text_label.hpp"
+#include "../widget.hpp"
 #include <spdlog/spdlog.h>
 
 namespace battleship {

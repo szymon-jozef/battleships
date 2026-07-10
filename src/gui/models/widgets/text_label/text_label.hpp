@@ -1,5 +1,5 @@
 #pragma once
-#include "widget.hpp"
+#include "../widget.hpp"
 
 namespace battleship {
 namespace gui {

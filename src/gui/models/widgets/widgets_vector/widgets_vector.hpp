@@ -1,7 +1,7 @@
 #pragma once
 
+#include "../widget.hpp"
 #include "models/gui_models.hpp"
-#include "widget.hpp"
 
 namespace battleship {
 namespace gui {
