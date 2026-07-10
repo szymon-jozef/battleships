@@ -1,4 +1,5 @@
 #include "game.hpp"
+#include "models/data_structures.hpp"
 #include <raylib.h>
 
 namespace battleship {
@@ -317,8 +318,11 @@ void Game::updateLabels() {
     }
     break;
   case networking::GameStatus::GAME_FINISH:
-    // we don't do anything since summary screen should show now
-    gameStatusLabel.clear();
+    spdlog::info("[GUI] game has ended. GAME_FINISH screen should show now");
+    gameStatusLabel = "Game has ended!";
+    gameContext.loserName = gameManager.getLoserName();
+    gameContext.isWon = gameManager.isGameWon();
+    gameContext.guiState = GuiState::GAME_FINISH; // TODO! Perhaps to this on key press?
     break;
   }
 
@@ -397,7 +401,6 @@ Game::Game(GameContext &gameContext, Texture2D &background)
     }
   });
   spdlog::info("[GUI] client thread initialized!");
-  updateLabels();
 }
 
 Game::~Game() {
@@ -420,9 +423,9 @@ void Game::update() {
   Scene::update();
   board.update();
   radar.update();
-  if (IsWindowResized() || isGameStatusChanged()) {
-    updateLabels();
-  }
+
+  updateLabels(); // we update labels all the time, because checking every frame if the ship type has changed is too
+                  // much. TODO! Change this someday
 
   // TODO! Move this somewhere more appropriate
   if (gameManager.getCurrentGameStatus() == networking::GameStatus::PLACING_SHIPS && IsKeyPressed(KEY_SPACE)) {

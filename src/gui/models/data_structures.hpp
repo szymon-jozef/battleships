@@ -8,14 +8,19 @@ namespace gui {
 enum class GuiState {
   MAIN_MENU,
   MODE_SELECTION,
+
   GAME,
-  JOIN_SERVER,
+  JOIN_SERVER, // TODO! <-- Implement this
+  GAME_FINISH,
+
   SETTINGS,
   QUIT,
 };
 
 struct GameContext {
   std::string playerName;
+  std::string loserName;
+  bool isWon;
   GuiState guiState = GuiState::MAIN_MENU;
 
   std::string serverUrl = "127.0.0.1";

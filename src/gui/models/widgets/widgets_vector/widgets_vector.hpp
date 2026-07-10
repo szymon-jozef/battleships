@@ -22,6 +22,7 @@ class WidgetsVector {
   void handleFocus();
 
 public:
+  // TODO! I don't think I want to set this every time in the constructor
   WidgetsVector(GameContext &gameContext, float start_y, float margin, float width, float height);
 
   void push_back_button(std::string label, std::function<void()> onClick);

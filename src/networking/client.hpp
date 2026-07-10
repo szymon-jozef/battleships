@@ -38,6 +38,7 @@ public:
   boost::uuids::uuid enemyId;
   std::string enemyName;
   bool isMyTurn = false;
+  bool isGameWon = false;
 
   // TODO! Change  player and enemy id,name to some more sensible data structure
   std::string loserName;

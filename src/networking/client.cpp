@@ -231,9 +231,11 @@ void Client::handleBroadcastingPlayers(Message &msg) {
   if (id1 == this->id) {
     enemyName = std::string(name2.name);
     enemyId = id2;
+    id = id1;
   } else { // we are the second player
     enemyName = std::string(name1.name);
     enemyId = id1;
+    id = id2;
   }
 }
 
@@ -243,9 +245,11 @@ void Client::handleGameEnd(Message &msg) {
   if (loserId == id) {
     spdlog::info("[Client] we lost!");
     loserName = name;
+    isGameWon = false;
   } else {
     spdlog::info("[Client] we won!");
     loserName = enemyName;
+    isGameWon = true;
   }
   disconnect();
 }

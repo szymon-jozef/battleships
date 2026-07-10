@@ -1,4 +1,5 @@
 #include "scenes/all_scenes.hpp"
+#include "scenes/game_finish/game_finish.hpp"
 #include <memory>
 #include <raylib.h>
 
@@ -57,6 +58,9 @@ int run() {
         break;
       case GuiState::GAME:
         currentScene = std::make_unique<Game>(gameContext, bg.playBackground);
+        break;
+      case GuiState::GAME_FINISH:
+        currentScene = std::make_unique<GameFinish>(gameContext, bg.bg3);
         break;
       case GuiState::SETTINGS:
         currentScene = std::make_unique<Settings>(gameContext, bg.bg1);

@@ -88,7 +88,7 @@ std::string GameManager::getLoserName() const {
 }
 
 bool GameManager::isGameWon() const {
-  return client.enemyName == client.loserName;
+  return client.isGameWon;
 }
 
 bool GameManager::isConnected() const {
