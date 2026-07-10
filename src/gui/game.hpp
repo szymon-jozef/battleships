@@ -47,6 +47,7 @@ public:
       DrawRectangleRec(fieldRect, BLACK);
       break;
     }
+    onHover();
   }
 
   void setClickable(bool isClickable) {
@@ -67,6 +68,12 @@ public:
 
   Rectangle *getRect() {
     return &fieldRect;
+  }
+
+  void onHover() {
+    if (isClickable && CheckCollisionPointRec(GetMousePosition(), fieldRect)) {
+      DrawRectangleLinesEx(fieldRect, 1, GREEN);
+    }
   }
 };
 
@@ -331,6 +338,8 @@ class Game : public Scene {
       labelActualTextHeight, defaultLabelSize;
   int lineCount = 1;
 
+  networking::GameStatus prevGameStatus = gameManager.getCurrentGameStatus();
+
   void updateLabels() {
     // set text
     switch (gameManager.getCurrentGameStatus()) {
@@ -398,6 +407,14 @@ class Game : public Scene {
     DrawText(gameStatusLabel.c_str(), label_x, label_y, labelFontSize, labelColor);
   }
 
+  bool isGameStatusChanged() {
+    if (prevGameStatus != gameManager.getCurrentGameStatus()) {
+      prevGameStatus = gameManager.getCurrentGameStatus();
+      return true;
+    }
+    return false;
+  }
+
 public:
   Game(GameContext &gameContext, Texture2D &background)
       : Scene(gameContext, background)
@@ -461,7 +478,7 @@ public:
     Scene::update();
     board.update();
     radar.update();
-    if (IsWindowResized()) {
+    if (IsWindowResized() || isGameStatusChanged()) {
       updateLabels();
     }
 
