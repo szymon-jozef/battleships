@@ -8,18 +8,10 @@ class TextLabel : public Widget {
   Color color;
 
 public:
-  TextLabel(std::string text, float pos_y, Rectangle scaleRect, Color color)
-      : Widget(text, pos_y, scaleRect, 0.5f, false)
-      , color(color) {}
+  TextLabel(std::string text, float pos_y, Rectangle scaleRect, Color color);
 
-  void update() override {
-    Widget::update();
-  }
-
-  void draw() override {
-    drawLabelInTheMiddle(color);
-    Widget::draw();
-  }
+  void update() override;
+  void draw() override;
 };
 
 } // namespace gui
