@@ -190,3 +190,5 @@ include(CTest)
 include(Catch)
 catch_discover_tests(LogicTests)
 catch_discover_tests(IntegrationTests)
+
+install(TARGETS battleships DESTINATION bin)
