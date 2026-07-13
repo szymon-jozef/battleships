@@ -48,7 +48,10 @@ public:
   Client() = default;
   ~Client();
 
-  bool connect(const std::string &playerName, const std::string &host, const uint16_t port);
+  bool connect(const std::string &playerName,
+               const std::string &host,
+               const uint16_t port,
+               std::function<void(bool, std::string)> onResult);
   void disconnect();
   bool isConnected() const;
   void update(size_t maxMessages = -1, bool wait = true);

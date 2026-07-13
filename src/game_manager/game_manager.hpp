@@ -17,7 +17,7 @@ class GameManager {
 public:
   GameManager(const std::string &playerName, const std::string &serverUrl, const uint16_t serverPort = 6767);
 
-  bool connect();
+  bool connect(std::function<void(bool, std::string)> onResult = nullptr);
   void disconnect();
   void updateClient(bool wait = true);
   bool placeShip(unsigned short int row, unsigned short int column, bool isHorizontal);

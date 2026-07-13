@@ -388,19 +388,26 @@ Game::Game(GameContext &gameContext, Texture2D &background)
     gameContext.serverUrl = "127.0.0.1";
   }
 
-  if (!gameManager.connect()) {
-    spdlog::error("[GUI] could not connect to the server!");
-    return;
-  }
-  gameContext.serverUrl = prevUrl;
-
-  spdlog::info("[GUI] Initializing server client");
-  clientThread = std::thread([this]() {
-    while (gameManager.isConnected()) {
-      gameManager.updateClient();
+  gameManager.connect([&gameContext, this, prevUrl](
+                          bool success, const std::string &message) { // TODO! Show the message in some sort of label
+    if (!success) {
+      spdlog::error("[GUI] connection error: {}", message);
+      if (gameContext.currentGameMode == GameContext::GameMode::JOINING) {
+        gameContext.guiState = GuiState::MAIN_MENU;
+      } else {
+        gameContext.serverUrl = prevUrl;
+      }
+    } else {
+      spdlog::info("[GUI] connected to the server!");
+      spdlog::info("[GUI] Initializing server client");
+      clientThread = std::thread([this]() {
+        while (gameManager.isConnected()) {
+          gameManager.updateClient();
+        }
+      });
+      spdlog::info("[GUI] client thread initialized!");
     }
   });
-  spdlog::info("[GUI] client thread initialized!");
 }
 
 Game::~Game() {

@@ -14,8 +14,7 @@ ModeSelection::ModeSelection(GameContext &gameContext, Texture2D &background)
 
   widgets.push_back_button("Join Game", [&gameContext]() {
     gameContext.currentGameMode = GameContext::GameMode::JOINING;
-    // TODO! Add a scene for setting server url
-    gameContext.guiState = GuiState::GAME;
+    gameContext.guiState = GuiState::JOIN_SERVER;
   });
   widgets.push_back_button("Go back", [this]() { goBack(); });
 }

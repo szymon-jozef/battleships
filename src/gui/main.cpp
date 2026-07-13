@@ -35,7 +35,7 @@ int run() {
   InitWindow(screenWidth, screenHeight, "Battleships");
   // SetTargetFPS(60);
 
-  GuiState &currentState = gameContext.guiState;
+  std::atomic<GuiState> &currentState = gameContext.guiState;
   GuiState previousState = currentState;
   bool shouldClose = false;
 
@@ -58,6 +58,9 @@ int run() {
         break;
       case GuiState::GAME:
         currentScene = std::make_unique<Game>(gameContext, bg.playBackground);
+        break;
+      case GuiState::JOIN_SERVER:
+        currentScene = std::make_unique<JoinServer>(gameContext, bg.bg2);
         break;
       case GuiState::GAME_FINISH:
         currentScene = std::make_unique<GameFinish>(gameContext, bg.bg3);

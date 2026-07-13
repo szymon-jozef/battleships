@@ -22,15 +22,26 @@ Connection::Connection(Owner owner,
     , queIn(qIn)
     , id(boost::uuids::random_generator()()) {}
 
-void Connection::connectToServer(const boost::asio::ip::tcp::resolver::results_type &endpoints) {
+void Connection::connectToServer(const boost::asio::ip::tcp::resolver::results_type &endpoints,
+                                 std::function<void(bool, std::string)> onResult) {
   switch (owner) {
   case Owner::CLIENT:
     boost::asio::async_connect(
         socket,
         endpoints,
-        [this, self = shared_from_this()](std::error_code ec, boost::asio::ip::tcp::endpoint endpoint) {
-          if (!ec)
+        [this, self = shared_from_this(), onResult](std::error_code ec, boost::asio::ip::tcp::endpoint endpoint) {
+          if (!ec) {
             readHeader();
+
+            if (onResult) {
+              onResult(true, "Connected to the server");
+            }
+          } else {
+            spdlog::error("[Network] Could not connect: {}", ec.message());
+            if (onResult) {
+              onResult(false, ec.message());
+            }
+          }
         });
     break;
   case Owner::SERVER:
@@ -120,7 +131,9 @@ void Connection::readHeader() {
 
                             if (temporaryMessage.header.size > 0) {
                               if (temporaryMessage.header.size > 100000) {
-                                spdlog::error("[Network] {} Huge message size detected: {}, disconnecting.", boost::uuids::to_string(id), temporaryMessage.header.size);
+                                spdlog::error("[Network] {} Huge message size detected: {}, disconnecting.",
+                                              boost::uuids::to_string(id),
+                                              temporaryMessage.header.size);
                                 disconnect();
                                 return;
                               }

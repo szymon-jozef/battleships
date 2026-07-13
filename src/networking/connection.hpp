@@ -20,7 +20,8 @@ public:
     return id;
   };
   void setId(boost::uuids::uuid id);
-  void connectToServer(const boost::asio::ip::tcp::resolver::results_type &endpoints);
+  void connectToServer(const boost::asio::ip::tcp::resolver::results_type &endpoints,
+                       std::function<void(bool, std::string)> onResult);
   void disconnect();
   bool isConnected() const;
   void startListening();

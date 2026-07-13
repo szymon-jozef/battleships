@@ -17,7 +17,10 @@ Client::~Client() {
   disconnect();
 }
 
-bool Client::connect(const std::string &playerName, const std::string &host, const uint16_t port) {
+bool Client::connect(const std::string &playerName,
+                     const std::string &host,
+                     const uint16_t port,
+                     std::function<void(bool, std::string)> onResult) {
   name = playerName;
   boost::trim(name);
 
@@ -29,11 +32,12 @@ bool Client::connect(const std::string &playerName, const std::string &host, con
     connection =
         std::make_shared<Connection>(Connection::Owner::CLIENT, context, boost::asio::ip::tcp::socket(context), queIn);
 
-    connection->connectToServer(endpoints);
+    connection->connectToServer(endpoints, onResult);
 
     thread = std::thread([this]() { context.run(); });
   } catch (std::exception &e) {
     spdlog::error("[Client] failed trying to connect: {}", e.what());
+    onResult(false, "Failed trying to connect to the server.");
     return false;
   }
   return true;

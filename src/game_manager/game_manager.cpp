@@ -30,8 +30,8 @@ GameManager::GameManager(const std::string &playerName, const std::string &serve
   });
 }
 
-bool GameManager::connect() {
-  return (client.connect(player.getName(), serverUrl, serverPort));
+bool GameManager::connect(std::function<void(bool, std::string)> onResult) {
+  return (client.connect(player.getName(), serverUrl, serverPort, onResult));
 }
 
 void GameManager::disconnect() {

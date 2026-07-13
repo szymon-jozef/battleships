@@ -1,4 +1,5 @@
 #pragma once
+#include <atomic>
 #include <cstdint>
 #include <string>
 
@@ -21,7 +22,7 @@ struct GameContext {
   std::string playerName;
   std::string loserName;
   bool isWon;
-  GuiState guiState = GuiState::MAIN_MENU;
+  std::atomic<GuiState> guiState = GuiState::MAIN_MENU;
 
   std::string serverUrl = "127.0.0.1";
   uint16_t serverPort = 6767;

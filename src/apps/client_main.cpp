@@ -14,7 +14,11 @@ int main() {
   std::cout << "Enter your name: \n";
   std::cin >> name;
 
-  if (client.connect(name, "127.0.0.1", 6767)) {
+  if (client.connect(name, "127.0.0.1", 6767, [](bool success, const std::string &message) {
+        if (!success) {
+          spdlog::error("[CLIENT] Error: {}", message);
+        }
+      })) {
     spdlog::info("Connected!");
     // waiting for connection to establish
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
