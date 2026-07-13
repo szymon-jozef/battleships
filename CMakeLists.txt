@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 
+option(isDev "build tests" false)
+
 if (PROJECT_IS_TOP_LEVEL AND UNIX)
     # Create symlink to compile_commands.json for IDE to pick it up
     execute_process(
@@ -15,11 +17,14 @@ if (PROJECT_IS_TOP_LEVEL AND UNIX)
 endif()
 
 find_package(Boost REQUIRED)
-find_package(Catch2 3 REQUIRED)
 find_package(spdlog  REQUIRED)
 find_package(fmt  REQUIRED)
 find_package(Threads REQUIRED)
 find_package(raylib REQUIRED)
+
+if (${isDev})
+find_package(Catch2 3 REQUIRED)
+endif()
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
@@ -86,6 +91,7 @@ target_link_libraries(networking
     Threads::Threads
 )
 
+if (${isDev})
 add_executable(server_main)
 target_sources(server_main
     PRIVATE
@@ -97,6 +103,8 @@ target_sources(client_main
     PRIVATE
         src/apps/client_main.cpp
 )
+
+endif()
 
 # === Game Manager ===
 add_library(game_manager)
@@ -144,6 +152,7 @@ target_link_libraries(battleships
         game_manager
 )
 
+if (${isDev})
 target_link_libraries(server_main
     PRIVATE
         networking
@@ -153,6 +162,7 @@ target_link_libraries(client_main
     PRIVATE
         networking
 )
+endif()
 
 target_link_libraries(gui
     PRIVATE
@@ -165,6 +175,7 @@ target_link_libraries(gui
 
 
 # === Tests ===
+if (${isDev})
 file(GLOB TEST_LOGIC_SOURCES CONFIGURE_DEPENDS "tests/game_logic/*.cpp")
 add_executable(LogicTests ${TEST_LOGIC_SOURCES})
 
@@ -185,10 +196,10 @@ target_link_libraries(IntegrationTests
         game_manager
         game_logic
 )
-
 include(CTest)
 include(Catch)
 catch_discover_tests(LogicTests)
 catch_discover_tests(IntegrationTests)
+endif()
 
 install(TARGETS battleships DESTINATION bin)
