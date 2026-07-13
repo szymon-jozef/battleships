@@ -74,21 +74,10 @@ void GameGrid::updateData() {
   gridRect.y = 0 + padding_y;
   gridRect.height = GetScreenHeight() - (2 * padding_y);
 
-  switch (gridType) {
-  case GridType::BOARD:
+  if (gridType == GridType::BOARD) {
     gridRect.x = 0 + padding_x;
-    label = TextFormat("Player: %s",
-                       gameManager.getPlayerName().c_str()); // TODO! This could be set once - player name never changes
-    break;
-  case GridType::RADAR:
+  } else {
     gridRect.x = GetScreenWidth() / 2.0f + padding_x;
-
-    if (gameManager.getEnemyName().empty()) {
-      label = TextFormat("Waiting for the enemy");
-    } else {
-      label = TextFormat("Enemy: %s", gameManager.getEnemyName().c_str());
-    }
-    break;
   }
 
   // rectangle beginning
@@ -102,6 +91,22 @@ void GameGrid::updateData() {
 
   fieldSize = std::min(calculatedFieldWidth, calculatedFieldHight);
   deltaSize = fieldSize * multiplier;
+}
+
+void GameGrid::updateLabelContent() {
+  switch (gridType) {
+  case GridType::BOARD:
+    label = TextFormat("Player: %s",
+                       gameManager.getPlayerName().c_str()); // TODO! This could be set once - player name never changes
+    break;
+  case GridType::RADAR:
+    if (gameManager.getEnemyName().empty()) {
+      label = TextFormat("Waiting for the enemy");
+    } else {
+      label = TextFormat("Enemy: %s", gameManager.getEnemyName().c_str());
+    }
+    break;
+  }
 }
 
 /// @brief Update the position of grid rectangle, making it fit the last field.
@@ -118,7 +123,7 @@ void GameGrid::updateGridRect() {
 }
 
 /// @brief Update the position of label
-void GameGrid::updateLabel() {
+void GameGrid::updateLabelPos() {
   fontSize = gridRect.y * 0.5f;
   label_x = gridRect.x;
   label_y = gridRect.y * 0.5;
@@ -247,7 +252,8 @@ GameGrid::GameGrid(gameManager::GameManager &gameManager, GridType type)
   updateData();
   updateFieldsPos();
   updateGridRect();
-  updateLabel();
+  updateLabelPos();
+  updateLabelContent();
 }
 
 void GameGrid::toggleHorizontal() {
@@ -263,8 +269,9 @@ void GameGrid::update() {
     updateData();
     updateFieldsPos();
     updateGridRect();
-    updateLabel();
+    updateLabelPos();
   }
+  updateLabelContent();
   updateGridState();
   updateFieldsState();
 }

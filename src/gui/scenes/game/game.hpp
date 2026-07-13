@@ -62,7 +62,8 @@ class GameGrid {
   void updateGridRect();
 
   /// @brief Update the position of label
-  void updateLabel();
+  void updateLabelPos();
+  void updateLabelContent();
 
   /// @brief Make the grid clickable
   void setGridClickable(bool isClickable);
