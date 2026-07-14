@@ -1,6 +1,18 @@
 {
   perSystem =
     { pkgs, ... }:
+    let
+      desktopItem = pkgs.makeDesktopItem {
+        name = "battleships";
+        desktopName = "Battleships";
+        exec = "battleships";
+        comment = "Online game of battleships";
+        categories = [
+          "Game"
+        ];
+        terminal = false;
+      };
+    in
     {
       packages.default = (
         with pkgs;
@@ -14,6 +26,8 @@
           nativeBuildInputs = with pkgs; [
             clang
             cmake
+            copyDesktopItems
+            makeWrapper
           ];
 
           buildInputs = with pkgs; [
@@ -22,6 +36,12 @@
             spdlog
             raylib
           ];
+
+          desktopItems = [ desktopItem ];
+
+          postInstall = ''
+            wrapProgram $out/bin/battleships --set BATTLESHIPS_ASSETS_DIR "$out/usr/share/battleships/assets"
+          '';
 
         }
       );

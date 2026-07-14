@@ -15,13 +15,15 @@
         mkOption
         mkIf
         ;
+
+      inherit (pkgs.stdenv.hostPlatform) system;
     in
     {
       options.programs.battleships = {
         enable = mkEnableOption "Battleships";
 
         package = mkOption {
-          default = self.packages.${pkgs.system}.default;
+          default = self.packages.${system}.default;
           description = "Package to use";
           type = lib.types.package;
         };
