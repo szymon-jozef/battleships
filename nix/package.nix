@@ -7,7 +7,7 @@
         stdenv.mkDerivation {
           pname = "battleships";
           version = builtins.head (
-            builtins.match ".*VERSION\ ([0-9.]+).*" (builtins.readFile ./CMakeLists.txt)
+            builtins.match ".*VERSION\ ([0-9.]+).*" (builtins.readFile ../CMakeLists.txt)
           );
           src = ./..;
 

@@ -1,9 +1,10 @@
+{ self, ... }:
 {
-  flake.nixosModules.battleships =
+  flake.nixosModules.default =
     {
       config,
       lib,
-      self,
+      pkgs,
       ...
     }:
     let
@@ -20,7 +21,7 @@
         enable = mkEnableOption "Battleships";
 
         package = mkOption {
-          default = self.battleships;
+          default = self.packages.${pkgs.system}.default;
           description = "Package to use";
           type = lib.types.package;
         };
