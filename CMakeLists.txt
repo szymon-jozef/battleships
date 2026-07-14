@@ -16,7 +16,7 @@ if (PROJECT_IS_TOP_LEVEL AND UNIX)
     )
 endif()
 
-find_package(Boost REQUIRED)
+find_package(Boost REQUIRED COMPONENTS program_options)
 find_package(spdlog  REQUIRED)
 find_package(fmt  REQUIRED)
 find_package(Threads REQUIRED)
@@ -150,7 +150,8 @@ target_link_libraries(battleships
         game_logic
         networking
         game_manager
-)
+        Boost::program_options
+    )
 
 if (${isDev})
 target_link_libraries(server_main
