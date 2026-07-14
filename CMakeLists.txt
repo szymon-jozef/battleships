@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 4.1.2)
-project(battleships)
+project(battleships VERSION 0.0.1)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -202,5 +202,6 @@ catch_discover_tests(LogicTests)
 catch_discover_tests(IntegrationTests)
 endif()
 
+target_compile_definitions(battleships PUBLIC GAME_VERSION=\"${PROJECT_VERSION}\")
 install(TARGETS battleships DESTINATION bin)
 install(DIRECTORY assets DESTINATION usr/share/battleships)

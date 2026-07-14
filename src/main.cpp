@@ -7,6 +7,6 @@ int main() {
   // TODO args parsing
   // for example for running server standalone
 
-  spdlog::flush_on(spdlog::level::info);
+  spdlog::info("[MAIN] Running the game. Current version is: {}", GAME_VERSION);
   return run();
 }

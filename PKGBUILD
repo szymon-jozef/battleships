@@ -22,6 +22,10 @@ source=()
 noextract=()
 md5sums=() #generate with 'makepkg -g'
 
+pkgver() {
+    grep -e "project.*VERSION" $startdir/CMakeLists.txt | awk 'NR==1' | awk '{print $3}' | tr -d ')'
+}
+
 prepare() {
 	cd "$startdir/"
 }

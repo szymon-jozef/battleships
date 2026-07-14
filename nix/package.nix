@@ -6,7 +6,9 @@
         with pkgs;
         stdenv.mkDerivation {
           pname = "battleships";
-          version = "0.0.1";
+          version = builtins.head (
+            builtins.match ".*VERSION\ ([0-9.]+).*" (builtins.readFile ./CMakeLists.txt)
+          );
           src = ./..;
 
           nativeBuildInputs = with pkgs; [
