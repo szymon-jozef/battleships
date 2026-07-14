@@ -33,6 +33,7 @@ int run() {
 
   SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
   InitWindow(screenWidth, screenHeight, "Battleships");
+  SetWindowMinSize(GetScreenWidth() * 0.3f, GetScreenHeight() * 0.3f);
   // SetTargetFPS(60);
 
   std::atomic<GuiState> &currentState = gameContext.guiState;
