@@ -13,6 +13,7 @@
         inputsFrom = [
           (config.packages.default)
         ];
+
       };
     };
 }

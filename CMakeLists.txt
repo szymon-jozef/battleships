@@ -203,3 +203,4 @@ catch_discover_tests(IntegrationTests)
 endif()
 
 install(TARGETS battleships DESTINATION bin)
+install(DIRECTORY assets DESTINATION usr/share/battleships)

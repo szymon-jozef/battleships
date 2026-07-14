@@ -21,7 +21,6 @@
             raylib
           ];
 
-          # TODO! Copy assets and also change their paths to env var or something
         }
       );
     };
