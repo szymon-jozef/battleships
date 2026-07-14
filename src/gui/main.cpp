@@ -1,24 +1,58 @@
 #include "scenes/all_scenes.hpp"
 #include "scenes/game_finish/game_finish.hpp"
+#include <cstdlib>
+#include <filesystem>
 #include <memory>
 #include <raylib.h>
 
 namespace battleship {
 namespace gui {
 
-struct Backgrounds {
+class assetsManager {
+  std::vector<std::filesystem::path> expectedPaths = {std::filesystem::path("/usr/share/battleship"),
+                                                      std::filesystem::path("./assets")};
+  std::filesystem::path pathPrefix;
+
+  void loadPaths() {
+    bg1 = LoadTexture(std::filesystem::path(pathPrefix / std::filesystem::path("gfx/bg1.jpg")).c_str());
+    bg2 = LoadTexture(std::filesystem::path(pathPrefix / std::filesystem::path("gfx/bg2.jpg")).c_str());
+    bg3 = LoadTexture(std::filesystem::path(pathPrefix / std::filesystem::path("gfx/bg3.jpg")).c_str());
+    playBackground =
+        LoadTexture(std::filesystem::path(pathPrefix / std::filesystem::path("gfx/play_background.jpg")).c_str());
+  }
+
+public:
   Texture2D bg1;
   Texture2D bg2;
   Texture2D bg3;
   Texture2D playBackground;
 
-  Backgrounds()
-      : bg1(LoadTexture("assets/gfx/bg1.jpg"))
-      , bg2(LoadTexture("assets/gfx/bg2.jpg"))
-      , bg3(LoadTexture("assets/gfx/bg3.jpg"))
-      , playBackground(LoadTexture("assets/gfx/play_background.jpg")) {}
+  assetsManager() {
+    char *envPath = std::getenv("BATTLESHIPS_ASSETS_DIR");
 
-  ~Backgrounds() {
+    if (envPath) {
+      pathPrefix = std::filesystem::path(envPath);
+      spdlog::info("[GUI] Env variable BATTLESHIPS_ASSETS_DIR was set. Setting pathPrefix as: {}", envPath);
+      loadPaths();
+      return;
+    }
+
+    for (const auto &path : expectedPaths) {
+      if (std::filesystem::is_directory(path)) {
+        pathPrefix = std::filesystem::absolute(path);
+        spdlog::info("[GUI] found assets path at: {}", pathPrefix.c_str());
+        break;
+      }
+    }
+    if (!pathPrefix.empty()) {
+      loadPaths();
+      return;
+    }
+
+    spdlog::warn("[GUI] could not fine any viable asset directory");
+  }
+
+  ~assetsManager() {
     UnloadTexture(bg1);
     UnloadTexture(bg2);
     UnloadTexture(bg3);
@@ -40,7 +74,7 @@ int run() {
   GuiState previousState = currentState;
   bool shouldClose = false;
 
-  Backgrounds bg;
+  assetsManager bg;
 
   std::unique_ptr<Scene> currentScene;
   currentScene = std::make_unique<MainMenu>(gameContext, bg.bg1);
