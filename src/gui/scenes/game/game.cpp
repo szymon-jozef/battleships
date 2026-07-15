@@ -371,14 +371,14 @@ bool Game::isGameStatusChanged() {
 
 Game::Game(GameContext &gameContext, Texture2D &background)
     : Scene(gameContext, background)
-    , gameManager(gameContext.playerName, gameContext.serverUrl, gameContext.serverPort)
+    , gameManager(gameContext.settings.playerName, gameContext.settings.serverUrl, gameContext.settings.serverPort)
     , board(gameManager, GameGrid::GridType::BOARD)
     , radar(gameManager, GameGrid::GridType::RADAR) {
   spdlog::info("[GUI] Game constructor run");
 
-  std::string prevUrl = gameContext.serverUrl;
+  std::string prevUrl = gameContext.settings.serverUrl;
   if (gameContext.currentGameMode == GameContext::GameMode::HOSTING) {
-    server = std::make_unique<networking::Server>(gameContext.serverPort);
+    server = std::make_unique<networking::Server>(gameContext.settings.serverPort);
     if (!server->start()) {
       spdlog::error("[GUI] could not start the server...");
       return;
@@ -392,7 +392,7 @@ Game::Game(GameContext &gameContext, Texture2D &background)
       }
     });
     spdlog::info("[GUI] server thread initialized!");
-    gameContext.serverUrl = "127.0.0.1";
+    gameContext.settings.serverUrl = "127.0.0.1";
   }
 
   gameManager.connect([&gameContext, this, prevUrl](
@@ -402,7 +402,7 @@ Game::Game(GameContext &gameContext, Texture2D &background)
       if (gameContext.currentGameMode == GameContext::GameMode::JOINING) {
         gameContext.guiState = GuiState::MAIN_MENU;
       } else {
-        gameContext.serverUrl = prevUrl;
+        gameContext.settings.serverUrl = prevUrl;
       }
     } else {
       spdlog::info("[GUI] connected to the server!");

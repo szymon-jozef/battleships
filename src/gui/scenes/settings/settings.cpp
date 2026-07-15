@@ -9,8 +9,12 @@ Settings::Settings(GameContext &gameContext, Texture2D &background)
   backgroundTint = LIGHTGRAY;
 
   widgets.push_back_label("Player options", BLACK);
-  widgets.push_back_textInput_with_label("Player name: ", gameContext.playerName, BLACK, gameContext.playerName);
-  widgets.push_back_button("Go back", [&gameContext]() { gameContext.guiState = GuiState::MAIN_MENU; });
+  widgets.push_back_textInput_with_label(
+      "Player name: ", gameContext.settings.playerName, BLACK, gameContext.settings.playerName);
+  widgets.push_back_button("Go back", [&gameContext]() {
+    gameContext.settings.save();
+    gameContext.guiState = GuiState::MAIN_MENU;
+  });
 }
 
 void Settings::update() {

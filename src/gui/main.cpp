@@ -63,7 +63,8 @@ public:
 int run() {
   const int screenWidth = 1220;
   const int screenHeight = 720;
-  GameContext gameContext = {std::string("Szymon")};
+  GameContext gameContext;
+  gameContext.settings.load();
 
   SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
   InitWindow(screenWidth, screenHeight, "Battleships");
