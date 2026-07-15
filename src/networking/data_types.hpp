@@ -8,7 +8,11 @@
 namespace battleship {
 namespace networking {
 class Connection;
-class OwnedMessage;
+
+struct OwnedMessage {
+  std::shared_ptr<Connection> remote;
+  Message msg;
+};
 
 class MessageQueue {
   std::deque<OwnedMessage> queue;
@@ -29,11 +33,6 @@ public:
   void stop();
 
   MessageQueue() = default;
-};
-
-struct OwnedMessage {
-  std::shared_ptr<Connection> remote;
-  Message msg;
 };
 
 struct PlayerNameMessage {

@@ -197,8 +197,13 @@ catch_discover_tests(IntegrationTests)
 endif()
 
 if(WIN32)
-    target_compile_definitions(battleships PRIVATE WIN32_LEAN_AND_MEAN NOGDI)
+    target_compile_definitions(battleships PRIVATE WIN32_LEAN_AND_MEAN NOGDI NOUSER NOMINMAX)
 endif()
+
+if(WIN32)
+    target_compile_definitions(gui PRIVATE WIN32_LEAN_AND_MEAN NOGDI NOUSER NOMINMAX)
+endif()
+
 
 target_compile_definitions(battleships PUBLIC GAME_VERSION=\"${PROJECT_VERSION}\")
 install(TARGETS battleships DESTINATION bin)
