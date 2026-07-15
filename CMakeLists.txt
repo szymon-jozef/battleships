@@ -209,7 +209,7 @@ target_compile_definitions(battleships PUBLIC GAME_VERSION=\"${PROJECT_VERSION}\
 install(TARGETS battleships DESTINATION bin)
 
 if (WIN32)
-    install(DIRECTORY assets)
+    install(DIRECTORY assets DESTINATION "C:/Program files/ battleships")
 else()
     install(DIRECTORY assets DESTINATION usr/share/battleships)
 endif()
