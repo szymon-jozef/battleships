@@ -1,13 +1,14 @@
 cmake_minimum_required(VERSION 4.1.2)
-project(battleships VERSION 0.0.1)
-
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+
+project(battleships VERSION 0.0.1)
 
 option(isDev "build tests" false)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(Boost REQUIRED COMPONENTS program_options)
 find_package(spdlog  REQUIRED)
@@ -19,7 +20,6 @@ if (${isDev})
 find_package(Catch2 3 REQUIRED)
 endif()
 
-set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 # === Entry point ===
 add_executable(battleships)
