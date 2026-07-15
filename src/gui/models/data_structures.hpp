@@ -1,5 +1,6 @@
 #pragma once
 #include <atomic>
+#include <charconv>
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
@@ -70,8 +71,8 @@ public:
       playerName = "player";
       serverUrl = "127.0.0.1";
       serverPort = 6767;
-      save();
       file.close();
+      save();
     }
   }
 
@@ -98,25 +99,40 @@ public:
       return;
     }
 
-    std::string line, type, value;
+    std::string line;
+    std::string_view line_view, type, value;
     size_t delimeterPos;
 
     while (std::getline(file, line)) {
-      delimeterPos = line.find('=');
-      type = line.substr(0, delimeterPos);
-      value = line.substr(delimeterPos + 1);
+      line_view = {line};
+      delimeterPos = line_view.find('=');
+      if (delimeterPos == 0 || delimeterPos == std::string::npos) {
+        continue;
+      }
+
+      type = line_view.substr(0, delimeterPos);
+      value = line_view.substr(delimeterPos + 1);
 
       if (type == "playerName") {
         playerName = value;
       } else if (type == "serverUrl") {
         serverUrl = value;
       } else if (type == "serverPort") {
-        serverPort = std::atoi(value.c_str());
+        auto [ptr, ec] = std::from_chars(value.data(), value.data() + value.size(), serverPort);
+
+        if (ec == std::errc::invalid_argument) {
+          spdlog::error("[GUI] server port was set as something that's not a number!");
+          serverPort = 6767;
+        } else if (ec == std::errc::result_out_of_range) {
+          spdlog::error("[GUI] server port was set as value out of range!");
+          serverPort = 6767;
+        }
+
       } else {
         spdlog::warn("[GUI] unrecognize entry in the settings: {} - {}", type, value);
         continue;
       }
-      spdlog::info("[GUI] setting have been loaded: {} - {}", type.c_str(), value.c_str());
+      spdlog::info("[GUI] setting have been loaded: {} - {}", type, value);
     }
   };
 };
