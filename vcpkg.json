@@ -1,0 +1,9 @@
+{
+  "description": "Dependencies for battleship game",
+  "dependencies": [
+    "boost-program-options",
+    "spdlog",
+    "raylib",
+    "catch2"
+  ]
+}
