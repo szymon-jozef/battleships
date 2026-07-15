@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../widget.hpp"
+#include <raylib.h>
 #include <spdlog/spdlog.h>
 
 namespace battleship {

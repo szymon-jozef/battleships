@@ -1,5 +1,6 @@
 #pragma once
 #include "../widget.hpp"
+#include <raylib.h>
 
 namespace battleship {
 namespace gui {

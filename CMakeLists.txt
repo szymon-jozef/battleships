@@ -7,14 +7,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 
 option(isDev "build tests" false)
 
-if (PROJECT_IS_TOP_LEVEL AND UNIX)
-    # Create symlink to compile_commands.json for IDE to pick it up
-    execute_process(
-        COMMAND ${CMAKE_COMMAND} -E create_symlink
-            ${CMAKE_BINARY_DIR}/compile_commands.json
-            ${CMAKE_CURRENT_SOURCE_DIR}/compile_commands.json
-    )
-endif()
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(Boost REQUIRED COMPONENTS program_options)
 find_package(spdlog  REQUIRED)
@@ -201,6 +194,10 @@ include(CTest)
 include(Catch)
 catch_discover_tests(LogicTests)
 catch_discover_tests(IntegrationTests)
+endif()
+
+if(WIN32)
+    target_compile_definitions(battleships PRIVATE WIN32_LEAN_AND_MEAN NOGDI)
 endif()
 
 target_compile_definitions(battleships PUBLIC GAME_VERSION=\"${PROJECT_VERSION}\")

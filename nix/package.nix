@@ -24,7 +24,7 @@
           src = ./..;
 
           nativeBuildInputs = with pkgs; [
-            clang
+            ninja
             cmake
             copyDesktopItems
             makeWrapper
