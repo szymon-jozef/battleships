@@ -32,11 +32,7 @@ bool TextInput::handleKeyboardInput() {
       SetMouseCursor(MOUSE_CURSOR_DEFAULT);
     }
 
-    isEdited = getKeyboardInput();
-
-    isEdited = removeCharFromBuffer();
-
-    isEdited = clearBuffer();
+    isEdited = getKeyboardInput() || removeCharFromBuffer() || clearBuffer();
 
     normaliseText();
 
@@ -145,21 +141,13 @@ void TextInput::update() {
   if (handleClipboardInput() || handleKeyboardInput()) {
     target = std::string(buffer);
     normaliseText();
-  }
-
-  if (IsWindowResized()) {
-    updateTextPos();
+    updateEveryPos(true);
+    setLabel(target);
   }
 
   if (inputType == InputType::NAME) {
     updateCharactersLeftPrompt();
   }
-}
-
-void TextInput::updateTextPos() {
-  textWidth = MeasureText(target.c_str(), fontSize);
-  text_x = (finalPositionRect.x + finalPositionRect.width / 2.0f) - (textWidth / 2.0f);
-  text_y = (finalPositionRect.y + finalPositionRect.height / 2.0f) - (fontSize / 2.0f);
 }
 
 void TextInput::updateCharactersLeftPrompt() {
@@ -168,7 +156,7 @@ void TextInput::updateCharactersLeftPrompt() {
 
 void TextInput::draw() {
   drawInputRect();
-  drawBuffer();
+  drawLabel(MAROON); // draw the current buffer
 
   if (inputType == InputType::NAME) {
     drawCharactersLeftPrompt();
@@ -187,24 +175,11 @@ void TextInput::drawInputRect() {
   }
 }
 
-void TextInput::drawBuffer() {
-  if (!target.empty() && std::string(buffer).empty()) {
-    DrawText(target.c_str(), text_x, text_y, fontSize, MAROON);
-    drawLabelInTheMiddle(MAROON); // TODO! Change to some other color maybe?
-  } else {
-    drawTextInTheMiddle(buffer, MAROON);
-  }
-}
-
 void TextInput::drawCharactersLeftPrompt() {
   TextLabel charactersLeftLabel =
       TextLabel(charactersLeft.data(), finalPositionRect.y + finalPositionRect.height, {1, 0.1f, 1, 0.05f}, DARKGRAY);
   charactersLeftLabel.draw();
   Widget::draw();
-}
-
-std::string TextInput::getInput() const {
-  return std::string(buffer);
 }
 
 } // namespace gui

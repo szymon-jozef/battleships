@@ -15,7 +15,6 @@ public:
 
   void update() override;
   void draw() override;
-  std::string getInput() const;
 
 private:
   const static int MAX_INPUT_CHARS = 31;
@@ -45,12 +44,10 @@ private:
 
   // --- drawing ---
   void drawInputRect();
-  void drawBuffer();
   void drawCharactersLeftPrompt();
 
   // --- updating ---
   void updateCharactersLeftPrompt();
-  void updateTextPos();
 };
 
 } // namespace gui

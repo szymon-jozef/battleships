@@ -10,7 +10,7 @@ namespace gui {
 class Widget {
   Rectangle scaleRect;
 
-  void updateTextPos() {
+  void updateLabelPos() {
     fontSize = std::min(finalPositionRect.height, finalPositionRect.width) * fontScale;
 
     textWidth = MeasureText(label.c_str(), fontSize);
@@ -34,11 +34,11 @@ protected:
   /// @brief Rectangle that's used in calculating necessary space for the widget
   Rectangle finalPositionRect;
 
-  void drawLabelInTheMiddle(Color color) {
+  void drawLabel(Color color) {
     DrawText(label.c_str(), text_x, text_y, fontSize, color);
   }
 
-  void drawTextInTheMiddle(char *text, Color color) {
+  void drawText(char *text, Color color) {
     DrawText(text, text_x, text_y, fontSize, color);
   }
 
@@ -46,10 +46,10 @@ public:
   bool isFocusable = false;
 
   Widget(std::string label, float pos_y, Rectangle scaleRect, float fontScale, bool isFocusable = true)
-      : label(label)
-      , finalPositionRect({1, pos_y, 200, 200})
-      , scaleRect(scaleRect)
+      : scaleRect(scaleRect)
+      , label(label)
       , fontScale(fontScale)
+      , finalPositionRect({1, pos_y, 200, 200})
       , isFocusable(isFocusable) {
     updateEveryPos(true);
   }
@@ -71,7 +71,7 @@ public:
   void updateEveryPos(bool force = false) {
     if (force || IsWindowResized()) {
       updatePos();
-      updateTextPos();
+      updateLabelPos();
     }
   }
 
@@ -85,6 +85,10 @@ public:
 
   void setY(float y) {
     finalPositionRect.y = y;
+  }
+
+  void setLabel(std::string &newLabel) {
+    label = newLabel;
   }
 
   Rectangle getRect() {

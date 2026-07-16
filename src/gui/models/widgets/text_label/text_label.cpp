@@ -13,7 +13,7 @@ void TextLabel::update() {
 }
 
 void TextLabel::draw() {
-  drawLabelInTheMiddle(color);
+  drawLabel(color);
   Widget::draw();
 }
 
