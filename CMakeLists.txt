@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 4.1.2)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 project(battleships VERSION 0.0.1)
@@ -217,7 +216,7 @@ target_compile_definitions(battleships PUBLIC GAME_VERSION=\"${PROJECT_VERSION}\
 install(TARGETS battleships DESTINATION bin)
 
 if (WIN32)
-    install(DIRECTORY assets DESTINATION "C:/Program files/ battleships")
+    install(DIRECTORY assets DESTINATION "C:/Program files/battleships")
 else()
     install(DIRECTORY assets DESTINATION usr/share/battleships)
 endif()

@@ -1,4 +1,7 @@
 CompileFlags:
   Add: [-Wall -Wextra -Wunused-variable]
   Remove: [-fdeps-format=p1689r5, -fmodule-mapper=*, -fmodules-ts]
+  CompilationDatabase: ./build/
 
+Documentation:
+  CommentFormat: Doxygen
