@@ -63,9 +63,6 @@ bool TextInput::handleKeyboardInput() {
       isEdited = true;
     }
 
-    // NOTE: this should be okay, because we reserve space in the constructor, so no reallocation will happen
-    bufferString = std::string(buffer);
-
     normaliseText();
 
     return isEdited;
@@ -80,10 +77,10 @@ bool TextInput::handleClipboardInput() {
       return false;
     }
 
-    bufferString = std::string(clipboardText_c);
-
-    if (bufferString.empty()) {
-      return false;
+    strncpy(buffer, clipboardText_c, MAX_INPUT_CHARS);
+    if (strlen(clipboardText_c) > MAX_INPUT_CHARS) {
+      letterCount = MAX_INPUT_CHARS;
+      buffer[letterCount] = '\0';
     }
 
     normaliseText();
@@ -129,6 +126,7 @@ void TextInput::normaliseText() {
     break;
   }
   }
+  // TODO! Change this to something cheaper maybe
   strncpy(buffer, bufferString.c_str(), MAX_INPUT_CHARS);
   letterCount = bufferString.size();
   buffer[letterCount] = '\0';
@@ -136,7 +134,7 @@ void TextInput::normaliseText() {
 
 void TextInput::update() {
   Widget::update();
-  if (handleKeyboardInput() || handleClipboardInput()) {
+  if (handleClipboardInput() || handleKeyboardInput()) {
     target = std::string(buffer);
     normaliseText();
     letterCount = target.size();
