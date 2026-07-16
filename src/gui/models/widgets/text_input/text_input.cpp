@@ -28,16 +28,15 @@ bool TextInput::handleKeyboardInput() {
     bool isEdited = false;
     if (isMouseOnText) {
       SetMouseCursor(MOUSE_CURSOR_IBEAM);
-    } else {
-      SetMouseCursor(MOUSE_CURSOR_DEFAULT);
     }
-
     isEdited = getKeyboardInput() || removeCharFromBuffer() || clearBuffer();
 
     normaliseText();
 
     return isEdited;
   }
+  SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+
   return false;
 }
 
