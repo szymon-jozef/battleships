@@ -202,8 +202,8 @@ void TextInput::drawPrompt() {
 }
 
 void TextInput::drawCharactersLeftPrompt() {
-  TextLabel charactersLeftLabel = TextLabel(
-      charactersLeft.data(), finalPositionRect.y + finalPositionRect.height * 2, {2, 0.1f, 1, 0.4f}, DARKGRAY);
+  TextLabel charactersLeftLabel =
+      TextLabel(charactersLeft.data(), finalPositionRect.y + finalPositionRect.height, {1, 0.1f, 1, 0.05f}, DARKGRAY);
   charactersLeftLabel.draw();
   Widget::draw();
 }
