@@ -21,7 +21,11 @@ private:
   const static int MAX_INPUT_CHARS = 31;
   int letterCount = 0;
 
+  int promptWidth = 0;
+  float text_x = 0, text_y = 0;
+
   char buffer[MAX_INPUT_CHARS + 1] = "";
+  std::string bufferString;
 
   std::string prompt, &target;
   std::string_view charactersLeft;
@@ -31,9 +35,16 @@ private:
   bool handleKeyboardInput();
   bool handleClipboardInput();
 
+  /// @brief Remove bad characters from `bufferString` depending on `inputType`, modifying it in-place.
+  /// Then save it to the `buffer`
+  void normaliseText();
+
   void drawInputRect();
   void drawPrompt();
   void drawCharactersLeftPrompt();
+
+  void updateCharactersLeftPrompt();
+  void updatePromptPos();
 
   InputType inputType;
 };

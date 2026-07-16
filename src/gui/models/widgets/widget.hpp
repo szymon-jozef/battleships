@@ -55,9 +55,10 @@ public:
   }
   virtual ~Widget() = default;
 
+  /// @brief Draws focus
+  /// NOTE: should be called at the end of each draw function, so it's not covered
   virtual void draw() {
     // focused border
-    // NOTE: should be called at the end of each draw function, so it's not covered
     if (isFocusable && isFocused) {
       DrawRectangleLines(scaleRect.x, scaleRect.y, scaleRect.width, scaleRect.height, GRAY);
     }

@@ -1,6 +1,7 @@
 #include "text_input.hpp"
 #include "../text_label/text_label.hpp"
 #include "../widget.hpp"
+#include <raylib.h>
 #include <spdlog/spdlog.h>
 
 namespace battleship {
@@ -10,6 +11,7 @@ TextInput::TextInput(std::string prompt, float pos_y, Rectangle scaleRect, std::
     : Widget(prompt, pos_y, scaleRect, 0.8f)
     , target(target)
     , inputType(inputType) {
+  bufferString.reserve(MAX_INPUT_CHARS);
   if (target.size() < MAX_INPUT_CHARS) {
     std::copy(target.begin(), target.end(), buffer);
     letterCount = target.size();
@@ -34,7 +36,7 @@ bool TextInput::handleKeyboardInput() {
     int key = GetCharPressed();
 
     while (key > 0) {
-      if ((key >= 32) && (key <= 125) && (letterCount < MAX_INPUT_CHARS)) {
+      if (letterCount < MAX_INPUT_CHARS) {
         buffer[letterCount] = (char)key;
         buffer[letterCount + 1] = '\0';
         letterCount++;
@@ -61,6 +63,11 @@ bool TextInput::handleKeyboardInput() {
       isEdited = true;
     }
 
+    // NOTE: this should be okay, because we reserve space in the constructor, so no reallocation will happen
+    bufferString = std::string(buffer);
+
+    normaliseText();
+
     return isEdited;
   }
   return false;
@@ -73,48 +80,96 @@ bool TextInput::handleClipboardInput() {
       return false;
     }
 
-    std::string clipboardText(clipboardText_c);
+    bufferString = std::string(clipboardText_c);
 
-    if (clipboardText.empty()) {
+    if (bufferString.empty()) {
       return false;
     }
 
-    clipboardText.erase(std::remove(clipboardText.begin(), clipboardText.end(), '\n'), clipboardText.end());
-    clipboardText.erase(std::remove_if(clipboardText.begin(),
-                                       clipboardText.end(),
-                                       [](auto const &c) -> bool { return !std::isalnum(c); }),
-                        clipboardText.end());
-
-    if (clipboardText.size() >= MAX_INPUT_CHARS) {
-      clipboardText.resize(MAX_INPUT_CHARS);
-    }
-
-    std::copy(clipboardText.begin(), clipboardText.end(), buffer);
-    letterCount = clipboardText.size();
-    buffer[letterCount] = '\0';
+    normaliseText();
     return true;
   }
   return false;
+}
+
+void TextInput::normaliseText() {
+  // remove end lines
+  bufferString = buffer;
+  bufferString.erase(std::remove(bufferString.begin(), bufferString.end(), '\n'), bufferString.end());
+
+  // we delete different things depending on input type
+  switch (inputType) {
+  case InputType::NAME: {
+    // remove non-alphanumeric characters
+    bufferString.erase(std::remove_if(bufferString.begin(),
+                                      bufferString.end(),
+                                      [](auto const &c) -> bool { return !std::isalnum(c); }),
+                       bufferString.end());
+
+    // trim if bufferString is to large
+    if (bufferString.size() >= MAX_INPUT_CHARS) {
+      bufferString.resize(MAX_INPUT_CHARS);
+    }
+    break;
+  }
+  case InputType::IP: {
+    // we remove everything that's not number/dot
+    bufferString.erase(std::remove_if(bufferString.begin(),
+                                      bufferString.end(),
+                                      [](auto const &c) -> bool { return (c < 48 || c > 57) && c != 46; }),
+                       bufferString.end());
+
+    // xxx.xxx.xxx.xxx = 3 * 4 + 3 * 1 = 12 + 3 + 15
+    if (bufferString.size() >= 15) {
+      bufferString.resize(15);
+    }
+    break;
+  }
+  default: {
+    break;
+  }
+  }
+  strncpy(buffer, bufferString.c_str(), MAX_INPUT_CHARS);
+  letterCount = bufferString.size();
+  buffer[letterCount] = '\0';
 }
 
 void TextInput::update() {
   Widget::update();
   if (handleKeyboardInput() || handleClipboardInput()) {
     target = std::string(buffer);
+    normaliseText();
     letterCount = target.size();
     buffer[letterCount] = '\0';
   }
 
-  // TODO! Move this to widget
-  int textWidth = MeasureText(prompt.c_str(), fontSize);
-  float text_x = (finalPositionRect.x + finalPositionRect.width / 2.0f) - (textWidth / 2.0f);
-  float text_y = (finalPositionRect.y + finalPositionRect.height / 2.0f) - (fontSize / 2.0f);
+  if (IsWindowResized()) {
+    updatePromptPos();
+  }
+
+  if (inputType == InputType::NAME) {
+    updateCharactersLeftPrompt();
+  }
+}
+
+void TextInput::updatePromptPos() {
+  textWidth = MeasureText(prompt.c_str(), fontSize);
+  text_x = (finalPositionRect.x + finalPositionRect.width / 2.0f) - (textWidth / 2.0f);
+  text_y = (finalPositionRect.y + finalPositionRect.height / 2.0f) - (fontSize / 2.0f);
+}
+
+void TextInput::updateCharactersLeftPrompt() {
+  charactersLeft = TextFormat("%i/%i", letterCount, MAX_INPUT_CHARS);
 }
 
 void TextInput::draw() {
   drawInputRect();
   drawPrompt();
-  drawCharactersLeftPrompt();
+
+  if (inputType == InputType::NAME) {
+    drawCharactersLeftPrompt();
+  }
+  Widget::draw();
 }
 
 void TextInput::drawInputRect() {
@@ -138,8 +193,6 @@ void TextInput::drawPrompt() {
 }
 
 void TextInput::drawCharactersLeftPrompt() {
-  charactersLeft = TextFormat("%i/%i", letterCount, MAX_INPUT_CHARS);
-
   TextLabel charactersLeftLabel = TextLabel(
       charactersLeft.data(), finalPositionRect.y + finalPositionRect.height * 2, {2, 0.1f, 1, 0.4f}, DARKGRAY);
   charactersLeftLabel.draw();
