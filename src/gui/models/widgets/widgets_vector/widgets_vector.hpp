@@ -31,7 +31,7 @@ public:
   void push_back_ipInput(std::string &target);
 
   void push_back_label(std::string text, Color color);
-  void push_back_textInput_with_label(std::string label, std::string prompt, Color color, std::string &target);
+  void push_back_textInput_with_label(std::string label, Color color, std::string &target);
 
   void update_all();
   void draw_all();

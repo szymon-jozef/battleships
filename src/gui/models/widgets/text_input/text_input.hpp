@@ -24,9 +24,8 @@ private:
   float text_x = 0, text_y = 0;
 
   char buffer[MAX_INPUT_CHARS + 1] = "";
-  std::string bufferString;
 
-  std::string prompt, &target;
+  std::string &target;
   std::string_view charactersLeft;
 
   bool isMouseOnText = false;
@@ -46,12 +45,12 @@ private:
 
   // --- drawing ---
   void drawInputRect();
-  void drawPrompt();
+  void drawBuffer();
   void drawCharactersLeftPrompt();
 
   // --- updating ---
   void updateCharactersLeftPrompt();
-  void updatePromptPos();
+  void updateTextPos();
 };
 
 } // namespace gui

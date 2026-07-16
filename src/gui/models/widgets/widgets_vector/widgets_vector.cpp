@@ -5,8 +5,8 @@ namespace gui {
 
 WidgetsVector::WidgetsVector(GameContext &gameContext, float start_y, float margin, float width, float height)
     : gameContext(gameContext)
-    , start_y(start_y)
     , margin(margin)
+    , start_y(start_y)
     , width(width)
     , height(height)
     , scale({0.5f, 1.0f, width, height}) {}
@@ -59,16 +59,13 @@ void WidgetsVector::push_back_label(std::string text, Color color) {
   widgets.push_back(std::move(label));
 }
 
-void WidgetsVector::push_back_textInput_with_label(std::string label,
-                                                   std::string prompt,
-                                                   Color color,
-                                                   std::string &target) {
+void WidgetsVector::push_back_textInput_with_label(std::string label, Color color, std::string &target) {
   std::unique_ptr<TextLabel> labelWidget = std::make_unique<TextLabel>(label, getCurrentDistance(), scale, color);
 
   widgets.push_back(std::move(labelWidget));
 
   std::unique_ptr<TextInput> input =
-      std::make_unique<TextInput>(getCurrentDistance() - height, scale, target, TextInput::InputType::NAME);
+      std::make_unique<TextInput>(getCurrentDistance() - height * 2, scale, target, TextInput::InputType::NAME);
 
   widgets.push_back(std::move(input));
 }

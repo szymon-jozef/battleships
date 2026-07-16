@@ -11,7 +11,7 @@ TextInput::TextInput(float pos_y, Rectangle scaleRect, std::string &target, Inpu
     : Widget(target, pos_y, scaleRect, 0.8f)
     , target(target)
     , inputType(inputType) {
-  bufferString.reserve(MAX_INPUT_CHARS);
+  target.reserve(MAX_INPUT_CHARS);
   if (target.size() < MAX_INPUT_CHARS) {
     std::copy(target.begin(), target.end(), buffer);
     letterCount = target.size();
@@ -102,34 +102,31 @@ bool TextInput::handleClipboardInput() {
 
 void TextInput::normaliseText() {
   // remove end lines
-  bufferString = buffer;
-  bufferString.erase(std::remove(bufferString.begin(), bufferString.end(), '\n'), bufferString.end());
+  target = buffer;
+  target.erase(std::remove(target.begin(), target.end(), '\n'), target.end());
 
   // we delete different things depending on input type
   switch (inputType) {
   case InputType::NAME: {
     // remove non-alphanumeric characters
-    bufferString.erase(std::remove_if(bufferString.begin(),
-                                      bufferString.end(),
-                                      [](auto const &c) -> bool { return !std::isalnum(c); }),
-                       bufferString.end());
+    target.erase(std::remove_if(target.begin(), target.end(), [](auto const &c) -> bool { return !std::isalnum(c); }),
+                 target.end());
 
-    // trim if bufferString is to large
-    if (bufferString.size() >= MAX_INPUT_CHARS) {
-      bufferString.resize(MAX_INPUT_CHARS);
+    // trim if target is to large
+    if (target.size() >= MAX_INPUT_CHARS) {
+      target.resize(MAX_INPUT_CHARS);
     }
     break;
   }
   case InputType::IP: {
     // we remove everything that's not number/dot
-    bufferString.erase(std::remove_if(bufferString.begin(),
-                                      bufferString.end(),
-                                      [](auto const &c) -> bool { return (c < 48 || c > 57) && c != 46; }),
-                       bufferString.end());
+    target.erase(std::remove_if(
+                     target.begin(), target.end(), [](auto const &c) -> bool { return (c < 48 || c > 57) && c != 46; }),
+                 target.end());
 
     // xxx.xxx.xxx.xxx = 3 * 4 + 3 * 1 = 12 + 3 + 15
-    if (bufferString.size() >= 15) {
-      bufferString.resize(15);
+    if (target.size() >= 15) {
+      target.resize(15);
     }
     break;
   }
@@ -138,8 +135,8 @@ void TextInput::normaliseText() {
   }
   }
   // TODO! Change this to something cheaper maybe
-  strncpy(buffer, bufferString.c_str(), MAX_INPUT_CHARS);
-  letterCount = bufferString.size();
+  strncpy(buffer, target.c_str(), MAX_INPUT_CHARS);
+  letterCount = target.size();
   buffer[letterCount] = '\0';
 }
 
@@ -148,12 +145,10 @@ void TextInput::update() {
   if (handleClipboardInput() || handleKeyboardInput()) {
     target = std::string(buffer);
     normaliseText();
-    letterCount = target.size();
-    buffer[letterCount] = '\0';
   }
 
   if (IsWindowResized()) {
-    updatePromptPos();
+    updateTextPos();
   }
 
   if (inputType == InputType::NAME) {
@@ -161,8 +156,8 @@ void TextInput::update() {
   }
 }
 
-void TextInput::updatePromptPos() {
-  textWidth = MeasureText(prompt.c_str(), fontSize);
+void TextInput::updateTextPos() {
+  textWidth = MeasureText(target.c_str(), fontSize);
   text_x = (finalPositionRect.x + finalPositionRect.width / 2.0f) - (textWidth / 2.0f);
   text_y = (finalPositionRect.y + finalPositionRect.height / 2.0f) - (fontSize / 2.0f);
 }
@@ -173,7 +168,7 @@ void TextInput::updateCharactersLeftPrompt() {
 
 void TextInput::draw() {
   drawInputRect();
-  drawPrompt();
+  drawBuffer();
 
   if (inputType == InputType::NAME) {
     drawCharactersLeftPrompt();
@@ -192,9 +187,9 @@ void TextInput::drawInputRect() {
   }
 }
 
-void TextInput::drawPrompt() {
-  if (!prompt.empty() && std::string(buffer).empty()) {
-    DrawText(prompt.c_str(), text_x, text_y, fontSize, MAROON);
+void TextInput::drawBuffer() {
+  if (!target.empty() && std::string(buffer).empty()) {
+    DrawText(target.c_str(), text_x, text_y, fontSize, MAROON);
     drawLabelInTheMiddle(MAROON); // TODO! Change to some other color maybe?
   } else {
     drawTextInTheMiddle(buffer, MAROON);
