@@ -25,7 +25,6 @@ bool TextInput::handleKeyboardInput() {
   isMouseOnText = CheckCollisionPointRec(GetMousePosition(), finalPositionRect);
 
   if (isMouseOnText || isFocused) {
-
     bool isEdited = false;
     if (isMouseOnText) {
       SetMouseCursor(MOUSE_CURSOR_IBEAM);
@@ -33,39 +32,51 @@ bool TextInput::handleKeyboardInput() {
       SetMouseCursor(MOUSE_CURSOR_DEFAULT);
     }
 
-    int key = GetCharPressed();
+    isEdited = getKeyboardInput();
 
-    while (key > 0) {
-      if (letterCount < MAX_INPUT_CHARS) {
-        buffer[letterCount] = (char)key;
-        buffer[letterCount + 1] = '\0';
-        letterCount++;
-      }
-      key = GetCharPressed();
-      isEdited = true;
-    }
+    isEdited = removeCharFromBuffer();
 
-    // delete one char
-    if (IsKeyPressed(KEY_BACKSPACE)) {
-      letterCount--;
-      if (letterCount < 0) {
-        letterCount = 0;
-      }
-      buffer[letterCount] = '\0';
-      isEdited = true;
-    }
-
-    // delete everything
-    if ((IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_U)) ||
-        (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_BACKSPACE))) {
-      letterCount = 0;
-      buffer[letterCount] = '\0';
-      isEdited = true;
-    }
+    isEdited = clearBuffer();
 
     normaliseText();
 
     return isEdited;
+  }
+  return false;
+}
+
+bool TextInput::getKeyboardInput() {
+  int key = GetCharPressed();
+  while (key > 0) {
+    if (letterCount < MAX_INPUT_CHARS) {
+      buffer[letterCount] = (char)key;
+      buffer[letterCount + 1] = '\0';
+      letterCount++;
+    }
+    key = GetCharPressed();
+    return true;
+  }
+  return false;
+}
+
+bool TextInput::removeCharFromBuffer() {
+  if (IsKeyPressed(KEY_BACKSPACE)) {
+    letterCount--;
+    if (letterCount < 0) {
+      letterCount = 0;
+    }
+    buffer[letterCount] = '\0';
+    return true;
+  }
+  return false;
+}
+
+bool TextInput::clearBuffer() {
+  if ((IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_U)) ||
+      (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_BACKSPACE))) {
+    letterCount = 0;
+    buffer[letterCount] = '\0';
+    return true;
   }
   return false;
 }

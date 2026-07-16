@@ -20,7 +20,6 @@ public:
 private:
   const static int MAX_INPUT_CHARS = 31;
   int letterCount = 0;
-
   int promptWidth = 0;
   float text_x = 0, text_y = 0;
 
@@ -31,22 +30,28 @@ private:
   std::string_view charactersLeft;
 
   bool isMouseOnText = false;
+  InputType inputType;
 
+  // --- handlers ---
   bool handleKeyboardInput();
   bool handleClipboardInput();
 
+  // --- text utils ---
   /// @brief Remove bad characters from `bufferString` depending on `inputType`, modifying it in-place.
   /// Then save it to the `buffer`
   void normaliseText();
+  bool clearBuffer();
+  bool removeCharFromBuffer();
+  bool getKeyboardInput();
 
+  // --- drawing ---
   void drawInputRect();
   void drawPrompt();
   void drawCharactersLeftPrompt();
 
+  // --- updating ---
   void updateCharactersLeftPrompt();
   void updatePromptPos();
-
-  InputType inputType;
 };
 
 } // namespace gui
