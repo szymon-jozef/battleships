@@ -204,6 +204,14 @@ if(WIN32)
     target_compile_definitions(gui PRIVATE WIN32_LEAN_AND_MEAN NOGDI NOUSER NOMINMAX)
 endif()
 
+# show warnings if developing 
+if (isDev)
+target_compile_options(battleships PRIVATE -Wall -Wextra -Wunreachable-code)
+target_compile_options(gui PRIVATE -Wall -Wextra -Wunreachable-code)
+target_compile_options(networking PRIVATE -Wall -Wextra -Wunreachable-code)
+target_compile_options(game_logic PRIVATE -Wall -Wextra -Wunreachable-code)
+target_compile_options(game_manager PRIVATE -Wall -Wextra -Wunreachable-code)
+endif()
 
 target_compile_definitions(battleships PUBLIC GAME_VERSION=\"${PROJECT_VERSION}\")
 install(TARGETS battleships DESTINATION bin)
