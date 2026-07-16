@@ -7,8 +7,8 @@
 namespace battleship {
 namespace gui {
 
-TextInput::TextInput(std::string prompt, float pos_y, Rectangle scaleRect, std::string &target, InputType inputType)
-    : Widget(prompt, pos_y, scaleRect, 0.8f)
+TextInput::TextInput(float pos_y, Rectangle scaleRect, std::string &target, InputType inputType)
+    : Widget(target, pos_y, scaleRect, 0.8f)
     , target(target)
     , inputType(inputType) {
   bufferString.reserve(MAX_INPUT_CHARS);

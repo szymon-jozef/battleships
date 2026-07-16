@@ -42,15 +42,15 @@ void WidgetsVector::push_back_button(std::string label, std::function<void()> on
   widgets.push_back(std::move(btn));
 }
 
-void WidgetsVector::push_back_nameInput(std::string prompt, std::string &target) {
+void WidgetsVector::push_back_nameInput(std::string &target) {
   std::unique_ptr<TextInput> input =
-      std::make_unique<TextInput>(prompt, getCurrentDistance(), scale, target, TextInput::InputType::NAME);
+      std::make_unique<TextInput>(getCurrentDistance(), scale, target, TextInput::InputType::NAME);
   widgets.push_back(std::move(input));
 }
 
-void WidgetsVector::push_back_ipInput(std::string prompt, std::string &target) {
+void WidgetsVector::push_back_ipInput(std::string &target) {
   std::unique_ptr<TextInput> input =
-      std::make_unique<TextInput>(prompt, getCurrentDistance(), scale, target, TextInput::InputType::IP);
+      std::make_unique<TextInput>(getCurrentDistance(), scale, target, TextInput::InputType::IP);
   widgets.push_back(std::move(input));
 }
 
@@ -68,7 +68,7 @@ void WidgetsVector::push_back_textInput_with_label(std::string label,
   widgets.push_back(std::move(labelWidget));
 
   std::unique_ptr<TextInput> input =
-      std::make_unique<TextInput>(prompt, getCurrentDistance() - height, scale, target, TextInput::InputType::NAME);
+      std::make_unique<TextInput>(getCurrentDistance() - height, scale, target, TextInput::InputType::NAME);
 
   widgets.push_back(std::move(input));
 }

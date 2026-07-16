@@ -11,7 +11,7 @@ class TextInput : public Widget {
   // 31 chars, because 32 is the max we can send through the network
 public:
   enum class InputType { NAME, IP };
-  TextInput(std::string prompt, float pos_y, Rectangle scaleRect, std::string &target, InputType inputType);
+  TextInput(float pos_y, Rectangle scaleRect, std::string &target, InputType inputType);
 
   void update() override;
   void draw() override;
