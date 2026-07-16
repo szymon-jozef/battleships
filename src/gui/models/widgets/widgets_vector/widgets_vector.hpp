@@ -20,14 +20,16 @@ class WidgetsVector {
   const Rectangle scale;
 
   float getCurrentDistance();
-  void handleFocus();
+  void handleFocusChange();
 
 public:
   // TODO! I don't think I want to set this every time in the constructor
   WidgetsVector(GameContext &gameContext, float start_y, float margin, float width, float height);
 
   void push_back_button(std::string label, std::function<void()> onClick);
-  void push_back_textInput(std::string prompt, std::string &target);
+  void push_back_nameInput(std::string prompt, std::string &target);
+  void push_back_ipInput(std::string prompt, std::string &target);
+
   void push_back_label(std::string text, Color color);
   void push_back_textInput_with_label(std::string label, std::string prompt, Color color, std::string &target);
 

@@ -6,6 +6,19 @@
 namespace battleship {
 namespace gui {
 
+TextInput::TextInput(std::string prompt, float pos_y, Rectangle scaleRect, std::string &target, InputType inputType)
+    : Widget(prompt, pos_y, scaleRect, 0.8f)
+    , target(target)
+    , inputType(inputType) {
+  if (target.size() < MAX_INPUT_CHARS) {
+    std::copy(target.begin(), target.end(), buffer);
+    letterCount = target.size();
+    buffer[letterCount] = '\0';
+  } else {
+    spdlog::warn("[GUI] Loaded text was to long");
+  }
+}
+
 bool TextInput::handleKeyboardInput() {
   isMouseOnText = CheckCollisionPointRec(GetMousePosition(), finalPositionRect);
 
@@ -84,18 +97,6 @@ bool TextInput::handleClipboardInput() {
   return false;
 }
 
-TextInput::TextInput(std::string prompt, float pos_y, Rectangle scaleRect, std::string &target)
-    : Widget(prompt, pos_y, scaleRect, 0.8f)
-    , target(target) {
-  if (target.size() < MAX_INPUT_CHARS) {
-    std::copy(target.begin(), target.end(), buffer);
-    letterCount = target.size();
-    buffer[letterCount] = '\0';
-  } else {
-    spdlog::warn("[GUI] Loaded text was to long");
-  }
-}
-
 void TextInput::update() {
   Widget::update();
   if (handleKeyboardInput() || handleClipboardInput()) {
@@ -111,7 +112,12 @@ void TextInput::update() {
 }
 
 void TextInput::draw() {
+  drawInputRect();
+  drawPrompt();
+  drawCharactersLeftPrompt();
+}
 
+void TextInput::drawInputRect() {
   DrawRectangleRec(finalPositionRect, LIGHTGRAY);
   if (isMouseOnText) {
     DrawRectangleLines(
@@ -120,18 +126,22 @@ void TextInput::draw() {
     DrawRectangleLines(
         finalPositionRect.x, finalPositionRect.y, finalPositionRect.width, finalPositionRect.height, DARKGRAY);
   }
+}
 
-  if (prompt != "" && std::string(buffer).empty()) {
+void TextInput::drawPrompt() {
+  if (!prompt.empty() && std::string(buffer).empty()) {
     DrawText(prompt.c_str(), text_x, text_y, fontSize, MAROON);
     drawLabelInTheMiddle(MAROON); // TODO! Change to some other color maybe?
   } else {
     drawTextInTheMiddle(buffer, MAROON);
   }
+}
 
-  std::string charactersLeft = std::string(TextFormat("%i/%i", letterCount, MAX_INPUT_CHARS));
+void TextInput::drawCharactersLeftPrompt() {
+  charactersLeft = TextFormat("%i/%i", letterCount, MAX_INPUT_CHARS);
 
-  TextLabel charactersLeftLabel =
-      TextLabel(charactersLeft, finalPositionRect.y + finalPositionRect.height * 2, {2, 0.1f, 1, 0.4f}, DARKGRAY);
+  TextLabel charactersLeftLabel = TextLabel(
+      charactersLeft.data(), finalPositionRect.y + finalPositionRect.height * 2, {2, 0.1f, 1, 0.4f}, DARKGRAY);
   charactersLeftLabel.draw();
   Widget::draw();
 }

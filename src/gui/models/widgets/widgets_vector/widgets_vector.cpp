@@ -3,14 +3,19 @@
 namespace battleship {
 namespace gui {
 
-/// @brief A "layout manager" if you can call it that. It has a vector of widgets. It places one under the other in the
-/// order they were added
+WidgetsVector::WidgetsVector(GameContext &gameContext, float start_y, float margin, float width, float height)
+    : gameContext(gameContext)
+    , start_y(start_y)
+    , margin(margin)
+    , width(width)
+    , height(height)
+    , scale({0.5f, 1.0f, width, height}) {}
 
 float WidgetsVector::getCurrentDistance() {
   return start_y + (GetScreenHeight() * margin + height) * widgets.size();
 }
 
-void WidgetsVector::handleFocus() {
+void WidgetsVector::handleFocusChange() {
   if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_TAB)) {
     do {
       currentFocus--;
@@ -30,14 +35,6 @@ void WidgetsVector::handleFocus() {
   widgets[currentFocus]->focus();
 }
 
-WidgetsVector::WidgetsVector(GameContext &gameContext, float start_y, float margin, float width, float height)
-    : gameContext(gameContext)
-    , start_y(start_y)
-    , margin(margin)
-    , width(width)
-    , height(height)
-    , scale({0.5f, 1.0f, width, height}) {}
-
 void WidgetsVector::push_back_button(std::string label, std::function<void()> onClick) {
   std::unique_ptr<Button> btn = std::make_unique<Button>(label, getCurrentDistance(), scale);
 
@@ -45,8 +42,15 @@ void WidgetsVector::push_back_button(std::string label, std::function<void()> on
   widgets.push_back(std::move(btn));
 }
 
-void WidgetsVector::push_back_textInput(std::string prompt, std::string &target) {
-  std::unique_ptr<TextInput> input = std::make_unique<TextInput>(prompt, getCurrentDistance(), scale, target);
+void WidgetsVector::push_back_nameInput(std::string prompt, std::string &target) {
+  std::unique_ptr<TextInput> input =
+      std::make_unique<TextInput>(prompt, getCurrentDistance(), scale, target, TextInput::InputType::NAME);
+  widgets.push_back(std::move(input));
+}
+
+void WidgetsVector::push_back_ipInput(std::string prompt, std::string &target) {
+  std::unique_ptr<TextInput> input =
+      std::make_unique<TextInput>(prompt, getCurrentDistance(), scale, target, TextInput::InputType::IP);
   widgets.push_back(std::move(input));
 }
 
@@ -63,7 +67,8 @@ void WidgetsVector::push_back_textInput_with_label(std::string label,
 
   widgets.push_back(std::move(labelWidget));
 
-  std::unique_ptr<TextInput> input = std::make_unique<TextInput>(prompt, getCurrentDistance() - height, scale, target);
+  std::unique_ptr<TextInput> input =
+      std::make_unique<TextInput>(prompt, getCurrentDistance() - height, scale, target, TextInput::InputType::NAME);
 
   widgets.push_back(std::move(input));
 }
@@ -81,7 +86,7 @@ void WidgetsVector::update_all() {
 
     absolute_y += widget->getRect().height + absolute_margin;
   }
-  handleFocus();
+  handleFocusChange();
 }
 
 void WidgetsVector::draw_all() {
