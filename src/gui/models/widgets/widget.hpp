@@ -19,7 +19,7 @@ class Widget {
   }
 
   void updatePos() {
-    finalPositionRect.width = GetScreenWidth() * scaleRect.width;
+    finalPositionRect.width = std::max(GetScreenWidth() * scaleRect.width, textWidth);
     finalPositionRect.height = GetScreenHeight() * scaleRect.height;
 
     finalPositionRect.x = GetScreenWidth() * scaleRect.x - finalPositionRect.width * scaleRect.x;
