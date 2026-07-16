@@ -1,5 +1,6 @@
 #include "../widget.hpp"
 #include <functional>
+#include <raylib.h>
 
 namespace battleship {
 namespace gui {

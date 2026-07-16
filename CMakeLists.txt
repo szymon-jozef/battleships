@@ -1,20 +1,14 @@
 cmake_minimum_required(VERSION 4.1.2)
-project(battleships VERSION 0.0.1)
-
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+
+project(battleships VERSION 0.0.1)
 
 option(isDev "build tests" false)
 
-if (PROJECT_IS_TOP_LEVEL AND UNIX)
-    # Create symlink to compile_commands.json for IDE to pick it up
-    execute_process(
-        COMMAND ${CMAKE_COMMAND} -E create_symlink
-            ${CMAKE_BINARY_DIR}/compile_commands.json
-            ${CMAKE_CURRENT_SOURCE_DIR}/compile_commands.json
-    )
-endif()
 
 find_package(Boost REQUIRED COMPONENTS program_options)
 find_package(spdlog  REQUIRED)
@@ -26,7 +20,6 @@ if (${isDev})
 find_package(Catch2 3 REQUIRED)
 endif()
 
-set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 # === Entry point ===
 add_executable(battleships)
@@ -203,6 +196,20 @@ catch_discover_tests(LogicTests)
 catch_discover_tests(IntegrationTests)
 endif()
 
+if(WIN32)
+    target_compile_definitions(battleships PRIVATE WIN32_LEAN_AND_MEAN NOGDI NOUSER NOMINMAX)
+endif()
+
+if(WIN32)
+    target_compile_definitions(gui PRIVATE WIN32_LEAN_AND_MEAN NOGDI NOUSER NOMINMAX)
+endif()
+
+
 target_compile_definitions(battleships PUBLIC GAME_VERSION=\"${PROJECT_VERSION}\")
 install(TARGETS battleships DESTINATION bin)
-install(DIRECTORY assets DESTINATION usr/share/battleships)
+
+if (WIN32)
+    install(DIRECTORY assets DESTINATION "C:/Program files/ battleships")
+else()
+    install(DIRECTORY assets DESTINATION usr/share/battleships)
+endif()

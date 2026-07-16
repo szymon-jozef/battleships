@@ -13,12 +13,13 @@ class assetsManager {
                                                       std::filesystem::path("./assets")};
   std::filesystem::path pathPrefix;
 
+  // we first change to string then to c_str, because windows is bad
   void loadPaths() {
-    bg1 = LoadTexture(std::filesystem::path(pathPrefix / std::filesystem::path("gfx/bg1.jpg")).c_str());
-    bg2 = LoadTexture(std::filesystem::path(pathPrefix / std::filesystem::path("gfx/bg2.jpg")).c_str());
-    bg3 = LoadTexture(std::filesystem::path(pathPrefix / std::filesystem::path("gfx/bg3.jpg")).c_str());
+    bg1 = LoadTexture(std::filesystem::path(pathPrefix / std::filesystem::path("gfx/bg1.jpg")).string().c_str());
+    bg2 = LoadTexture(std::filesystem::path(pathPrefix / std::filesystem::path("gfx/bg2.jpg")).string().c_str());
+    bg3 = LoadTexture(std::filesystem::path(pathPrefix / std::filesystem::path("gfx/bg3.jpg")).string().c_str());
     playBackground =
-        LoadTexture(std::filesystem::path(pathPrefix / std::filesystem::path("gfx/play_background.jpg")).c_str());
+        LoadTexture(std::filesystem::path(pathPrefix / std::filesystem::path("gfx/play_background.jpg")).string().c_str());
   }
 
 public:
@@ -40,7 +41,7 @@ public:
     for (const auto &path : expectedPaths) {
       if (std::filesystem::is_directory(path)) {
         pathPrefix = std::filesystem::absolute(path);
-        spdlog::info("[GUI] found assets path at: {}", pathPrefix.c_str());
+        spdlog::info("[GUI] found assets path at: {}", pathPrefix.string());
         break;
       }
     }

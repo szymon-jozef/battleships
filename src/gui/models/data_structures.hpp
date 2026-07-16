@@ -64,7 +64,7 @@ public:
     std::filesystem::create_directories(configPath);
 
     configFilePath = configPath / std::filesystem::path("config.cfg");
-    spdlog::info("[GUI] settings path is: {}", configFilePath.c_str());
+    spdlog::info("[GUI] settings path is: {}", configFilePath.string());
 
     if (!std::filesystem::is_regular_file(configFilePath)) {
       std::ofstream file(configFilePath);
@@ -104,7 +104,7 @@ public:
     size_t delimeterPos;
 
     while (std::getline(file, line)) {
-      line_view = {line};
+      line_view = std::string_view(line);
       delimeterPos = line_view.find('=');
       if (delimeterPos == 0 || delimeterPos == std::string::npos) {
         continue;
