@@ -15,6 +15,7 @@ find_package(spdlog  REQUIRED)
 find_package(fmt  REQUIRED)
 find_package(Threads REQUIRED)
 find_package(raylib REQUIRED)
+find_package(glfw3 CONFIG REQUIRED)
 
 if (${isDev})
 find_package(Catch2 3 REQUIRED)
@@ -161,6 +162,7 @@ endif()
 target_link_libraries(gui
     PRIVATE
         raylib
+        glfw
         networking
         game_manager
         game_logic
