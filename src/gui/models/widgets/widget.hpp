@@ -60,7 +60,8 @@ public:
   virtual void draw() {
     // focused border
     if (isFocusable && isFocused) {
-      DrawRectangleLines(scaleRect.x, scaleRect.y, scaleRect.width, scaleRect.height, GRAY);
+      DrawRectangleLines(
+          finalPositionRect.x, finalPositionRect.y, finalPositionRect.width, finalPositionRect.height, DARKGRAY);
     }
   }
 
