@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.1.2)
+cmake_minimum_required(VERSION 3.28.3)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
@@ -7,6 +7,7 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 project(battleships VERSION 0.0.2)
 
 option(isDev "build tests" false)
+option(isRelease "install everything to ." false)
 
 
 find_package(Boost REQUIRED COMPONENTS program_options)
@@ -213,10 +214,30 @@ target_compile_options(game_manager PRIVATE -Wall -Wextra -Wunreachable-code)
 endif()
 
 target_compile_definitions(battleships PUBLIC GAME_VERSION=\"${PROJECT_VERSION}\")
-install(TARGETS battleships DESTINATION bin)
+
+if (isRelease)
+
+    install(TARGETS battleships DESTINATION .)
+    install(DIRECTORY assets DESTINATION .)
+
+else()
+    install(TARGETS battleships DESTINATION bin)
+
+    if (WIN32)
+        install(DIRECTORY assets DESTINATION "C:/Program files/battleships")
+    else()
+        install(DIRECTORY assets DESTINATION usr/share/battleships)
+    endif()
+
+endif()
+
+set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
+set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
 
 if (WIN32)
-    install(DIRECTORY assets DESTINATION "C:/Program files/battleships")
+    set(CPACK_GENERATOR "ZIP")
 else()
-    install(DIRECTORY assets DESTINATION usr/share/battleships)
+    set(CPACK_GENERATOR "TGZ")
 endif()
+
+include(CPack)

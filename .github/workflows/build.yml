@@ -1,0 +1,50 @@
+name: Build and Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install Ninja (Linux)
+      if: runner.os == 'Linux'
+      run: sudo apt update && sudo apt install -y ninja-build cmake
+
+    - name: Install Ninja (Windows)
+      if: runner.os == 'Windows'
+      run: choco install ninja
+
+    - name: Configure CMake
+      run: >
+        cmake -B build -G Ninja 
+        -DCMAKE_TOOLCHAIN_FILE="${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake"
+        -DCMAKE_BUILD_TYPE=Release
+        -D"isRelease=True"
+
+    - name: Build
+      run: cmake --build build --config Release
+
+    - name: Package with CPack
+      working-directory: ./build
+      run: cpack -C Release
+
+    - name: Upload to Github Release
+      if: github.event_name == 'release'
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          build/*.zip
+          build/*.tar.gz
