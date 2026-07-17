@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
-project(battleships VERSION 0.0.1)
+project(battleships VERSION 0.0.2)
 
 option(isDev "build tests" false)
 
