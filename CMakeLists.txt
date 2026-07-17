@@ -21,6 +21,10 @@ if (${isDev})
 find_package(Catch2 3 REQUIRED)
 endif()
 
+if(MSVC)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+
 
 # === Entry point ===
 add_executable(battleships)
