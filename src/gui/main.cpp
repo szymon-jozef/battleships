@@ -10,6 +10,8 @@ namespace gui {
 
 class assetsManager {
   std::vector<std::filesystem::path> expectedPaths = {std::filesystem::path("/usr/share/battleship"),
+                                                      std::filesystem::path(GetApplicationDirectory()) /
+                                                          std::filesystem::path("./assets"),
                                                       std::filesystem::path("./assets")};
   std::filesystem::path pathPrefix;
 
@@ -18,8 +20,8 @@ class assetsManager {
     bg1 = LoadTexture(std::filesystem::path(pathPrefix / std::filesystem::path("gfx/bg1.jpg")).string().c_str());
     bg2 = LoadTexture(std::filesystem::path(pathPrefix / std::filesystem::path("gfx/bg2.jpg")).string().c_str());
     bg3 = LoadTexture(std::filesystem::path(pathPrefix / std::filesystem::path("gfx/bg3.jpg")).string().c_str());
-    playBackground =
-        LoadTexture(std::filesystem::path(pathPrefix / std::filesystem::path("gfx/play_background.jpg")).string().c_str());
+    playBackground = LoadTexture(
+        std::filesystem::path(pathPrefix / std::filesystem::path("gfx/play_background.jpg")).string().c_str());
   }
 
 public:
