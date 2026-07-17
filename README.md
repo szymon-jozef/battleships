@@ -12,6 +12,7 @@ On first release this readme will be updated.
 - [boost](https://www.boost.org/)
 - [spdlog](https://github.com/gabime/spdlog)
 - [raylib](https://www.raylib.com/)
+- [glfw3](https://www.glfw.org/)
 - [catch2 (for tests)](https://github.com/catchorg/Catch2)
 
 # Installation

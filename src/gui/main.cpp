@@ -71,6 +71,7 @@ int run() {
 
   SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
   InitWindow(screenWidth, screenHeight, "Battleships");
+  // MaximizeWindow();
   SetWindowMinSize(GetScreenWidth() * 0.3f, GetScreenHeight() * 0.3f);
   // SetTargetFPS(60);
 

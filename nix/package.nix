@@ -28,6 +28,7 @@
             cmake
             copyDesktopItems
             makeWrapper
+            glfw3
           ];
 
           buildInputs = with pkgs; [
