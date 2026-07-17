@@ -10,7 +10,7 @@ namespace gui {
 class Widget {
   Rectangle scaleRect;
 
-  void updateTextPos() {
+  void updateLabelPos() {
     fontSize = std::min(finalPositionRect.height, finalPositionRect.width) * fontScale;
 
     textWidth = MeasureText(label.c_str(), fontSize);
@@ -19,7 +19,7 @@ class Widget {
   }
 
   void updatePos() {
-    finalPositionRect.width = GetScreenWidth() * scaleRect.width;
+    finalPositionRect.width = std::max(GetScreenWidth() * scaleRect.width, textWidth);
     finalPositionRect.height = GetScreenHeight() * scaleRect.height;
 
     finalPositionRect.x = GetScreenWidth() * scaleRect.x - finalPositionRect.width * scaleRect.x;
@@ -34,11 +34,11 @@ protected:
   /// @brief Rectangle that's used in calculating necessary space for the widget
   Rectangle finalPositionRect;
 
-  void drawLabelInTheMiddle(Color color) {
+  void drawLabel(Color color) {
     DrawText(label.c_str(), text_x, text_y, fontSize, color);
   }
 
-  void drawTextInTheMiddle(char *text, Color color) {
+  void drawText(char *text, Color color) {
     DrawText(text, text_x, text_y, fontSize, color);
   }
 
@@ -46,20 +46,22 @@ public:
   bool isFocusable = false;
 
   Widget(std::string label, float pos_y, Rectangle scaleRect, float fontScale, bool isFocusable = true)
-      : label(label)
-      , finalPositionRect({1, pos_y, 200, 200})
-      , scaleRect(scaleRect)
+      : scaleRect(scaleRect)
+      , label(label)
       , fontScale(fontScale)
+      , finalPositionRect(Rectangle{1, pos_y, 1, 1})
       , isFocusable(isFocusable) {
     updateEveryPos(true);
   }
   virtual ~Widget() = default;
 
+  /// @brief Draws focus
+  /// NOTE: should be called at the end of each draw function, so it's not covered
   virtual void draw() {
     // focused border
-    // NOTE: should be called at the end of each draw function, so it's not covered
     if (isFocusable && isFocused) {
-      DrawRectangleLines(scaleRect.x, scaleRect.y, scaleRect.width, scaleRect.height, GRAY);
+      DrawRectangleLines(
+          finalPositionRect.x, finalPositionRect.y, finalPositionRect.width, finalPositionRect.height, DARKGRAY);
     }
   }
 
@@ -70,7 +72,7 @@ public:
   void updateEveryPos(bool force = false) {
     if (force || IsWindowResized()) {
       updatePos();
-      updateTextPos();
+      updateLabelPos();
     }
   }
 
@@ -84,6 +86,10 @@ public:
 
   void setY(float y) {
     finalPositionRect.y = y;
+  }
+
+  void setLabel(std::string &newLabel) {
+    label = newLabel;
   }
 
   Rectangle getRect() {

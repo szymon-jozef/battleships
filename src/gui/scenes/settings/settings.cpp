@@ -9,9 +9,14 @@ Settings::Settings(GameContext &gameContext, Texture2D &background)
   backgroundTint = LIGHTGRAY;
 
   widgets.push_back_label("Player options", BLACK);
-  widgets.push_back_textInput_with_label(
-      "Player name: ", gameContext.settings.playerName, BLACK, gameContext.settings.playerName);
+  widgets.push_back_nameInput(gameContext.settings.playerName);
   widgets.push_back_button("Go back", [&gameContext]() {
+    if (gameContext.settings.playerName.empty()) {
+      spdlog::warn("[GUI] trying to save empty name. That's a nono!");
+      return;
+    }
+    // TODO! Server should not allow connections with nonames
+    // Especially since you can just set empty name in the config file
     gameContext.settings.save();
     gameContext.guiState = GuiState::MAIN_MENU;
   });

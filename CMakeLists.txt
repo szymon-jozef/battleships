@@ -2,10 +2,9 @@ cmake_minimum_required(VERSION 4.1.2)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
-project(battleships VERSION 0.0.1)
+project(battleships VERSION 0.0.2)
 
 option(isDev "build tests" false)
 
@@ -204,12 +203,20 @@ if(WIN32)
     target_compile_definitions(gui PRIVATE WIN32_LEAN_AND_MEAN NOGDI NOUSER NOMINMAX)
 endif()
 
+# show warnings if developing 
+if (isDev)
+target_compile_options(battleships PRIVATE -Wall -Wextra -Wunreachable-code)
+target_compile_options(gui PRIVATE -Wall -Wextra -Wunreachable-code)
+target_compile_options(networking PRIVATE -Wall -Wextra -Wunreachable-code)
+target_compile_options(game_logic PRIVATE -Wall -Wextra -Wunreachable-code)
+target_compile_options(game_manager PRIVATE -Wall -Wextra -Wunreachable-code)
+endif()
 
 target_compile_definitions(battleships PUBLIC GAME_VERSION=\"${PROJECT_VERSION}\")
 install(TARGETS battleships DESTINATION bin)
 
 if (WIN32)
-    install(DIRECTORY assets DESTINATION "C:/Program files/ battleships")
+    install(DIRECTORY assets DESTINATION "C:/Program files/battleships")
 else()
     install(DIRECTORY assets DESTINATION usr/share/battleships)
 endif()

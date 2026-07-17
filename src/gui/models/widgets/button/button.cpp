@@ -8,7 +8,7 @@ Button::Button(std::string label, float pos_y, Rectangle rect)
 
 void Button::draw() {
   DrawRectangleRec(finalPositionRect, WHITE);
-  drawLabelInTheMiddle(BLACK);
+  drawLabel(BLACK);
   Widget::draw();
 }
 

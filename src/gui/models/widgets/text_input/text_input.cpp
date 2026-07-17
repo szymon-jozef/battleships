@@ -1,54 +1,88 @@
 #include "text_input.hpp"
 #include "../text_label/text_label.hpp"
 #include "../widget.hpp"
+#include <raylib.h>
 #include <spdlog/spdlog.h>
 
 namespace battleship {
 namespace gui {
 
+TextInput::TextInput(float pos_y, Rectangle scaleRect, std::string &target, InputType inputType)
+    : Widget(target, pos_y, scaleRect, 0.8f)
+    , inputText(finalPositionRect.y - fontSize, Rectangle{1, 0.1f, 1, 0.05f}, BLACK)
+    , charactersLeftLabel(finalPositionRect.y + finalPositionRect.height, Rectangle{1, 0.1f, 1, 0.05f}, DARKGRAY)
+    , target(target)
+    , inputType(inputType) {
+  target.reserve(MAX_INPUT_CHARS);
+  if (target.size() < MAX_INPUT_CHARS) {
+    std::copy(target.begin(), target.end(), buffer);
+    letterCount = target.size();
+    buffer[letterCount] = '\0';
+  } else {
+    spdlog::warn("[GUI] Loaded text [{}]  was to long!", target);
+  }
+
+  switch (inputType) {
+  case InputType::NAME:
+    inputText.setLabel("Player name");
+    break;
+  case InputType::IP:
+    inputText.setLabel("IP address");
+    break;
+  }
+}
+
 bool TextInput::handleKeyboardInput() {
   isMouseOnText = CheckCollisionPointRec(GetMousePosition(), finalPositionRect);
 
   if (isMouseOnText || isFocused) {
-
     bool isEdited = false;
     if (isMouseOnText) {
       SetMouseCursor(MOUSE_CURSOR_IBEAM);
-    } else {
-      SetMouseCursor(MOUSE_CURSOR_DEFAULT);
     }
+    isEdited = getKeyboardInput() || removeCharFromBuffer() || clearBuffer();
 
-    int key = GetCharPressed();
-
-    while (key > 0) {
-      if ((key >= 32) && (key <= 125) && (letterCount < MAX_INPUT_CHARS)) {
-        buffer[letterCount] = (char)key;
-        buffer[letterCount + 1] = '\0';
-        letterCount++;
-      }
-      key = GetCharPressed();
-      isEdited = true;
-    }
-
-    // delete one char
-    if (IsKeyPressed(KEY_BACKSPACE)) {
-      letterCount--;
-      if (letterCount < 0) {
-        letterCount = 0;
-      }
-      buffer[letterCount] = '\0';
-      isEdited = true;
-    }
-
-    // delete everything
-    if ((IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_U)) ||
-        (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_BACKSPACE))) {
-      letterCount = 0;
-      buffer[letterCount] = '\0';
-      isEdited = true;
-    }
+    normaliseText();
 
     return isEdited;
+  }
+  SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+
+  return false;
+}
+
+bool TextInput::getKeyboardInput() {
+  int key = GetCharPressed();
+  while (key > 0) {
+    if (letterCount < MAX_INPUT_CHARS) {
+      buffer[letterCount] = (char)key;
+      buffer[letterCount + 1] = '\0';
+      letterCount++;
+    }
+    key = GetCharPressed();
+    return true;
+  }
+  return false;
+}
+
+bool TextInput::removeCharFromBuffer() {
+  if (IsKeyPressed(KEY_BACKSPACE)) {
+    letterCount--;
+    if (letterCount < 0) {
+      letterCount = 0;
+    }
+    buffer[letterCount] = '\0';
+    return true;
+  }
+  return false;
+}
+
+bool TextInput::clearBuffer() {
+  if ((IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_U)) ||
+      (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_BACKSPACE))) {
+    letterCount = 0;
+    buffer[letterCount] = '\0';
+    return true;
   }
   return false;
 }
@@ -60,58 +94,107 @@ bool TextInput::handleClipboardInput() {
       return false;
     }
 
-    std::string clipboardText(clipboardText_c);
-
-    if (clipboardText.empty()) {
-      return false;
+    strncpy(buffer, clipboardText_c, MAX_INPUT_CHARS);
+    if (strlen(clipboardText_c) > MAX_INPUT_CHARS) {
+      letterCount = MAX_INPUT_CHARS;
+      buffer[letterCount] = '\0';
     }
 
-    clipboardText.erase(std::remove(clipboardText.begin(), clipboardText.end(), '\n'), clipboardText.end());
-    clipboardText.erase(std::remove_if(clipboardText.begin(),
-                                       clipboardText.end(),
-                                       [](auto const &c) -> bool { return !std::isalnum(c); }),
-                        clipboardText.end());
-
-    if (clipboardText.size() >= MAX_INPUT_CHARS) {
-      clipboardText.resize(MAX_INPUT_CHARS);
-    }
-
-    std::copy(clipboardText.begin(), clipboardText.end(), buffer);
-    letterCount = clipboardText.size();
-    buffer[letterCount] = '\0';
+    normaliseText();
     return true;
   }
   return false;
 }
 
-TextInput::TextInput(std::string prompt, float pos_y, Rectangle scaleRect, std::string &target)
-    : Widget(prompt, pos_y, scaleRect, 0.8f)
-    , target(target) {
-  if (target.size() < MAX_INPUT_CHARS) {
-    std::copy(target.begin(), target.end(), buffer);
-    letterCount = target.size();
-    buffer[letterCount] = '\0';
-  } else {
-    spdlog::warn("[GUI] Loaded text was to long");
+void TextInput::normaliseText() {
+  // remove end lines
+  target = buffer;
+  target.erase(std::remove(target.begin(), target.end(), '\n'), target.end());
+
+  // we delete different things depending on input type
+  switch (inputType) {
+  case InputType::NAME: {
+    // remove non-alphanumeric characters
+    target.erase(std::remove_if(target.begin(), target.end(), [](auto const &c) -> bool { return !std::isalnum(c); }),
+                 target.end());
+
+    // trim if target is to large
+    if (target.size() >= MAX_INPUT_CHARS) {
+      target.resize(MAX_INPUT_CHARS);
+    }
+    break;
   }
+  case InputType::IP: {
+    // we remove everything that's not number/dot
+    target.erase(std::remove_if(
+                     target.begin(), target.end(), [](auto const &c) -> bool { return (c < 48 || c > 57) && c != 46; }),
+                 target.end());
+
+    // xxx.xxx.xxx.xxx = 3 * 4 + 3 * 1 = 12 + 3 + 15
+    if (target.size() >= 15) {
+      target.resize(15);
+    }
+    break;
+  }
+  default: {
+    break;
+  }
+  }
+  // TODO! Change this to something cheaper maybe
+  strncpy(buffer, target.c_str(), MAX_INPUT_CHARS);
+  letterCount = target.size();
+  buffer[letterCount] = '\0';
 }
+
+// --- Updating ---
 
 void TextInput::update() {
   Widget::update();
-  if (handleKeyboardInput() || handleClipboardInput()) {
+  if (handleClipboardInput() || handleKeyboardInput()) {
     target = std::string(buffer);
-    letterCount = target.size();
-    buffer[letterCount] = '\0';
+    normaliseText();
+    updateEveryPos(true);
+    setLabel(target);
   }
 
-  // TODO! Move this to widget
-  int textWidth = MeasureText(prompt.c_str(), fontSize);
-  float text_x = (finalPositionRect.x + finalPositionRect.width / 2.0f) - (textWidth / 2.0f);
-  float text_y = (finalPositionRect.y + finalPositionRect.height / 2.0f) - (fontSize / 2.0f);
+  if (inputType == InputType::NAME) {
+    updateCharactersLeftPrompt();
+  }
+
+  updateInputText();
 }
 
-void TextInput::draw() {
+void TextInput::updateCharactersLeftPrompt() {
+  charactersLeft = TextFormat("%i/%i", letterCount, MAX_INPUT_CHARS);
+  charactersLeftLabel.setLabel(charactersLeft.data());
+  charactersLeftLabel.setY(finalPositionRect.y + finalPositionRect.height);
+  charactersLeftLabel.updateEveryPos(true); // we do this since widget_vector changes Y position of the thing and i'm
+                                            // not sure if we can update it once after this
+  charactersLeftLabel.update();
+}
 
+void TextInput::updateInputText() {
+  inputText.setY(finalPositionRect.y - fontSize);
+  inputText.updateEveryPos(true);
+  inputText.update();
+}
+
+// --- Drawing ---
+
+void TextInput::draw() {
+  drawInputRect();
+  drawLabel(MAROON); // draw the current buffer
+
+  if (inputType == InputType::NAME) {
+    drawCharactersLeftPrompt();
+  }
+
+  drawInputName();
+
+  Widget::draw();
+}
+
+void TextInput::drawInputRect() {
   DrawRectangleRec(finalPositionRect, LIGHTGRAY);
   if (isMouseOnText) {
     DrawRectangleLines(
@@ -120,24 +203,14 @@ void TextInput::draw() {
     DrawRectangleLines(
         finalPositionRect.x, finalPositionRect.y, finalPositionRect.width, finalPositionRect.height, DARKGRAY);
   }
-
-  if (prompt != "" && std::string(buffer).empty()) {
-    DrawText(prompt.c_str(), text_x, text_y, fontSize, MAROON);
-    drawLabelInTheMiddle(MAROON); // TODO! Change to some other color maybe?
-  } else {
-    drawTextInTheMiddle(buffer, MAROON);
-  }
-
-  std::string charactersLeft = std::string(TextFormat("%i/%i", letterCount, MAX_INPUT_CHARS));
-
-  TextLabel charactersLeftLabel =
-      TextLabel(charactersLeft, finalPositionRect.y + finalPositionRect.height * 2, {2, 0.1f, 1, 0.4f}, DARKGRAY);
-  charactersLeftLabel.draw();
-  Widget::draw();
 }
 
-std::string TextInput::getInput() const {
-  return std::string(buffer);
+void TextInput::drawCharactersLeftPrompt() {
+  charactersLeftLabel.draw();
+}
+
+void TextInput::drawInputName() {
+  inputText.draw();
 }
 
 } // namespace gui
