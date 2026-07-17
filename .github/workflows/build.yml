@@ -21,9 +21,10 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Install Ninja (Linux)
+    - name: Install dependencies (Linux)
       if: runner.os == 'Linux'
-      run: sudo apt update && sudo apt install -y ninja-build
+      run: sudo apt update && sudo apt install -y ninja-build libx11-dev libxrandr-dev libxi-dev libxext-dev libgl1-mesa-dev libxcursor-dev libxinerama-dev libwayland-dev libxkbcommon-dev
+
 
     - name: Install Ninja (Windows)
       if: runner.os == 'Windows'
