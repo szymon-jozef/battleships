@@ -30,13 +30,15 @@ jobs:
       if: runner.os == 'Windows'
       run: choco install ninja
 
-    - name: Configure CMake
+    - name: Configure CMake (Linux)
+      if: runner.os == 'Linux'
       shell: bash
-      run: >
-        cmake -B build -G Ninja 
-        -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
-        -DCMAKE_BUILD_TYPE=Release
-        -D"isRelease=True"
+      run: cmake -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=Release -D"isRelease=True"
+
+    - name: Configure CMake (Windows)
+      if: runner.os == 'Windows'
+      shell: powershell
+      run: cmake -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=Release -D"isRelease=True"
 
     - name: Build
       run: cmake --build build --config Release
@@ -50,5 +52,13 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         files: |
+          build/*.zip
+          build/*.tar.gz
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: battleships-${{ runner.os }}
+        path: |
           build/*.zip
           build/*.tar.gz
