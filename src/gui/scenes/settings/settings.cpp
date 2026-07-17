@@ -9,7 +9,7 @@ Settings::Settings(GameContext &gameContext, Texture2D &background)
   backgroundTint = LIGHTGRAY;
 
   widgets.push_back_label("Player options", BLACK);
-  widgets.push_back_textInput_with_label("Player name: ", BLACK, gameContext.settings.playerName);
+  widgets.push_back_nameInput(gameContext.settings.playerName);
   widgets.push_back_button("Go back", [&gameContext]() {
     if (gameContext.settings.playerName.empty()) {
       spdlog::warn("[GUI] trying to save empty name. That's a nono!");

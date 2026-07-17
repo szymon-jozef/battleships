@@ -49,7 +49,7 @@ public:
       : scaleRect(scaleRect)
       , label(label)
       , fontScale(fontScale)
-      , finalPositionRect({1, pos_y, 200, 200})
+      , finalPositionRect(Rectangle{1, pos_y, 1, 1})
       , isFocusable(isFocusable) {
     updateEveryPos(true);
   }

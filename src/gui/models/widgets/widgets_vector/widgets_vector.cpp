@@ -59,17 +59,6 @@ void WidgetsVector::push_back_label(std::string text, Color color) {
   widgets.push_back(std::move(label));
 }
 
-void WidgetsVector::push_back_textInput_with_label(std::string label, Color color, std::string &target) {
-  std::unique_ptr<TextLabel> labelWidget = std::make_unique<TextLabel>(label, getCurrentDistance(), scale, color);
-
-  widgets.push_back(std::move(labelWidget));
-
-  std::unique_ptr<TextInput> input =
-      std::make_unique<TextInput>(getCurrentDistance() - height * 2, scale, target, TextInput::InputType::NAME);
-
-  widgets.push_back(std::move(input));
-}
-
 void WidgetsVector::update_all() {
   float absolute_y = GetScreenHeight() * start_y;
   float absolute_margin = GetScreenHeight() * margin;

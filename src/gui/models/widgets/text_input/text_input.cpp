@@ -19,6 +19,15 @@ TextInput::TextInput(float pos_y, Rectangle scaleRect, std::string &target, Inpu
   } else {
     spdlog::warn("[GUI] Loaded text was to long");
   }
+
+  switch (inputType) {
+  case InputType::NAME:
+    inputName = "Player name";
+    break;
+  case InputType::IP:
+    inputName = "IP address";
+    break;
+  }
 }
 
 bool TextInput::handleKeyboardInput() {
@@ -135,6 +144,8 @@ void TextInput::normaliseText() {
   buffer[letterCount] = '\0';
 }
 
+// --- Updating ---
+
 void TextInput::update() {
   Widget::update();
   if (handleClipboardInput() || handleKeyboardInput()) {
@@ -153,6 +164,8 @@ void TextInput::updateCharactersLeftPrompt() {
   charactersLeft = TextFormat("%i/%i", letterCount, MAX_INPUT_CHARS);
 }
 
+// --- Drawing ---
+
 void TextInput::draw() {
   drawInputRect();
   drawLabel(MAROON); // draw the current buffer
@@ -160,6 +173,9 @@ void TextInput::draw() {
   if (inputType == InputType::NAME) {
     drawCharactersLeftPrompt();
   }
+
+  drawInputName();
+
   Widget::draw();
 }
 
@@ -178,6 +194,12 @@ void TextInput::drawCharactersLeftPrompt() {
   TextLabel charactersLeftLabel =
       TextLabel(charactersLeft.data(), finalPositionRect.y + finalPositionRect.height, {1, 0.1f, 1, 0.05f}, DARKGRAY);
   charactersLeftLabel.draw();
+  Widget::draw();
+}
+
+void TextInput::drawInputName() {
+  TextLabel inputText = TextLabel(inputName.c_str(), finalPositionRect.y * 0.8, {0.5, 0.1f, 1, 0.05f}, BLACK);
+  inputText.draw();
   Widget::draw();
 }
 

@@ -26,6 +26,7 @@ private:
 
   std::string &target;
   std::string_view charactersLeft;
+  std::string inputName;
 
   bool isMouseOnText = false;
   InputType inputType;
@@ -45,6 +46,7 @@ private:
   // --- drawing ---
   void drawInputRect();
   void drawCharactersLeftPrompt();
+  void drawInputName();
 
   // --- updating ---
   void updateCharactersLeftPrompt();
