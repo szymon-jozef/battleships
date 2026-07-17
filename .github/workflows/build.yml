@@ -38,7 +38,7 @@ jobs:
     - name: Configure CMake (Windows)
       if: runner.os == 'Windows'
       shell: powershell
-      run: cmake -B build -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=Release -D"isRelease=True"
+      run: cmake -B build -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=Release -D"isRelease=True" -DVCPKG_TARGET_TRIPLET=x64-windows-static
 
     - name: Build
       run: cmake --build build --config Release
