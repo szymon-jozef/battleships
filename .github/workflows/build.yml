@@ -23,16 +23,17 @@ jobs:
 
     - name: Install Ninja (Linux)
       if: runner.os == 'Linux'
-      run: sudo apt update && sudo apt install -y ninja-build cmake
+      run: sudo apt update && sudo apt install -y ninja-build
 
     - name: Install Ninja (Windows)
       if: runner.os == 'Windows'
       run: choco install ninja
 
     - name: Configure CMake
+      shell: bash
       run: >
         cmake -B build -G Ninja 
-        -DCMAKE_TOOLCHAIN_FILE="${{ env.VCPKG_INSTALLATION_ROOT }}/scripts/buildsystems/vcpkg.cmake"
+        -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
         -DCMAKE_BUILD_TYPE=Release
         -D"isRelease=True"
 
