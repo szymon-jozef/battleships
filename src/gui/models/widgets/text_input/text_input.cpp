@@ -198,7 +198,7 @@ void TextInput::drawCharactersLeftPrompt() {
 }
 
 void TextInput::drawInputName() {
-  TextLabel inputText = TextLabel(inputName.c_str(), finalPositionRect.y * 0.8, {0.5, 0.1f, 1, 0.05f}, BLACK);
+  TextLabel inputText = TextLabel(inputName.c_str(), finalPositionRect.y - fontSize, {0.5, 0.1f, 1, 0.05f}, BLACK);
   inputText.draw();
   Widget::draw();
 }
