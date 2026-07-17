@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../widget.hpp"
+#include "models/widgets/text_label/text_label.hpp"
 #include <raylib.h>
 #include <spdlog/spdlog.h>
 
@@ -23,6 +24,8 @@ private:
   float text_x = 0, text_y = 0;
 
   char buffer[MAX_INPUT_CHARS + 1] = "";
+
+  TextLabel inputText, charactersLeftLabel;
 
   std::string &target;
   std::string_view charactersLeft;
@@ -50,6 +53,7 @@ private:
 
   // --- updating ---
   void updateCharactersLeftPrompt();
+  void updateInputText();
 };
 
 } // namespace gui

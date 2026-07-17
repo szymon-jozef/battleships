@@ -9,6 +9,8 @@ namespace gui {
 
 TextInput::TextInput(float pos_y, Rectangle scaleRect, std::string &target, InputType inputType)
     : Widget(target, pos_y, scaleRect, 0.8f)
+    , inputText(finalPositionRect.y - fontSize, Rectangle{1, 0.1f, 1, 0.05f}, BLACK)
+    , charactersLeftLabel(finalPositionRect.y + finalPositionRect.height, Rectangle{1, 0.1f, 1, 0.05f}, DARKGRAY)
     , target(target)
     , inputType(inputType) {
   target.reserve(MAX_INPUT_CHARS);
@@ -17,15 +19,15 @@ TextInput::TextInput(float pos_y, Rectangle scaleRect, std::string &target, Inpu
     letterCount = target.size();
     buffer[letterCount] = '\0';
   } else {
-    spdlog::warn("[GUI] Loaded text was to long");
+    spdlog::warn("[GUI] Loaded text [{}]  was to long!", target);
   }
 
   switch (inputType) {
   case InputType::NAME:
-    inputName = "Player name";
+    inputText.setLabel("Player name");
     break;
   case InputType::IP:
-    inputName = "IP address";
+    inputText.setLabel("IP address");
     break;
   }
 }
@@ -158,10 +160,23 @@ void TextInput::update() {
   if (inputType == InputType::NAME) {
     updateCharactersLeftPrompt();
   }
+
+  updateInputText();
 }
 
 void TextInput::updateCharactersLeftPrompt() {
   charactersLeft = TextFormat("%i/%i", letterCount, MAX_INPUT_CHARS);
+  charactersLeftLabel.setLabel(charactersLeft.data());
+  charactersLeftLabel.setY(finalPositionRect.y + finalPositionRect.height);
+  charactersLeftLabel.updateEveryPos(true); // we do this since widget_vector changes Y position of the thing and i'm
+                                            // not sure if we can update it once after this
+  charactersLeftLabel.update();
+}
+
+void TextInput::updateInputText() {
+  inputText.setY(finalPositionRect.y - fontSize);
+  inputText.updateEveryPos(true);
+  inputText.update();
 }
 
 // --- Drawing ---
@@ -191,16 +206,11 @@ void TextInput::drawInputRect() {
 }
 
 void TextInput::drawCharactersLeftPrompt() {
-  TextLabel charactersLeftLabel =
-      TextLabel(charactersLeft.data(), finalPositionRect.y + finalPositionRect.height, {1, 0.1f, 1, 0.05f}, DARKGRAY);
   charactersLeftLabel.draw();
-  Widget::draw();
 }
 
 void TextInput::drawInputName() {
-  TextLabel inputText = TextLabel(inputName.c_str(), finalPositionRect.y - fontSize, {0.5, 0.1f, 1, 0.05f}, BLACK);
   inputText.draw();
-  Widget::draw();
 }
 
 } // namespace gui

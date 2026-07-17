@@ -10,6 +10,9 @@ class TextLabel : public Widget {
 
 public:
   TextLabel(std::string text, float pos_y, Rectangle scaleRect, Color color);
+  TextLabel(float pos_y, Rectangle scaleRect, Color color);
+
+  void setLabel(std::string label);
 
   void update() override;
   void draw() override;
