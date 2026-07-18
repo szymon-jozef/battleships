@@ -22,14 +22,14 @@ public:
   void setClickable(bool isClickable);
   void setState(logic::FieldState state);
 
-  bool getIsClickable();
-  logic::FieldState getState();
+  bool getIsClickable() const;
+  logic::FieldState getState() const;
 };
 
 class GameGrid {
   gameManager::GameManager &gameManager;
   Rectangle gridRect;
-  std::vector<std::vector<GameField>> fields;
+  std::vector<GameField> fields;
   std::optional<unsigned short int> hoveredRow = std::nullopt, hoveredColumn = std::nullopt;
 
   bool isHorizontal = true;
@@ -72,6 +72,11 @@ class GameGrid {
   void drawHighlitedField();
 
   void handleFieldClick();
+
+  GameField &getField(unsigned short int row, unsigned short int column);
+  const GameField &getField(unsigned short int row, unsigned short int column) const;
+
+  bool isHoverValid() const;
 
 public:
   enum class GridType { BOARD, RADAR };

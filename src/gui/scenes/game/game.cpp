@@ -13,7 +13,7 @@ void GameField::setClickable(bool isClickable) {
   this->isClickable = isClickable;
 }
 
-bool GameField::getIsClickable() {
+bool GameField::getIsClickable() const {
   return isClickable && state == logic::FieldState::EMPTY; // we can only click empty fields
 }
 
@@ -21,7 +21,7 @@ void GameField::setState(logic::FieldState state) {
   this->state = state;
 }
 
-logic::FieldState GameField::getState() {
+logic::FieldState GameField::getState() const {
   return state;
 }
 
@@ -100,14 +100,14 @@ void GameGrid::updateFieldsState() {
   case GridType::BOARD:
     for (size_t column = 0; column < columns; column++) {
       for (size_t row = 0; row < rows; row++) {
-        fields[column][row].setState(gameManager.getBoardField(row, column));
+        getField(row, column).setState(gameManager.getBoardField(row, column));
       }
     }
     break;
   case GridType::RADAR:
     for (size_t column = 0; column < columns; column++) {
       for (size_t row = 0; row < rows; row++) {
-        fields[column][row].setState(gameManager.getRadarField(row, column));
+        getField(row, column).setState(gameManager.getRadarField(row, column));
       }
     }
     break;
@@ -140,6 +140,14 @@ void GameGrid::updateGridState() {
   }
 }
 
+GameField &GameGrid::getField(unsigned short int row, unsigned short int column) {
+  return fields[row * columns + column];
+}
+
+const GameField &GameGrid::getField(unsigned short int row, unsigned short int column) const {
+  return fields[row * columns + column];
+}
+
 GameGrid::GameGrid(gameManager::GameManager &gameManager, GridType type)
     : gameManager(gameManager)
     , gridRect({0, 0, GetScreenWidth() / 2.0f, GetScreenHeight() / 1.0f})
@@ -148,25 +156,7 @@ GameGrid::GameGrid(gameManager::GameManager &gameManager, GridType type)
     , gridType(type) {
   spdlog::info("[GUI] GameGrid created. Size: {} by {}", rows, columns);
   updateData();
-  fields.resize(columns);
-
-  // TODO! This could by just one vector
-  for (unsigned short int columnIndex = 0; columnIndex < columns; columnIndex++) {
-    auto &column = fields[columnIndex];
-
-    for (int fieldIndex = 0; fieldIndex < rows; fieldIndex++) {
-      column.emplace_back();
-    }
-
-    current_y_pos = begin_y_pos;
-    current_x_pos += deltaSize;
-  }
-
-  gridRect.x += padding_x;
-  gridRect.width -= padding_x * 2.0f;
-
-  gridRect.y += padding_y;
-  gridRect.height -= padding_y * 2.0f;
+  fields.resize(columns * rows, GameField());
 
   updateData();
   updateGridRect();
@@ -207,11 +197,11 @@ void GameGrid::update() {
     hoveredColumn = static_cast<unsigned short int>(relativeX / deltaSize);
     hoveredRow = static_cast<unsigned short int>(relativeY / deltaSize);
 
-    if (hoveredRow && hoveredColumn && offsetX <= fieldSize && offsetY <= fieldSizeInt &&
-        fields[hoveredColumn.value()][hoveredRow.value()].getIsClickable()) {
+    if (isHoverValid() && offsetX <= fieldSize && offsetY <= fieldSizeInt &&
+        getField(hoveredRow.value(), hoveredColumn.value()).getIsClickable()) {
       SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
 
-      if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+      if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
         handleFieldClick();
       }
     }
@@ -219,7 +209,7 @@ void GameGrid::update() {
 }
 
 void GameGrid::handleFieldClick() {
-  auto &field = fields[hoveredColumn.value()][hoveredRow.value()];
+  auto &field = getField(hoveredRow.value(), hoveredColumn.value());
   if (field.getIsClickable()) {
     switch (gridType) {
     case GridType::BOARD:
@@ -241,13 +231,17 @@ void GameGrid::handleFieldClick() {
   }
 }
 
+bool GameGrid::isHoverValid() const {
+  return (hoveredRow && hoveredRow.value() < rows && hoveredColumn && hoveredColumn.value() < columns);
+}
+
 void GameGrid::draw() {
   DrawRectangleRec(gridRect, WHITE);
   for (size_t column = 0; column < columns; column++) {
     for (size_t row = 0; row < rows; row++) {
       float x = gridRect.x + column * deltaSize;
       float y = gridRect.y + row * deltaSize;
-      auto &field = fields[column][row];
+      const auto &field = getField(row, column);
 
       switch (field.getState()) {
       case battleship::logic::FieldState::EMPTY:
@@ -277,8 +271,8 @@ Rectangle GameGrid::getGridRect() {
 }
 
 void GameGrid::drawHighlitedField() {
-  if (hoveredRow && hoveredColumn) {
-    auto &field = fields[hoveredColumn.value()][hoveredRow.value()];
+  if (isHoverValid()) {
+    const auto &field = getField(hoveredRow.value(), hoveredColumn.value());
     if (isActive && field.getIsClickable()) {
       float x = gridRect.x + hoveredColumn.value() * deltaSize;
       float y = gridRect.y + hoveredRow.value() * deltaSize;
