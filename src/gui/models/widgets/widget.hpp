@@ -27,8 +27,8 @@ class Widget {
 
 protected:
   std::string label;
-  float text_x, text_y, textWidth, fontScale;
-  int fontSize;
+  float text_x = 0.0, text_y = 0.0, textWidth = 0.0, fontScale = 0.0;
+  int fontSize = 0;
 
   bool isFocused = false;
   /// @brief Rectangle that's used in calculating necessary space for the widget
@@ -71,8 +71,8 @@ public:
 
   void updateEveryPos(bool force = false) {
     if (force || IsWindowResized()) {
-      updatePos();
       updateLabelPos();
+      updatePos();
     }
   }
 
