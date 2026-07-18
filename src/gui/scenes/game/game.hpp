@@ -15,7 +15,7 @@ namespace gui {
 class GameField {
   Rectangle fieldRect;
   logic::FieldState state = logic::FieldState::EMPTY;
-  bool isClickable = false;
+  bool isClickable = true;
 
 public:
   GameField(Rectangle fieldRect);
@@ -26,6 +26,8 @@ public:
   void setClickable(bool isClickable);
   void setState(logic::FieldState state);
   void setPos(Rectangle pos);
+
+  bool getIsClickable();
 
   Rectangle *getRect();
   void onHover();
@@ -38,6 +40,7 @@ class GameGrid {
 
   Rectangle *lastFieldRect = nullptr;
   bool isHorizontal = true;
+  bool isActive = false;
 
   float padding_x, padding_y, multiplier = 1.2f;
   float begin_y_pos;

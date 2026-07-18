@@ -35,6 +35,10 @@ void GameField::setClickable(bool isClickable) {
   this->isClickable = isClickable;
 }
 
+bool GameField::getIsClickable() {
+  return isClickable;
+}
+
 void GameField::setState(logic::FieldState state) {
   this->state = state;
 }
@@ -121,12 +125,9 @@ void GameGrid::updateLabelPos() {
   textWidth = MeasureText(label.c_str(), fontSize);
 }
 
+/// @brief Set if the whole grid is clickable
 void GameGrid::setGridClickable(bool isClickable) {
-  for (auto &column : fields) {
-    for (auto &field : column) {
-      field.setClickable(isClickable);
-    }
-  }
+  isActive = isClickable;
 }
 
 /// @brief Update the state of every field in the grid.
@@ -238,6 +239,7 @@ bool GameGrid::getIsHorizontal() {
 }
 
 void GameGrid::update() {
+
   if (IsWindowResized()) {
     updateData();
     updateFieldsPos();
@@ -248,35 +250,39 @@ void GameGrid::update() {
   updateGridState();
   updateFieldsState();
 
-  if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(GetMousePosition(), gridRect)) {
-    int relativeX = GetMouseX() - gridRect.x;
-    int relativeY = GetMouseY() - gridRect.y;
+  if (CheckCollisionPointRec(GetMousePosition(), gridRect) && isActive) {
+    SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
 
-    unsigned short int columnIndex = static_cast<unsigned short int>(relativeX / deltaSize);
-    unsigned short int columnRow = static_cast<unsigned short int>(relativeY / deltaSize);
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
 
-    int offsetX = relativeX % static_cast<int>(deltaSize);
-    int offsetY = relativeY % static_cast<int>(deltaSize);
+      int relativeX = GetMouseX() - gridRect.x;
+      int relativeY = GetMouseY() - gridRect.y;
 
-    int fieldSizeInt = static_cast<int>(fieldSize);
+      unsigned short int columnIndex = static_cast<unsigned short int>(relativeX / deltaSize);
+      unsigned short int columnRow = static_cast<unsigned short int>(relativeY / deltaSize);
 
-    if (offsetX <= fieldSize && offsetY <= fieldSizeInt) {
-      switch (gridType) {
-      case GridType::BOARD:
-        try {
-          gameManager.placeShip(columnRow, columnIndex, isHorizontal);
+      int offsetX = relativeX % static_cast<int>(deltaSize);
+      int offsetY = relativeY % static_cast<int>(deltaSize);
 
-        } catch (std::invalid_argument &e) {
-          spdlog::warn("[GUI] cannot place ship here: {}", e.what());
+      int fieldSizeInt = static_cast<int>(fieldSize);
+
+      if (offsetX <= fieldSize && offsetY <= fieldSizeInt && fields[columnRow][columnIndex].getIsClickable()) {
+        switch (gridType) {
+        case GridType::BOARD:
+          try {
+            gameManager.placeShip(columnRow, columnIndex, isHorizontal);
+            fields[columnRow][columnIndex].setClickable(false);
+
+          } catch (std::invalid_argument &e) {
+            spdlog::warn("[GUI] cannot place ship here: {}", e.what());
+          }
+          break;
+        case GridType::RADAR:
+          gameManager.makeShot(columnRow, columnIndex);
+          fields[columnRow][columnIndex].setClickable(false);
+          break;
         }
-        break;
-      case GridType::RADAR:
-        gameManager.makeShot(columnRow, columnIndex);
-        spdlog::info("[GUI] mouse touches: ({}, {})", columnRow, columnIndex);
-        break;
       }
-    } else {
-      SetMouseCursor(MOUSE_BUTTON_LEFT);
     }
   }
 }
@@ -439,6 +445,7 @@ Game::~Game() {
 }
 
 void Game::update() {
+  SetMouseCursor(MOUSE_CURSOR_DEFAULT);
   Scene::update();
   board.update();
   radar.update();
