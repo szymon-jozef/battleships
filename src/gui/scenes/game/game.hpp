@@ -28,6 +28,7 @@ public:
   void setPos(Rectangle pos);
 
   bool getIsClickable();
+  logic::FieldState getState();
 
   Rectangle *getRect();
   void onHover();
@@ -37,6 +38,7 @@ class GameGrid {
   gameManager::GameManager &gameManager;
   Rectangle gridRect;
   std::vector<std::vector<GameField>> fields;
+  std::optional<unsigned short int> hoveredRow = std::nullopt, hoveredColumn = std::nullopt;
 
   Rectangle *lastFieldRect = nullptr;
   bool isHorizontal = true;
@@ -78,6 +80,10 @@ class GameGrid {
 
   /// @brief Update the position of every field in the grid
   void updateFieldsPos();
+
+  void drawHighlitedField();
+
+  void handleFieldClick();
 
 public:
   enum class GridType { BOARD, RADAR };

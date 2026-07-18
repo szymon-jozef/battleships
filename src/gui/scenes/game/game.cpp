@@ -1,7 +1,10 @@
 #include "game.hpp"
+#include "logic_models.hpp"
 #include "models/data_structures.hpp"
+#include <chrono>
 #include <raylib.h>
 #include <stdexcept>
+#include <thread>
 
 namespace battleship {
 namespace gui {
@@ -28,7 +31,6 @@ void GameField::draw() {
     DrawRectangleRec(fieldRect, BLACK);
     break;
   }
-  onHover();
 }
 
 void GameField::setClickable(bool isClickable) {
@@ -36,7 +38,7 @@ void GameField::setClickable(bool isClickable) {
 }
 
 bool GameField::getIsClickable() {
-  return isClickable;
+  return isClickable && state == logic::FieldState::EMPTY; // we can only click empty fields
 }
 
 void GameField::setState(logic::FieldState state) {
@@ -51,10 +53,8 @@ Rectangle *GameField::getRect() {
   return &fieldRect;
 }
 
-void GameField::onHover() {
-  if (isClickable && CheckCollisionPointRec(GetMousePosition(), fieldRect)) {
-    DrawRectangleLinesEx(fieldRect, 1, GREEN);
-  }
+logic::FieldState GameField::getState() {
+  return state;
 }
 
 // === GameGrid ===
@@ -239,6 +239,8 @@ bool GameGrid::getIsHorizontal() {
 }
 
 void GameGrid::update() {
+  hoveredRow = std::nullopt;
+  hoveredColumn = std::nullopt;
 
   if (IsWindowResized()) {
     updateData();
@@ -251,38 +253,47 @@ void GameGrid::update() {
   updateFieldsState();
 
   if (CheckCollisionPointRec(GetMousePosition(), gridRect) && isActive) {
-    SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+    int relativeX = GetMouseX() - gridRect.x;
+    int relativeY = GetMouseY() - gridRect.y;
 
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+    int offsetX = relativeX % static_cast<int>(deltaSize);
+    int offsetY = relativeY % static_cast<int>(deltaSize);
 
-      int relativeX = GetMouseX() - gridRect.x;
-      int relativeY = GetMouseY() - gridRect.y;
+    int fieldSizeInt = static_cast<int>(fieldSize);
 
-      unsigned short int columnIndex = static_cast<unsigned short int>(relativeX / deltaSize);
-      unsigned short int columnRow = static_cast<unsigned short int>(relativeY / deltaSize);
+    hoveredColumn = static_cast<unsigned short int>(relativeX / deltaSize);
+    hoveredRow = static_cast<unsigned short int>(relativeY / deltaSize);
 
-      int offsetX = relativeX % static_cast<int>(deltaSize);
-      int offsetY = relativeY % static_cast<int>(deltaSize);
+    if (hoveredRow && hoveredColumn && offsetX <= fieldSize && offsetY <= fieldSizeInt &&
+        fields[hoveredColumn.value()][hoveredRow.value()].getIsClickable()) {
+      SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
 
-      int fieldSizeInt = static_cast<int>(fieldSize);
-
-      if (offsetX <= fieldSize && offsetY <= fieldSizeInt && fields[columnRow][columnIndex].getIsClickable()) {
-        switch (gridType) {
-        case GridType::BOARD:
-          try {
-            gameManager.placeShip(columnRow, columnIndex, isHorizontal);
-            fields[columnRow][columnIndex].setClickable(false);
-
-          } catch (std::invalid_argument &e) {
-            spdlog::warn("[GUI] cannot place ship here: {}", e.what());
-          }
-          break;
-        case GridType::RADAR:
-          gameManager.makeShot(columnRow, columnIndex);
-          fields[columnRow][columnIndex].setClickable(false);
-          break;
-        }
+      if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        handleFieldClick();
       }
+    }
+  }
+}
+
+void GameGrid::handleFieldClick() {
+  auto &field = fields[hoveredColumn.value()][hoveredRow.value()];
+  if (field.getIsClickable()) {
+    switch (gridType) {
+    case GridType::BOARD:
+      try {
+        gameManager.placeShip(hoveredRow.value(), hoveredColumn.value(), isHorizontal);
+        field.setClickable(false);
+
+      } catch (std::invalid_argument &e) {
+        spdlog::warn("[GUI] cannot place ship here: {}", e.what());
+      }
+      break;
+    case GridType::RADAR:
+      if (gameManager.isMyTurn()) {
+        gameManager.makeShot(hoveredRow.value(), hoveredColumn.value());
+        field.setClickable(false); // we set as unclickable only if shot was made during players turn
+      }
+      break;
     }
   }
 }
@@ -295,10 +306,20 @@ void GameGrid::draw() {
     }
   }
   DrawText(label.c_str(), label_x, label_y, fontSize, WHITE);
+  drawHighlitedField();
 }
 
 Rectangle GameGrid::getGridRect() {
   return gridRect;
+}
+
+void GameGrid::drawHighlitedField() {
+  if (hoveredRow && hoveredColumn) {
+    auto &field = fields[hoveredColumn.value()][hoveredRow.value()];
+    if (isActive && field.getIsClickable()) {
+      DrawRectangleRec(*field.getRect(), GREEN);
+    }
+  }
 }
 
 /// === Game Scene ===
