@@ -1,6 +1,7 @@
 #include "game.hpp"
 #include "models/data_structures.hpp"
 #include <raylib.h>
+#include <stdexcept>
 
 namespace battleship {
 namespace gui {
@@ -8,13 +9,6 @@ namespace gui {
 // === GameField ===
 GameField::GameField(Rectangle fieldRect)
     : fieldRect(fieldRect) {}
-
-void GameField::update() {
-  if (onClick && isClickable && CheckCollisionPointRec(GetMousePosition(), fieldRect) &&
-      IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-    onClick();
-  }
-}
 
 void GameField::draw() {
   switch (state) {
@@ -43,10 +37,6 @@ void GameField::setClickable(bool isClickable) {
 
 void GameField::setState(logic::FieldState state) {
   this->state = state;
-}
-
-void GameField::setOnClick(std::function<void()> onClick) {
-  this->onClick = onClick;
 }
 
 void GameField::setPos(Rectangle pos) {
@@ -146,7 +136,6 @@ void GameGrid::updateFieldsState() {
     for (size_t column = 0; column < columns; column++) {
       for (size_t row = 0; row < rows; row++) {
         fields[column][row].setState(gameManager.getBoardField(row, column));
-        fields[column][row].update();
       }
     }
     break;
@@ -154,7 +143,6 @@ void GameGrid::updateFieldsState() {
     for (size_t column = 0; column < columns; column++) {
       for (size_t row = 0; row < rows; row++) {
         fields[column][row].setState(gameManager.getRadarField(row, column));
-        fields[column][row].update();
       }
     }
     break;
@@ -206,35 +194,20 @@ void GameGrid::updateFieldsPos() {
 
 GameGrid::GameGrid(gameManager::GameManager &gameManager, GridType type)
     : gameManager(gameManager)
-    , gridType(type)
+    , gridRect({0, 0, GetScreenWidth() / 2.0f, GetScreenHeight() / 1.0f})
     , columns(gameManager.getBoardWidth())
     , rows(gameManager.getBoardWidth())
-    , gridRect({0, 0, GetScreenWidth() / 2.0f, GetScreenHeight() / 1.0f}) {
+    , gridType(type) {
   spdlog::info("[GUI] GameGrid created. Size: {} by {}", rows, columns);
   updateData();
   fields.resize(columns);
 
+  // TODO! This could by just one vector
   for (unsigned short int columnIndex = 0; columnIndex < columns; columnIndex++) {
     auto &column = fields[columnIndex];
 
     for (int fieldIndex = 0; fieldIndex < rows; fieldIndex++) {
       column.emplace_back(Rectangle{current_x_pos, current_y_pos, fieldSize, fieldSize});
-
-      switch (gridType) {
-      case GridType::BOARD:
-        column.back().setOnClick([this, fieldIndex, columnIndex, &gameManager]() {
-          try {
-            gameManager.placeShip(fieldIndex, columnIndex, isHorizontal);
-          } catch (std::invalid_argument &e) {
-            spdlog::warn("[GUI] {}", e.what());
-          }
-        });
-        break;
-      case GridType::RADAR:
-        column[fieldIndex].setOnClick(
-            [this, fieldIndex, columnIndex, &gameManager]() { gameManager.makeShot(fieldIndex, columnIndex); });
-        break;
-      }
     }
 
     current_y_pos = begin_y_pos;
@@ -274,6 +247,38 @@ void GameGrid::update() {
   updateLabelContent();
   updateGridState();
   updateFieldsState();
+
+  if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(GetMousePosition(), gridRect)) {
+    int relativeX = GetMouseX() - gridRect.x;
+    int relativeY = GetMouseY() - gridRect.y;
+
+    unsigned short int columnIndex = static_cast<unsigned short int>(relativeX / deltaSize);
+    unsigned short int columnRow = static_cast<unsigned short int>(relativeY / deltaSize);
+
+    int offsetX = relativeX % static_cast<int>(deltaSize);
+    int offsetY = relativeY % static_cast<int>(deltaSize);
+
+    int fieldSizeInt = static_cast<int>(fieldSize);
+
+    if (offsetX <= fieldSize && offsetY <= fieldSizeInt) {
+      switch (gridType) {
+      case GridType::BOARD:
+        try {
+          gameManager.placeShip(columnRow, columnIndex, isHorizontal);
+
+        } catch (std::invalid_argument &e) {
+          spdlog::warn("[GUI] cannot place ship here: {}", e.what());
+        }
+        break;
+      case GridType::RADAR:
+        gameManager.makeShot(columnRow, columnIndex);
+        spdlog::info("[GUI] mouse touches: ({}, {})", columnRow, columnIndex);
+        break;
+      }
+    } else {
+      SetMouseCursor(MOUSE_BUTTON_LEFT);
+    }
+  }
 }
 
 void GameGrid::draw() {

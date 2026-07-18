@@ -16,7 +16,6 @@ class GameField {
   Rectangle fieldRect;
   logic::FieldState state = logic::FieldState::EMPTY;
   bool isClickable = false;
-  std::function<void()> onClick;
 
 public:
   GameField(Rectangle fieldRect);
@@ -26,7 +25,6 @@ public:
 
   void setClickable(bool isClickable);
   void setState(logic::FieldState state);
-  void setOnClick(std::function<void()> onClick);
   void setPos(Rectangle pos);
 
   Rectangle *getRect();
