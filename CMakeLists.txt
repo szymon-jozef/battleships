@@ -211,7 +211,7 @@ if(WIN32)
 endif()
 
 # show warnings if developing 
-if (isDev)
+if (isDev AND ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 target_compile_options(battleships PRIVATE -Wall -Wextra -Wunreachable-code)
 target_compile_options(gui PRIVATE -Wall -Wextra -Wunreachable-code)
 target_compile_options(networking PRIVATE -Wall -Wextra -Wunreachable-code)
