@@ -13,25 +13,17 @@ namespace battleship {
 namespace gui {
 
 class GameField {
-  Rectangle fieldRect;
   logic::FieldState state = logic::FieldState::EMPTY;
   bool isClickable = true;
 
 public:
-  GameField(Rectangle fieldRect);
-
-  void update();
-  void draw();
+  GameField() = default;
 
   void setClickable(bool isClickable);
   void setState(logic::FieldState state);
-  void setPos(Rectangle pos);
 
   bool getIsClickable();
   logic::FieldState getState();
-
-  Rectangle *getRect();
-  void onHover();
 };
 
 class GameGrid {
@@ -40,7 +32,6 @@ class GameGrid {
   std::vector<std::vector<GameField>> fields;
   std::optional<unsigned short int> hoveredRow = std::nullopt, hoveredColumn = std::nullopt;
 
-  Rectangle *lastFieldRect = nullptr;
   bool isHorizontal = true;
   bool isActive = false;
 
@@ -77,9 +68,6 @@ class GameGrid {
   // TODO! Use this only on status change
   /// @brief Set the active grid clickable
   void updateGridState();
-
-  /// @brief Update the position of every field in the grid
-  void updateFieldsPos();
 
   void drawHighlitedField();
 

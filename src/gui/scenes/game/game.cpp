@@ -1,7 +1,6 @@
 #include "game.hpp"
 #include "logic_models.hpp"
 #include "models/data_structures.hpp"
-#include <chrono>
 #include <raylib.h>
 #include <stdexcept>
 #include <thread>
@@ -10,29 +9,6 @@ namespace battleship {
 namespace gui {
 
 // === GameField ===
-GameField::GameField(Rectangle fieldRect)
-    : fieldRect(fieldRect) {}
-
-void GameField::draw() {
-  switch (state) {
-  case battleship::logic::FieldState::EMPTY:
-    DrawRectangleRec(fieldRect, BLUE);
-    break;
-  case battleship::logic::FieldState::HIT:
-    DrawRectangleRec(fieldRect, ORANGE);
-    break;
-  case battleship::logic::FieldState::MISSED:
-    DrawRectangleRec(fieldRect, GRAY);
-    break;
-  case battleship::logic::FieldState::SUNK:
-    DrawRectangleRec(fieldRect, RED);
-    break;
-  case battleship::logic::FieldState::TAKEN:
-    DrawRectangleRec(fieldRect, BLACK);
-    break;
-  }
-}
-
 void GameField::setClickable(bool isClickable) {
   this->isClickable = isClickable;
 }
@@ -43,14 +19,6 @@ bool GameField::getIsClickable() {
 
 void GameField::setState(logic::FieldState state) {
   this->state = state;
-}
-
-void GameField::setPos(Rectangle pos) {
-  fieldRect = pos;
-}
-
-Rectangle *GameField::getRect() {
-  return &fieldRect;
 }
 
 logic::FieldState GameField::getState() {
@@ -105,15 +73,11 @@ void GameGrid::updateLabelContent() {
 
 /// @brief Update the position of grid rectangle, making it fit the last field.
 void GameGrid::updateGridRect() {
-  if (!lastFieldRect) {
-    spdlog::warn("[GUI] lastFieldRect is a nullptr?");
-    return;
-  }
+  float lastFieldX = gridRect.x + (columns - 1) * deltaSize;
+  float lastFieldY = gridRect.y + (rows - 1) * deltaSize;
 
-  gridRect = Rectangle{gridRect.x,
-                       gridRect.y,
-                       ((lastFieldRect->x + lastFieldRect->width) - gridRect.x),
-                       ((lastFieldRect->y + lastFieldRect->height) - gridRect.y)};
+  gridRect = Rectangle{
+      gridRect.x, gridRect.y, ((lastFieldX + fieldSize) - gridRect.x), ((lastFieldY + fieldSize) - gridRect.y)};
 }
 
 /// @brief Update the position of label
@@ -176,23 +140,6 @@ void GameGrid::updateGridState() {
   }
 }
 
-/// @brief Update the position of every field in the grid
-void GameGrid::updateFieldsPos() {
-  current_x_pos = gridRect.x;
-  current_y_pos = gridRect.y;
-
-  for (unsigned short int columnIndex = 0; columnIndex < columns; columnIndex++) {
-    auto &column = fields[columnIndex];
-
-    for (int fieldIndex = 0; fieldIndex < rows; fieldIndex++) {
-      fields[columnIndex][fieldIndex].setPos(Rectangle{current_x_pos, current_y_pos, fieldSize, fieldSize});
-      current_y_pos += deltaSize;
-    }
-    current_y_pos = begin_y_pos;
-    current_x_pos += deltaSize;
-  }
-}
-
 GameGrid::GameGrid(gameManager::GameManager &gameManager, GridType type)
     : gameManager(gameManager)
     , gridRect({0, 0, GetScreenWidth() / 2.0f, GetScreenHeight() / 1.0f})
@@ -208,14 +155,12 @@ GameGrid::GameGrid(gameManager::GameManager &gameManager, GridType type)
     auto &column = fields[columnIndex];
 
     for (int fieldIndex = 0; fieldIndex < rows; fieldIndex++) {
-      column.emplace_back(Rectangle{current_x_pos, current_y_pos, fieldSize, fieldSize});
+      column.emplace_back();
     }
 
     current_y_pos = begin_y_pos;
     current_x_pos += deltaSize;
   }
-
-  lastFieldRect = fields.back().back().getRect();
 
   gridRect.x += padding_x;
   gridRect.width -= padding_x * 2.0f;
@@ -224,7 +169,6 @@ GameGrid::GameGrid(gameManager::GameManager &gameManager, GridType type)
   gridRect.height -= padding_y * 2.0f;
 
   updateData();
-  updateFieldsPos();
   updateGridRect();
   updateLabelPos();
   updateLabelContent();
@@ -244,7 +188,6 @@ void GameGrid::update() {
 
   if (IsWindowResized()) {
     updateData();
-    updateFieldsPos();
     updateGridRect();
     updateLabelPos();
   }
@@ -300,9 +243,29 @@ void GameGrid::handleFieldClick() {
 
 void GameGrid::draw() {
   DrawRectangleRec(gridRect, WHITE);
-  for (auto &column : fields) {
-    for (auto &field : column) {
-      field.draw();
+  for (size_t column = 0; column < columns; column++) {
+    for (size_t row = 0; row < rows; row++) {
+      float x = gridRect.x + column * deltaSize;
+      float y = gridRect.y + row * deltaSize;
+      auto &field = fields[column][row];
+
+      switch (field.getState()) {
+      case battleship::logic::FieldState::EMPTY:
+        DrawRectangleRec({x, y, fieldSize, fieldSize}, BLUE);
+        break;
+      case battleship::logic::FieldState::HIT:
+        DrawRectangleRec({x, y, fieldSize, fieldSize}, ORANGE);
+        break;
+      case battleship::logic::FieldState::MISSED:
+        DrawRectangleRec({x, y, fieldSize, fieldSize}, GRAY);
+        break;
+      case battleship::logic::FieldState::SUNK:
+        DrawRectangleRec({x, y, fieldSize, fieldSize}, RED);
+        break;
+      case battleship::logic::FieldState::TAKEN:
+        DrawRectangleRec({x, y, fieldSize, fieldSize}, BLACK);
+        break;
+      }
     }
   }
   DrawText(label.c_str(), label_x, label_y, fontSize, WHITE);
@@ -317,7 +280,9 @@ void GameGrid::drawHighlitedField() {
   if (hoveredRow && hoveredColumn) {
     auto &field = fields[hoveredColumn.value()][hoveredRow.value()];
     if (isActive && field.getIsClickable()) {
-      DrawRectangleRec(*field.getRect(), GREEN);
+      float x = gridRect.x + hoveredColumn.value() * deltaSize;
+      float y = gridRect.y + hoveredRow.value() * deltaSize;
+      DrawRectangleRec(Rectangle{x, y, fieldSize, fieldSize}, GREEN);
     }
   }
 }
