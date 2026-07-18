@@ -1,3 +1,4 @@
+#include "gui.hpp"
 #include "scenes/all_scenes.hpp"
 #include "scenes/game_finish/game_finish.hpp"
 #include <cstdlib>
@@ -8,60 +9,45 @@
 namespace battleship {
 namespace gui {
 
-class assetsManager {
-  std::vector<std::filesystem::path> expectedPaths = {std::filesystem::path("/usr/share/battleship"),
-                                                      std::filesystem::path(GetApplicationDirectory()) /
-                                                          std::filesystem::path("./assets"),
-                                                      std::filesystem::path("./assets")};
-  std::filesystem::path pathPrefix;
+void AssetsManager::loadPaths() {
+  bg1 = LoadTexture(std::filesystem::path(pathPrefix / std::filesystem::path("gfx/bg1.jpg")).string().c_str());
+  bg2 = LoadTexture(std::filesystem::path(pathPrefix / std::filesystem::path("gfx/bg2.jpg")).string().c_str());
+  bg3 = LoadTexture(std::filesystem::path(pathPrefix / std::filesystem::path("gfx/bg3.jpg")).string().c_str());
+  playBackground = LoadTexture(
+      std::filesystem::path(pathPrefix / std::filesystem::path("gfx/play_background.jpg")).string().c_str());
+}
 
-  // we first change to string then to c_str, because windows is bad
-  void loadPaths() {
-    bg1 = LoadTexture(std::filesystem::path(pathPrefix / std::filesystem::path("gfx/bg1.jpg")).string().c_str());
-    bg2 = LoadTexture(std::filesystem::path(pathPrefix / std::filesystem::path("gfx/bg2.jpg")).string().c_str());
-    bg3 = LoadTexture(std::filesystem::path(pathPrefix / std::filesystem::path("gfx/bg3.jpg")).string().c_str());
-    playBackground = LoadTexture(
-        std::filesystem::path(pathPrefix / std::filesystem::path("gfx/play_background.jpg")).string().c_str());
+AssetsManager::AssetsManager() {
+  char *envPath = std::getenv("BATTLESHIPS_ASSETS_DIR");
+
+  if (envPath) {
+    pathPrefix = std::filesystem::path(envPath);
+    spdlog::info("[GUI] Env variable BATTLESHIPS_ASSETS_DIR was set. Setting pathPrefix as: {}", envPath);
+    loadPaths();
+    return;
   }
 
-public:
-  Texture2D bg1;
-  Texture2D bg2;
-  Texture2D bg3;
-  Texture2D playBackground;
-
-  assetsManager() {
-    char *envPath = std::getenv("BATTLESHIPS_ASSETS_DIR");
-
-    if (envPath) {
-      pathPrefix = std::filesystem::path(envPath);
-      spdlog::info("[GUI] Env variable BATTLESHIPS_ASSETS_DIR was set. Setting pathPrefix as: {}", envPath);
-      loadPaths();
-      return;
+  for (const auto &path : expectedPaths) {
+    if (std::filesystem::is_directory(path)) {
+      pathPrefix = std::filesystem::absolute(path);
+      spdlog::info("[GUI] found assets path at: {}", pathPrefix.string());
+      break;
     }
-
-    for (const auto &path : expectedPaths) {
-      if (std::filesystem::is_directory(path)) {
-        pathPrefix = std::filesystem::absolute(path);
-        spdlog::info("[GUI] found assets path at: {}", pathPrefix.string());
-        break;
-      }
-    }
-    if (!pathPrefix.empty()) {
-      loadPaths();
-      return;
-    }
-
-    spdlog::warn("[GUI] could not fine any viable asset directory");
+  }
+  if (!pathPrefix.empty()) {
+    loadPaths();
+    return;
   }
 
-  ~assetsManager() {
-    UnloadTexture(bg1);
-    UnloadTexture(bg2);
-    UnloadTexture(bg3);
-    UnloadTexture(playBackground);
-  }
-};
+  spdlog::warn("[GUI] could not fine any viable asset directory");
+}
+
+AssetsManager::~AssetsManager() {
+  UnloadTexture(bg1);
+  UnloadTexture(bg2);
+  UnloadTexture(bg3);
+  UnloadTexture(playBackground);
+}
 
 int run() {
   const int screenWidth = 1220;
@@ -79,7 +65,7 @@ int run() {
   GuiState previousState = currentState;
   bool shouldClose = false;
 
-  assetsManager bg;
+  AssetsManager bg;
 
   std::unique_ptr<Scene> currentScene;
   currentScene = std::make_unique<MainMenu>(gameContext, bg.bg1);

@@ -1,11 +1,9 @@
-#include "gui/main.cpp"
+#include "gui/gui.hpp"
 #include <boost/program_options.hpp>
 #include <boost/program_options/detail/parsers.hpp>
 #include <boost/program_options/options_description.hpp>
 #include <iostream>
 #include <spdlog/spdlog.h>
-
-using namespace battleship::gui;
 
 int main(int ac, char **av) {
   boost::program_options::options_description desc("Allowe options");
@@ -25,5 +23,5 @@ int main(int ac, char **av) {
   }
 
   spdlog::info("[MAIN] Running the game. Current version is: {}", GAME_VERSION);
-  return run();
+  return battleship::gui::run();
 }
