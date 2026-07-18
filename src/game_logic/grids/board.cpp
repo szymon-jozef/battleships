@@ -46,7 +46,7 @@ bool Board::placeShip(std::shared_ptr<Ship> ship,
 
   for (int row = rectangleTop; row <= rectangleBottom; row++) {
     for (int column = rectangleLeft; column <= rectangleRight; column++) {
-      if (grid[row][column].getState() == FieldState::TAKEN) {
+      if (getFieldState(row, column) == FieldState::TAKEN) {
         throw std::invalid_argument("Cannot place ship here, because of collision nearby!");
       }
     }
@@ -55,12 +55,12 @@ bool Board::placeShip(std::shared_ptr<Ship> ship,
   for (int i = 0; i < shipLength; i++) {
     if (isHorizontal) {
       spdlog::info("[Logic] Settings ({}, {}) as taken", startRow, startColumn + i);
-      grid[startRow][startColumn + i].placeShip(ship);
-      grid[startRow][startColumn + i].setState(FieldState::TAKEN);
+      grid[startRow * WIDTH + (startColumn + i)].placeShip(ship);
+      setFieldState(startRow, startColumn + i, FieldState::TAKEN);
     } else {
       spdlog::info("[Logic] Settings ({}, {}) as taken", startRow + i, startColumn);
-      grid[startRow + i][startColumn].placeShip(ship);
-      grid[startRow + i][startColumn].setState(FieldState::TAKEN);
+      grid[(startRow + i) * WIDTH + startColumn].placeShip(ship);
+      setFieldState(startRow + i, startColumn, FieldState::TAKEN);
     }
   }
   return true;
@@ -72,9 +72,9 @@ FieldState Board::recieveShot(unsigned short int row, unsigned short int column)
     throw std::invalid_argument("Given coordinates are out of bounds!");
   }
 
-  if (grid[row][column].getState() == FieldState::TAKEN) {
+  if (getFieldState(row, column) == FieldState::TAKEN) {
     spdlog::info("[Logic] there was a ship at ({},{})!", row, column);
-    Ship *ship = grid[row][column].getShip();
+    Ship *ship = grid[row * WIDTH + column].getShip();
     if (!ship) {
       throw std::logic_error("Taken field couldn't retrieve the ship. This "
                              "__should never happen!__");
@@ -83,17 +83,17 @@ FieldState Board::recieveShot(unsigned short int row, unsigned short int column)
 
     if (ship->isSunk()) {
       spdlog::info("[Logic] ship was sunk!");
-      grid[row][column].setState(FieldState::SUNK);
+      setFieldState(row, column, FieldState::SUNK);
       markNearbyAsSunk(row, column);
       return FieldState::SUNK;
     }
     spdlog::info("[Logic] ship was hit!");
-    grid[row][column].setState(FieldState::HIT);
+    setFieldState(row, column, FieldState::HIT);
     return FieldState::HIT;
   }
 
   spdlog::info("[Logic] Enemy attempted to hit ({},{}) but he missed!", row, column);
-  grid[row][column].setState(FieldState::MISSED);
+  setFieldState(row, column, FieldState::MISSED);
   return FieldState::MISSED;
 }
 

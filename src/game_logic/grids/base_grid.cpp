@@ -5,27 +5,31 @@
 namespace battleship {
 namespace logic {
 BaseGrid::BaseGrid(const unsigned short int width, const unsigned short int height)
-    : WIDTH(width)
-    , HEIGHT(height)
-    , grid(height, std::vector<Field>(width)) {}
+    : grid(height * width, Field())
+    , WIDTH(width)
+    , HEIGHT(height) {}
 
 FieldState BaseGrid::getFieldState(unsigned short int row, unsigned short int column) const {
-  return grid[row][column].getState();
+  return grid[row * WIDTH + column].getState();
+}
+
+void BaseGrid::setFieldState(unsigned short int row, unsigned short int column, FieldState state) {
+  grid[row * WIDTH + column].setState(state);
 }
 
 std::string BaseGrid::asString() const {
   std::stringstream s;
-  for (const auto &row : grid) {
-    for (const auto &field : row) {
-      s << static_cast<char>(field.getState());
+  for (size_t fieldIndex = 0; fieldIndex < WIDTH * HEIGHT; fieldIndex++) {
+    s << static_cast<char>(grid[fieldIndex].getState());
+    if (fieldIndex % WIDTH == 0) {
+      s << '\n';
     }
-    s << '\n';
   }
   return s.str();
 }
 
 void BaseGrid::markNearbyAsSunk(unsigned short int row, unsigned short int column) {
-  FieldState baseFieldState = grid[row][column].getState();
+  FieldState baseFieldState = getFieldState(row, column);
 
   std::vector<std::tuple<unsigned short int, unsigned short int>> toCheck;
 
@@ -48,9 +52,9 @@ void BaseGrid::markNearbyAsSunk(unsigned short int row, unsigned short int colum
 
         if (checkRow >= 0 && checkRow < HEIGHT && checkColumn >= 0 && checkColumn < WIDTH) {
 
-          if (grid[checkRow][checkColumn].getState() == FieldState::HIT) {
+          if (getFieldState(checkRow, checkColumn) == FieldState::HIT) {
             toCheck.push_back(std::make_tuple(checkRow, checkColumn));
-            grid[checkRow][checkColumn].setState(FieldState::SUNK);
+            setFieldState(checkRow, checkColumn, FieldState::SUNK);
           }
         }
       }

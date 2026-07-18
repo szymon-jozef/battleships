@@ -21,12 +21,12 @@ void Radar::markShotResult(FieldState shotResult, unsigned short int row, unsign
                  "fields as sunk",
                  row,
                  column);
-    grid[row][column].setState(FieldState::SUNK);
+    setFieldState(row, column, FieldState::SUNK);
     markNearbyAsSunk(row, column);
     return;
   }
   spdlog::info("[Logic] Field at ({}, {}) was {}", row, column, static_cast<char>(shotResult));
-  grid[row][column].setState(shotResult);
+  setFieldState(row, column, shotResult);
 }
 
 } // namespace logic
