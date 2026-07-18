@@ -1,14 +1,10 @@
 #include "game.hpp"
-#include "logic_models.hpp"
 #include "models/data_structures.hpp"
 #include <raylib.h>
-#include <stdexcept>
 #include <thread>
 
 namespace battleship {
 namespace gui {
-
-
 
 /// === Game Scene ===
 void Game::updateLabels() {
