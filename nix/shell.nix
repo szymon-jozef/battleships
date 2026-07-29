@@ -8,6 +8,7 @@
           clang-tools
           clang-analyzer
           valgrind
+          cppcheck
         ];
 
         inputsFrom = [
