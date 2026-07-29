@@ -8,17 +8,15 @@ on:
 
 jobs:
   build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-  runs-on: ubuntu-latest
+      - name: install tools
+        run: sudo apt update -y && sudo apt install -y cppcheck fd-find
 
-  steps:
-    - uses: actions/checkout@v4
+      - name: cppcheck
+        run: cppcheck --enable=all --error-exitcode=1 .
 
-    - name: install tools
-      run: sudo apt update -y && sudo apt install -y cppcheck fd-find
-
-    - name: cppcheck
-      run: cppcheck --enable=all ${{github.workspace}}
-
-    - name: clang-format
-      run: fdfind --type file --extension cpp --extension hpp --exec clang-format --dry-run
+      - name: clang-format
+        run: fdfind --type file --extension cpp --extension hpp --exec clang-format --dry-run -Werror
