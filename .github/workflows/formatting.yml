@@ -18,7 +18,7 @@ jobs:
         run: sudo apt update -y && sudo apt install -y cppcheck fd-find
 
       - name: cppcheck
-        run: cppcheck --enable=all --error-exitcode=1 .
+        run: cppcheck --enable=all --error-exitcode=1 --project ${{github.workspace}}build/compile_commands.json
 
       - name: clang-format
         run: fdfind --type file --extension cpp --extension hpp --exec clang-format --dry-run -Werror
