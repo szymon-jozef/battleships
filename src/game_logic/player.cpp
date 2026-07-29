@@ -14,16 +14,23 @@ Player::Player(std::string name, unsigned short int width, unsigned short int he
     , board(Board(width, height))
     , radar(Radar(width, height)) {
   spdlog::info("[Logic] Player named {} was created!", this->name);
-  // there are 10 ships at total
-  shipsBay.reserve(10);
-  for (int i = 0; i < 4; ++i)
-    shipsBay.emplace_back(std::make_shared<Ship>(ShipType::OneMaster));
-  for (int i = 0; i < 3; ++i)
-    shipsBay.emplace_back(std::make_shared<Ship>(ShipType::TwoMaster));
-  for (int i = 0; i < 2; ++i)
-    shipsBay.emplace_back(std::make_shared<Ship>(ShipType::ThreeMaster));
 
-  shipsBay.emplace_back(std::make_shared<Ship>(ShipType::FourMaster));
+  const std::array fleet{
+      std::pair{ShipType::OneMaster, 4},
+      std::pair{ShipType::TwoMaster, 3},
+      std::pair{ShipType::ThreeMaster, 2},
+      std::pair{ShipType::FourMaster, 1},
+  };
+
+  shipsBay.clear();
+  shipsBay.reserve(fleet.size());
+
+  for (const auto &[type, count] : fleet) {
+    for (int i = 0; i < count; ++i) {
+      shipsBay.emplace_back(std::make_shared<Ship>(type));
+    }
+  }
+
   ships = shipsBay;
 }
 
