@@ -1,3 +1,6 @@
+![Tests status](https://github.com/szymon-jozef/battleships/actions/workflows/tests.yml/badge.svg)
+![Formatting tests status](https://github.com/szymon-jozef/battleships/actions/workflows/formatting.yml/badge.svg)
+
 Classic game of battleships.
 
 Assets made by my friend [real-morbius](https://github.com/Real-Morbius)

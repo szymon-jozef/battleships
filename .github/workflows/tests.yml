@@ -1,0 +1,33 @@
+name: Unit and integration tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    env:
+      BUILD_TYPE: Debug
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install dependencies
+        run: sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config
+
+      - name: configure
+        run: cmake -B ${{github.workspace}}/build -D"isDev=True" -G Ninja -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
+
+      - name: compile
+        run: cmake --build ${{github.workspace}}/build 
+
+      - name: logic tests
+        run: ${{github.workspace}}/build/LogicTests
+
+      - name: integration tests
+        run: ${{github.workspace}}/build/IntegrationTests
