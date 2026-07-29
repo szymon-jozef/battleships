@@ -7,6 +7,7 @@
 #include <raylib.h>
 #include <spdlog/spdlog.h>
 #include <string>
+#include <string_view>
 
 namespace battleship {
 namespace gui {
@@ -146,18 +147,16 @@ class AssetsManager {
                                                           std::filesystem::path("./assets"),
                                                       std::filesystem::path("./assets")};
   void loadPaths() {
-    bg1 = LoadTexture(std::filesystem::path(pathPrefix / std::filesystem::path("gfx/bg1.jpg")).string().c_str());
-    bg2 = LoadTexture(std::filesystem::path(pathPrefix / std::filesystem::path("gfx/bg2.jpg")).string().c_str());
-    bg3 = LoadTexture(std::filesystem::path(pathPrefix / std::filesystem::path("gfx/bg3.jpg")).string().c_str());
-    playBackground = LoadTexture(
-        std::filesystem::path(pathPrefix / std::filesystem::path("gfx/play_background.jpg")).string().c_str());
+    bg1 = loadAsset<Texture2D>("gfx/bg1.jpg");
+    bg2 = loadAsset<Texture2D>("gfx/bg2.jpg");
+    bg3 = loadAsset<Texture2D>("gfx/bg3.jpg");
+    playBackground = loadAsset<Texture2D>("gfx/play_background.jpg");
 
-    click = LoadSound(std::filesystem::path(pathPrefix / std::filesystem::path("sfx/click.mp3")).string().c_str());
-
-    hit = LoadSound(std::filesystem::path(pathPrefix / std::filesystem::path("sfx/hit.ogg")).string().c_str());
-    sink = LoadSound(std::filesystem::path(pathPrefix / std::filesystem::path("sfx/sink.ogg")).string().c_str());
-    miss = LoadSound(std::filesystem::path(pathPrefix / std::filesystem::path("sfx/miss.ogg")).string().c_str());
-    start = LoadSound(std::filesystem::path(pathPrefix / std::filesystem::path("sfx/play.mp3")).string().c_str());
+    click = loadAsset<Sound>("sfx/click.mp3");
+    hit = loadAsset<Sound>("sfx/hit.ogg");
+    sink = loadAsset<Sound>("sfx/sink.ogg");
+    miss = loadAsset<Sound>("sfx/miss.ogg");
+    start = loadAsset<Sound>("sfx/play.mp3");
   }
 
 public:
@@ -214,6 +213,18 @@ public:
 
   AssetsManager(const AssetsManager &as) = delete;
   AssetsManager &operator=(const AssetsManager &as) = delete;
+
+private:
+  template <typename T> T loadAsset(std::string_view subPath) {
+    const auto assetPath = pathPrefix / std::filesystem::path{subPath};
+
+    if constexpr (std::same_as<T, Texture2D>)
+      return LoadTexture(assetPath.string().c_str());
+    else if constexpr (std::same_as<T, Sound>)
+      return LoadSound(assetPath.string().c_str());
+    else
+      static_assert(std::same_as<T, Texture2D> || std::same_as<T, Sound>);
+  }
 };
 
 class GameContext {

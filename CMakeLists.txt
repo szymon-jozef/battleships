@@ -203,14 +203,12 @@ catch_discover_tests(IntegrationTests)
 endif()
 
 if(WIN32)
-    target_compile_definitions(battleships PRIVATE WIN32_LEAN_AND_MEAN NOGDI NOUSER NOMINMAX)
+    target_compile_definitions(battleships PRIVATE WIN32_LEAN_AND_MEAN NOGDI NOUSER NOMINMAX _CRT_SECURE_NO_WARNINGS)
+    target_compile_definitions(gui PRIVATE WIN32_LEAN_AND_MEAN NOGDI NOUSER NOMINMAX _CRT_SECURE_NO_WARNINGS)
+    target_compile_definitions(networking PRIVATE _CRT_SECURE_NO_WARNINGS)
 endif()
 
-if(WIN32)
-    target_compile_definitions(gui PRIVATE WIN32_LEAN_AND_MEAN NOGDI NOUSER NOMINMAX)
-endif()
-
-# show warnings if developing 
+# show warnings if developing
 if (isDev AND ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 target_compile_options(battleships PRIVATE -Wall -Wextra -Wunreachable-code)
 target_compile_options(gui PRIVATE -Wall -Wextra -Wunreachable-code)

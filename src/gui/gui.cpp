@@ -52,6 +52,7 @@ int run() {
         break;
       case GuiState::QUIT:
         shouldClose = true;
+        break;
       }
     }
 
