@@ -56,6 +56,8 @@ int run() {
       }
     }
 
+    PollInputEvents();
+
     // === Updating ===
     currentScene->update();
 
@@ -68,7 +70,6 @@ int run() {
     EndDrawing();
 
     SwapScreenBuffer();
-    PollInputEvents();
   }
   CloseWindow();
   return 0;
