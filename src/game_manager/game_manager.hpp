@@ -27,9 +27,9 @@ public:
   logic::FieldState getBoardField(unsigned short int row, unsigned short int column);
   logic::FieldState getRadarField(unsigned short int row, unsigned short int column);
 
-  std::string getPlayerName() const;
-  std::string getEnemyName() const;
-  std::string getLoserName() const;
+  const std::string &getPlayerName() const;
+  const std::string &getEnemyName() const;
+  const std::string &getLoserName() const;
 
   unsigned short int getBoardWidth() const;
   unsigned short int getBoardHeight() const;
