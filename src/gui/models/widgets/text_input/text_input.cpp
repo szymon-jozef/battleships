@@ -24,10 +24,10 @@ TextInput::TextInput(float pos_y, Rectangle scaleRect, std::string &target, Inpu
 
   switch (inputType) {
   case InputType::NAME:
-    inputText.setLabel("Player name");
+    inputText.setInnerLabel("Player name");
     break;
   case InputType::IP:
-    inputText.setLabel("IP address");
+    inputText.setInnerLabel("IP address");
     break;
   }
 }
@@ -59,7 +59,6 @@ bool TextInput::getKeyboardInput() {
       buffer[letterCount + 1] = '\0';
       letterCount++;
     }
-    key = GetCharPressed();
     return true;
   }
   return false;
@@ -166,7 +165,7 @@ void TextInput::update() {
 
 void TextInput::updateCharactersLeftPrompt() {
   charactersLeft = TextFormat("%i/%i", letterCount, MAX_INPUT_CHARS);
-  charactersLeftLabel.setLabel(charactersLeft.data());
+  charactersLeftLabel.setInnerLabel(charactersLeft.data());
   charactersLeftLabel.setY(finalPositionRect.y + finalPositionRect.height);
   charactersLeftLabel.updateEveryPos(true); // we do this since widget_vector changes Y position of the thing and i'm
                                             // not sure if we can update it once after this

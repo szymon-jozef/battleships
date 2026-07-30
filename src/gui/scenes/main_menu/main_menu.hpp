@@ -12,7 +12,7 @@ class MainMenu : public Scene {
 
 public:
   MainMenu(GameContext &gameContext, Texture2D &background);
-  ~MainMenu();
+  ~MainMenu() override;
 
   void update() override;
   void draw() override;

@@ -13,7 +13,7 @@ class ModeSelection : public Scene {
 
 public:
   ModeSelection(GameContext &gameContext, Texture2D &background);
-  ~ModeSelection();
+  ~ModeSelection() override;
 
   void update() override;
   void draw() override;

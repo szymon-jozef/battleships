@@ -103,9 +103,10 @@ public:
 
     std::string line;
     std::string_view line_view, type, value;
-    size_t delimeterPos;
 
     while (std::getline(file, line)) {
+      size_t delimeterPos;
+
       line_view = std::string_view(line);
       delimeterPos = line_view.find('=');
       if (delimeterPos == 0 || delimeterPos == std::string::npos) {
@@ -182,19 +183,19 @@ public:
       return;
     }
 
-    for (const auto &path : expectedPaths) {
-      if (std::filesystem::is_directory(path)) {
-        pathPrefix = std::filesystem::absolute(path);
-        spdlog::info("[GUI] found assets path at: {}", pathPrefix.string());
-        break;
-      }
-    }
-    if (!pathPrefix.empty()) {
-      loadPaths();
+    auto foundPathIterator =
+        std::find_if(expectedPaths.begin(), expectedPaths.end(), [](const std::filesystem::path &p) {
+          return std::filesystem::is_directory(p);
+        });
+
+    if (foundPathIterator == expectedPaths.end()) {
+      spdlog::warn("[GUI] could not fine any viable asset directory");
       return;
     }
 
-    spdlog::warn("[GUI] could not fine any viable asset directory");
+    pathPrefix = *foundPathIterator;
+    spdlog::info("[GUI] found assets path at: {}", pathPrefix.string());
+    loadPaths();
   }
 
   ~AssetsManager() {

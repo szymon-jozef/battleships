@@ -13,7 +13,7 @@ class WidgetsVector {
   GameContext &gameContext;
 
   std::vector<std::unique_ptr<Widget>> widgets;
-  float margin, start_y, fontSize;
+  float margin, start_y, fontSize = 12;
   float width, height;
   int currentFocus = 0;
 

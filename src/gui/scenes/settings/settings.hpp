@@ -11,7 +11,7 @@ class Settings : public Scene {
 
 public:
   Settings(GameContext &gameContext, Texture2D &background);
-  ~Settings() = default;
+  ~Settings() override = default;
 
   void update() override;
   void draw() override;
