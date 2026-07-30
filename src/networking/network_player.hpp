@@ -65,11 +65,11 @@ public:
 
   void switchTurn() {
     std::scoped_lock lock(mutex);
-    auto newTurn = *std::find_if(
+    auto newTurn = std::find_if(
         playerList.begin(), playerList.end(), [this](std::shared_ptr<NetworkPlayer> p) { return currentTurn != p; });
 
-    if (newTurn) {
-      currentTurn = newTurn;
+    if (newTurn != playerList.end()) {
+      currentTurn = *newTurn;
     }
   }
 
@@ -80,14 +80,14 @@ public:
 
   std::shared_ptr<NetworkPlayer> getPassivePlayer() {
     std::scoped_lock lock(mutex);
-    auto newPassivePlayer = *std::find_if(
+    auto newPassivePlayer = std::find_if(
         playerList.begin(), playerList.end(), [this](std::shared_ptr<NetworkPlayer> p) { return p != currentTurn; });
 
-    if (newPassivePlayer) {
-      return newPassivePlayer;
-    } else {
-      return nullptr;
+    if (newPassivePlayer != playerList.end()) {
+      return *newPassivePlayer;
     }
+
+    return nullptr;
   }
 
   std::vector<std::shared_ptr<NetworkPlayer>> getPlayers() const {
@@ -97,15 +97,15 @@ public:
 
   std::shared_ptr<NetworkPlayer> getPlayerById(boost::uuids::uuid id) const {
     std::scoped_lock lock(mutex);
-    auto foundPlayer = *std::find_if(playerList.begin(), playerList.end(), [id](std::shared_ptr<NetworkPlayer> p) {
+    auto foundPlayer = std::find_if(playerList.begin(), playerList.end(), [id](std::shared_ptr<NetworkPlayer> p) {
       return p->connection->getId() == id;
     });
 
-    if (foundPlayer) {
-      return foundPlayer;
-    } else {
-      return nullptr;
+    if (foundPlayer != playerList.end()) {
+      return *foundPlayer;
     }
+
+    return nullptr;
   }
 
   /// @brief Check if every player has the same gameStatus and act accordingly
