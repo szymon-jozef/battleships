@@ -151,8 +151,8 @@ Remove files that were installed by cmake. That includes:
 - `C:\Program Files (x86)\battleships`
 
 ### Linux
-- `/usr/bin/battleships`
-- `/usr/share/battleships`
+- `/usr/local/bin/battleships`
+- `/usr/local/share/battleships`
 
 ## NixOS
 Just remove lines you added from your configuration.
