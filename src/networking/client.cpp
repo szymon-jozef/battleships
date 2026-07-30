@@ -128,20 +128,20 @@ void Client::onMessage(Message &msg) {
 
 // === Sending messages ===
 
-void Client::sendHandshake(std::string name) {
+void Client::sendHandshake(std::string playerName) {
   Message msg;
 
   msg.header.id = MessageType::CLIENT_HANDSHAKE;
   msg.header.receiver = boost::uuids::nil_uuid();
 
-  PlayerNameMessage pname;
+  PlayerNameMessage playerNameMessage;
 
-  std::strncpy(pname.name, name.c_str(), sizeof(pname.name) - 1);
-  if (sizeof(pname.name) < name.length()) {
-    spdlog::warn("[Client] Given username is longer than {}, so it will be cut short!", sizeof(pname.name));
+  std::strncpy(playerNameMessage.name, playerName.c_str(), sizeof(playerNameMessage.name) - 1);
+  if (sizeof(playerNameMessage.name) < playerName.length()) {
+    spdlog::warn("[Client] Given username is longer than {}, so it will be cut short!", sizeof(playerNameMessage.name));
   }
 
-  msg.push(pname);
+  msg.push(playerNameMessage);
 
   send(msg);
 }
@@ -227,9 +227,9 @@ void Client::handleShotResult(Message &msg) {
 }
 
 void Client::handleServerHandshake(Message &msg) {
-  auto id = msg.pop<boost::uuids::uuid>();
-  spdlog::info("[Client] got id {} from the server", boost::uuids::to_string(id));
-  this->id = id;
+  auto newId = msg.pop<boost::uuids::uuid>();
+  spdlog::info("[Client] got id {} from the server", boost::uuids::to_string(newId));
+  this->id = newId;
 }
 
 void Client::handleBroadcastingPlayers(Message &msg) {

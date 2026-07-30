@@ -44,7 +44,7 @@ public:
   // TODO! Change  player and enemy id,name to some more sensible data structure
   std::string loserName;
 
-  GameStatus currentGameStatus;
+  GameStatus currentGameStatus = GameStatus::LOBBY;
 
   Client() = default;
   ~Client();
