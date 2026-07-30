@@ -24,7 +24,7 @@ class Client {
 
   void send(const Message &msg);
   void onMessage(Message &msg);
-  void sendHandshake(std::string name);
+  void sendHandshake(const std::string &name);
 
   void handleIncomingAttack(Message &msg);
   void handleShotResult(Message &msg);

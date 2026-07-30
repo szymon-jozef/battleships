@@ -128,7 +128,7 @@ void Client::onMessage(Message &msg) {
 
 // === Sending messages ===
 
-void Client::sendHandshake(std::string playerName) {
+void Client::sendHandshake(const std::string &playerName) {
   Message msg;
 
   msg.header.id = MessageType::CLIENT_HANDSHAKE;
