@@ -89,7 +89,7 @@ bool Player::hasShips() {
   return !shipsBay.empty();
 }
 
-const std::string Player::getName() const {
+const std::string &Player::getName() const {
   return name;
 }
 
