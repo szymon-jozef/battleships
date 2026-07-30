@@ -164,9 +164,7 @@ Just remove lines you added from your configuration.
 If you have any suggestion or want to help improve the game, please refer to [contributing guide](CONTRIBUTING.md)
 
 # Roadmap:
-- Fixing what's not working
-- [ ] Single player
-- [ ] Highlighting hovered elements
+Most planned features are described in the [issues tab](https://github.com/szymon-jozef/battleships/issues) with enhancement label.
 
 # Special thanks
 - My friend [real-morbius](https://github.com/Real-Morbius) for making the game assets
