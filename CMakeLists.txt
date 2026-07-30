@@ -228,7 +228,7 @@ else()
     if (WIN32)
         install(DIRECTORY assets DESTINATION "C:/Program files/battleships")
     else()
-        install(DIRECTORY assets DESTINATION usr/share/battleships)
+        install(DIRECTORY assets DESTINATION share/battleships)
     endif()
 
 endif()
