@@ -2,10 +2,16 @@ name: Style check
 
 on:
   push:
+    paths:
+      - "**.cpp"
+      - "**.hpp"
     branches: [ master ]
   pull_request:
     branches: [ master ]
-
+    paths:
+      - "**.cpp"
+      - "**.hpp"
+      
 jobs:
   build:
 
