@@ -11,10 +11,10 @@ namespace networking {
 /// @brief Class made for the server to store it's players
 struct NetworkPlayer {
   std::optional<std::string> name;
-  GameStatus currentGameStatus;
+  GameStatus currentGameStatus = GameStatus::LOBBY;
   std::shared_ptr<Connection> connection;
 
-  NetworkPlayer(std::shared_ptr<Connection> connection)
+  explicit NetworkPlayer(std::shared_ptr<Connection> connection)
       : connection(connection) {}
 
   boost::uuids::uuid getId() const {
@@ -65,7 +65,7 @@ public:
 
   void switchTurn() {
     std::scoped_lock lock(mutex);
-    for (auto &player : playerList) {
+    for (const auto &player : playerList) {
       if (currentTurn != player) {
         currentTurn = player;
         return;
@@ -80,7 +80,7 @@ public:
 
   std::shared_ptr<NetworkPlayer> getPassivePlayer() {
     std::scoped_lock lock(mutex);
-    for (auto &player : playerList) {
+    for (const auto &player : playerList) {
       if (player != currentTurn) {
         return player;
       }
@@ -95,7 +95,7 @@ public:
 
   std::shared_ptr<NetworkPlayer> getPlayerById(boost::uuids::uuid id) const {
     std::scoped_lock lock(mutex);
-    for (auto &player : playerList) {
+    for (const auto &player : playerList) {
       if (player->connection->getId() == id) {
         return player;
       }
@@ -137,7 +137,7 @@ public:
 
   bool isEmpty() const {
     std::scoped_lock lock(mutex);
-    return playerList.size() <= 0;
+    return playerList.size() == 0;
   }
 };
 } // namespace networking
