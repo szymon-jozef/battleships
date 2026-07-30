@@ -47,7 +47,7 @@ class Server {
   void broadcast(const Message &msg);
 
 public:
-  Server(uint16_t port);
+  explicit Server(uint16_t port);
   ~Server();
 
   bool start();
