@@ -27,7 +27,7 @@ jobs:
         run: cmake -B ${{github.workspace}}/build -D"isDev=True" -G Ninja -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
 
       - name: cppcheck
-        run: cppcheck --enable=warning,style,performance,portability --error-exitcode=1 --project ${{github.workspace}}build/compile_commands.json
+        run: cppcheck --enable=warning,style,performance,portability --error-exitcode=1 --project=${{github.workspace}}/build/compile_commands.json
 
       - name: clang-format
         run: fdfind --type file --extension cpp --extension hpp --exec clang-format --dry-run -Werror
