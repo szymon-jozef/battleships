@@ -151,7 +151,7 @@ public:
   FieldState getRadarState(unsigned short int row, unsigned short int column);
   /// @return True if ships vector isn't empty. False otherwise
   bool hasShips();
-  std::string getName() const;
+  const std::string getName() const;
   std::string boardAsString();
   std::string radarAsString();
 
