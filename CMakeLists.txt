@@ -9,6 +9,9 @@ project(battleships VERSION 0.0.6)
 option(isDev "build tests" false)
 option(isRelease "install everything to ." false)
 
+if(MSVC)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
 
 find_package(Boost REQUIRED COMPONENTS program_options)
 find_package(spdlog REQUIRED)
