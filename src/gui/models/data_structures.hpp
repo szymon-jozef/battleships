@@ -147,10 +147,10 @@ class AssetsManager {
                                                           std::filesystem::path("./assets"),
                                                       std::filesystem::path("./assets")};
   void loadPaths() {
-    bg1 = loadAsset<Texture2D>("gfx/bg1.jpg");
-    bg2 = loadAsset<Texture2D>("gfx/bg2.jpg");
-    bg3 = loadAsset<Texture2D>("gfx/bg3.jpg");
-    playBackground = loadAsset<Texture2D>("gfx/play_background.jpg");
+    bg1 = loadAsset<Texture2D>("gfx/bg1.png");
+    bg2 = loadAsset<Texture2D>("gfx/bg2.png");
+    bg3 = loadAsset<Texture2D>("gfx/bg3.png");
+    playBackground = loadAsset<Texture2D>("gfx/play_background.png");
 
     click = loadAsset<Sound>("sfx/click.mp3");
     hit = loadAsset<Sound>("sfx/hit.ogg");
