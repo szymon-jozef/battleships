@@ -45,7 +45,7 @@ TEST_CASE("Full integration test") {
     }
   });
 
-  auto waitForState = [](battleship::gameManager::GameManager &p, battleship::networking::GameStatus target) {
+  auto waitForState = [](const battleship::gameManager::GameManager &p, battleship::networking::GameStatus target) {
     int timeout = 50;
     while (p.getCurrentGameStatus() != target && timeout-- > 0) {
       std::this_thread::sleep_for(std::chrono::milliseconds(100));

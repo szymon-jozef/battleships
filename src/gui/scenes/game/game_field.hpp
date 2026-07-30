@@ -10,16 +10,16 @@ class GameField {
 public:
   GameField() = default;
 
-  void setClickable(bool isClickable) {
-    this->isClickable = isClickable;
+  void setClickable(bool newIsClickable) {
+    this->isClickable = newIsClickable;
   }
 
   bool getIsClickable() const {
     return isClickable && state == logic::FieldState::EMPTY; // we can only click empty fields
   }
 
-  void setState(logic::FieldState state) {
-    this->state = state;
+  void setState(logic::FieldState newState) {
+    this->state = newState;
   }
 
   logic::FieldState getState() const {

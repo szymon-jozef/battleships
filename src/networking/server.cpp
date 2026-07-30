@@ -141,6 +141,10 @@ bool Server::onClientConnect(std::shared_ptr<Connection>) {
 }
 
 void Server::onClientDisconnect(std::shared_ptr<Connection> client) {
+  if (!client) {
+    return;
+  }
+
   auto player = playerList.getPlayerById(client->getId());
   if (!player) {
     spdlog::error("[Server] player does not exist while disconnecting");
@@ -249,14 +253,14 @@ void Server::handleGameStatusChange(std::shared_ptr<Connection> client, Message 
     spdlog::info("[Server] Global game status was updated to {}. Notifying players...",
                  static_cast<int>(globalGameStatus));
 
-    Message msg;
-    msg.header.id = MessageType::SERVER_GAME_STATUS;
-    msg.push(globalGameStatus);
-    broadcast(msg);
+    Message responseMsg;
+    responseMsg.header.id = MessageType::SERVER_GAME_STATUS;
+    responseMsg.push(globalGameStatus);
+    broadcast(responseMsg);
   }
 }
 
-void Server::handleClientSendingAttack(std::shared_ptr<Connection> client, Message &msg) {
+void Server::handleClientSendingAttack(std::shared_ptr<Connection> client, const Message &msg) {
   auto attacker = playerList.getPlayerById(client->getId());
   if (attacker != playerList.getCurrentTurn()) {
     spdlog::warn("[Server] player whose turn it is not tried to attack. Ignoring...");
@@ -271,7 +275,7 @@ void Server::handleClientSendingAttack(std::shared_ptr<Connection> client, Messa
   victim->connection->send(msg);
 }
 
-void Server::handleClientRecievingAttack(std::shared_ptr<Connection>, Message &msg) {
+void Server::handleClientRecievingAttack(std::shared_ptr<Connection>, const Message &msg) {
   Message msgCpy = msg;
   auto attackerId = msgCpy.header.receiver;
   auto attacker = playerList.getPlayerById(attackerId);

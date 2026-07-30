@@ -88,7 +88,7 @@ public:
     finalPositionRect.y = y;
   }
 
-  void setLabel(std::string &newLabel) {
+  void setLabel(const std::string &newLabel) {
     label = newLabel;
   }
 

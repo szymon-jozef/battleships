@@ -9,12 +9,12 @@ class Button : public Widget {
   std::function<void()> onClick;
 
 public:
-  Button(std::string label, float pos_y, Rectangle rect);
+  Button(const std::string &label, float pos_y, Rectangle rect);
 
-  void draw();
-  void update();
+  void draw() override;
+  void update() override;
 
-  void setOnClick(std::function<void()> onClick);
+  void setOnClick(std::function<void()> onClickFunc);
 };
 
 } // namespace gui

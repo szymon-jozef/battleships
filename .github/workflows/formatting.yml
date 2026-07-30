@@ -11,14 +11,23 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    env:
+      BUILD_TYPE: Debug
+
     steps:
       - uses: actions/checkout@v4
 
       - name: install tools
         run: sudo apt update -y && sudo apt install -y cppcheck fd-find
 
+      - name: install dependencies
+        run: sudo apt update && sudo apt install -y ninja-build libx11-dev libxrandr-dev libxi-dev libxext-dev libgl1-mesa-dev libxcursor-dev libxinerama-dev libwayland-dev libxkbcommon-dev
+
+      - name: configure
+        run: cmake -B ${{github.workspace}}/build -D"isDev=True" -G Ninja -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
+
       - name: cppcheck
-        run: cppcheck --enable=all --error-exitcode=1 .
+        run: cppcheck --enable=warning,style,performance,portability --error-exitcode=1 --project=${{github.workspace}}/build/compile_commands.json
 
       - name: clang-format
         run: fdfind --type file --extension cpp --extension hpp --exec clang-format --dry-run -Werror

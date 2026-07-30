@@ -9,7 +9,7 @@ Ship::Ship(ShipType type)
     , health(static_cast<unsigned int>(type)) {}
 
 bool Ship::isSunk() const {
-  return health <= 0;
+  return health == 0;
 }
 
 void Ship::hit() {

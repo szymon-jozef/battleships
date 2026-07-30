@@ -21,7 +21,7 @@ private:
   const static int MAX_INPUT_CHARS = 31;
   int letterCount = 0;
   int promptWidth = 0;
-  float text_x = 0, text_y = 0;
+  float inner_text_x = 0, inner_text_y = 0;
 
   char buffer[MAX_INPUT_CHARS + 1] = "";
 

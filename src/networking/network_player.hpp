@@ -11,10 +11,10 @@ namespace networking {
 /// @brief Class made for the server to store it's players
 struct NetworkPlayer {
   std::optional<std::string> name;
-  GameStatus currentGameStatus;
+  GameStatus currentGameStatus = GameStatus::LOBBY;
   std::shared_ptr<Connection> connection;
 
-  NetworkPlayer(std::shared_ptr<Connection> connection)
+  explicit NetworkPlayer(std::shared_ptr<Connection> connection)
       : connection(connection) {}
 
   boost::uuids::uuid getId() const {
@@ -65,11 +65,11 @@ public:
 
   void switchTurn() {
     std::scoped_lock lock(mutex);
-    for (auto &player : playerList) {
-      if (currentTurn != player) {
-        currentTurn = player;
-        return;
-      }
+    auto newTurn = *std::find_if(
+        playerList.begin(), playerList.end(), [this](std::shared_ptr<NetworkPlayer> p) { return currentTurn != p; });
+
+    if (newTurn) {
+      currentTurn = newTurn;
     }
   }
 
@@ -80,12 +80,14 @@ public:
 
   std::shared_ptr<NetworkPlayer> getPassivePlayer() {
     std::scoped_lock lock(mutex);
-    for (auto &player : playerList) {
-      if (player != currentTurn) {
-        return player;
-      }
+    auto newPassivePlayer = *std::find_if(
+        playerList.begin(), playerList.end(), [this](std::shared_ptr<NetworkPlayer> p) { return p != currentTurn; });
+
+    if (newPassivePlayer) {
+      return newPassivePlayer;
+    } else {
+      return nullptr;
     }
-    return nullptr;
   }
 
   std::vector<std::shared_ptr<NetworkPlayer>> getPlayers() const {
@@ -95,12 +97,15 @@ public:
 
   std::shared_ptr<NetworkPlayer> getPlayerById(boost::uuids::uuid id) const {
     std::scoped_lock lock(mutex);
-    for (auto &player : playerList) {
-      if (player->connection->getId() == id) {
-        return player;
-      }
+    auto foundPlayer = *std::find_if(playerList.begin(), playerList.end(), [id](std::shared_ptr<NetworkPlayer> p) {
+      return p->connection->getId() == id;
+    });
+
+    if (foundPlayer) {
+      return foundPlayer;
+    } else {
+      return nullptr;
     }
-    return nullptr;
   }
 
   /// @brief Check if every player has the same gameStatus and act accordingly
@@ -137,7 +142,7 @@ public:
 
   bool isEmpty() const {
     std::scoped_lock lock(mutex);
-    return playerList.size() <= 0;
+    return playerList.size() == 0;
   }
 };
 } // namespace networking

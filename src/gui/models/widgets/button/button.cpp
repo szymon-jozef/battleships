@@ -3,7 +3,7 @@
 namespace battleship {
 namespace gui {
 
-Button::Button(std::string label, float pos_y, Rectangle rect)
+Button::Button(const std::string &label, float pos_y, Rectangle rect)
     : Widget(label, pos_y, rect, 0.8f) {}
 
 void Button::draw() {
@@ -21,8 +21,8 @@ void Button::update() {
   }
 }
 
-void Button::setOnClick(std::function<void()> onClick) {
-  this->onClick = onClick;
+void Button::setOnClick(std::function<void()> onClickFunc) {
+  this->onClick = onClickFunc;
 }
 
 } // namespace gui

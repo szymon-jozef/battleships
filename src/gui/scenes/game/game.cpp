@@ -77,14 +77,6 @@ void Game::drawLabels() {
   DrawText(gameStatusLabel.c_str(), label_x, label_y, labelFontSize, labelColor);
 }
 
-bool Game::isGameStatusChanged() {
-  if (prevGameStatus != gameManager.getCurrentGameStatus()) {
-    prevGameStatus = gameManager.getCurrentGameStatus();
-    return true;
-  }
-  return false;
-}
-
 Game::Game(GameContext &gameContext, Texture2D &background)
     : Scene(gameContext, background)
     , gameManager(gameContext.settings.playerName, gameContext.settings.serverUrl, gameContext.settings.serverPort)

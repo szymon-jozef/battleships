@@ -50,12 +50,9 @@ void BaseGrid::markNearbyAsSunk(unsigned short int row, unsigned short int colum
           continue;
         }
 
-        if (checkRow < HEIGHT && checkColumn < WIDTH) {
-
-          if (getFieldState(checkRow, checkColumn) == FieldState::HIT) {
-            toCheck.push_back(std::make_tuple(checkRow, checkColumn));
-            setFieldState(checkRow, checkColumn, FieldState::SUNK);
-          }
+        if (getFieldState(checkRow, checkColumn) == FieldState::HIT) {
+          toCheck.push_back(std::make_tuple(checkRow, checkColumn));
+          setFieldState(checkRow, checkColumn, FieldState::SUNK);
         }
       }
     }

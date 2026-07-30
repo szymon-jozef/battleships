@@ -30,11 +30,10 @@ class Game : public Scene {
 
   void updateLabels();
   void drawLabels();
-  bool isGameStatusChanged();
 
 public:
   Game(GameContext &gameContext, Texture2D &background);
-  ~Game();
+  ~Game() override;
 
   void update() override;
   void draw() override;

@@ -34,7 +34,7 @@ Player::Player(std::string name, unsigned short int width, unsigned short int he
   ships = shipsBay;
 }
 
-Player::Player(std::string name)
+Player::Player(const std::string &name)
     : Player(name, 10, 10) {}
 
 Player::Player(std::string name, std::vector<std::shared_ptr<Ship>> ships)
@@ -74,12 +74,7 @@ void Player::markShotResult(FieldState shotResult, unsigned short int row, unsig
 }
 
 bool Player::isDead() {
-  for (auto ship : ships) {
-    if (!ship->isSunk()) {
-      return false;
-    }
-  }
-  return true;
+  return std::all_of(ships.begin(), ships.end(), [](std::shared_ptr<Ship> s) { return s->isSunk(); });
 }
 
 FieldState Player::getBoardState(unsigned short int row, unsigned short int column) {
@@ -94,7 +89,7 @@ bool Player::hasShips() {
   return !shipsBay.empty();
 }
 
-std::string Player::getName() {
+const std::string &Player::getName() const {
   return name;
 }
 

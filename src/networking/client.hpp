@@ -24,7 +24,7 @@ class Client {
 
   void send(const Message &msg);
   void onMessage(Message &msg);
-  void sendHandshake(std::string name);
+  void sendHandshake(const std::string &name);
 
   void handleIncomingAttack(Message &msg);
   void handleShotResult(Message &msg);
@@ -44,7 +44,7 @@ public:
   // TODO! Change  player and enemy id,name to some more sensible data structure
   std::string loserName;
 
-  GameStatus currentGameStatus;
+  GameStatus currentGameStatus = GameStatus::LOBBY;
 
   Client() = default;
   ~Client();
