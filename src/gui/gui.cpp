@@ -66,8 +66,8 @@ int run() {
     currentScene->draw();
 
     EndDrawing();
-
   }
+
   CloseWindow();
   return 0;
 }
