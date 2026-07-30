@@ -20,7 +20,7 @@ class Ship {
   unsigned int health;
 
 public:
-  Ship(ShipType type);
+  explicit Ship(ShipType type);
   bool isSunk() const;
   /// Decrement ship health by one
   void hit();
@@ -131,7 +131,7 @@ class Player {
 
 public:
   /// Defaults to board and radar size `10 x 10`
-  Player(std::string name);
+  explicit Player(std::string name);
   Player(std::string name, unsigned short int width, unsigned short int height);
   /// Constructor only for test purpose
   Player(std::string name, std::vector<std::shared_ptr<Ship>> ships);
