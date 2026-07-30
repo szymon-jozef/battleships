@@ -75,15 +75,15 @@ logic::FieldState GameManager::getRadarField(unsigned short int row, unsigned sh
   return player.getRadarState(row, column);
 }
 
-std::string GameManager::getPlayerName() const {
+const std::string &GameManager::getPlayerName() const {
   return client.name;
 }
 
-std::string GameManager::getEnemyName() const {
+const std::string &GameManager::getEnemyName() const {
   return client.enemyName;
 }
 
-std::string GameManager::getLoserName() const {
+const std::string &GameManager::getLoserName() const {
   return client.loserName;
 }
 
