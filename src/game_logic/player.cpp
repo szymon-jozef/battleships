@@ -34,7 +34,7 @@ Player::Player(std::string name, unsigned short int width, unsigned short int he
   ships = shipsBay;
 }
 
-Player::Player(std::string name)
+Player::Player(const std::string &name)
     : Player(name, 10, 10) {}
 
 Player::Player(std::string name, std::vector<std::shared_ptr<Ship>> ships)
@@ -94,7 +94,7 @@ bool Player::hasShips() {
   return !shipsBay.empty();
 }
 
-std::string Player::getName() {
+std::string Player::getName() const {
   return name;
 }
 

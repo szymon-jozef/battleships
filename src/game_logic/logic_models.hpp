@@ -131,7 +131,7 @@ class Player {
 
 public:
   /// Defaults to board and radar size `10 x 10`
-  explicit Player(std::string name);
+  explicit Player(const std::string &name);
   Player(std::string name, unsigned short int width, unsigned short int height);
   /// Constructor only for test purpose
   Player(std::string name, std::vector<std::shared_ptr<Ship>> ships);
@@ -151,7 +151,7 @@ public:
   FieldState getRadarState(unsigned short int row, unsigned short int column);
   /// @return True if ships vector isn't empty. False otherwise
   bool hasShips();
-  std::string getName();
+  std::string getName() const;
   std::string boardAsString();
   std::string radarAsString();
 
