@@ -238,7 +238,7 @@ public:
   AssetsManager assetsManager;
 
   std::string loserName;
-  bool isWon;
+  bool isWon = false;
   std::atomic<GuiState> guiState = GuiState::MAIN_MENU;
   enum class GameMode { HOSTING, JOINING };
   GameMode currentGameMode = GameMode::HOSTING;
