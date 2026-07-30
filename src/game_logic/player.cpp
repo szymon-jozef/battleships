@@ -74,12 +74,7 @@ void Player::markShotResult(FieldState shotResult, unsigned short int row, unsig
 }
 
 bool Player::isDead() {
-  for (auto ship : ships) {
-    if (!ship->isSunk()) {
-      return false;
-    }
-  }
-  return true;
+  return std::all_of(ships.begin(), ships.end(), [](std::shared_ptr<Ship> s) { return s->isSunk(); });
 }
 
 FieldState Player::getBoardState(unsigned short int row, unsigned short int column) {
