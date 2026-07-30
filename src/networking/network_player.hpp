@@ -65,11 +65,11 @@ public:
 
   void switchTurn() {
     std::scoped_lock lock(mutex);
-    for (const auto &player : playerList) {
-      if (currentTurn != player) {
-        currentTurn = player;
-        return;
-      }
+    auto newTurn = *std::find_if(
+        playerList.begin(), playerList.end(), [this](std::shared_ptr<NetworkPlayer> p) { return currentTurn != p; });
+
+    if (newTurn) {
+      currentTurn = newTurn;
     }
   }
 
