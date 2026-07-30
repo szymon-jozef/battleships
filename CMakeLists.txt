@@ -11,8 +11,8 @@ option(isRelease "install everything to ." false)
 
 
 find_package(Boost REQUIRED COMPONENTS program_options)
-find_package(spdlog  REQUIRED)
-find_package(fmt  REQUIRED)
+find_package(spdlog REQUIRED)
+find_package(fmt REQUIRED)
 find_package(Threads REQUIRED)
 find_package(raylib REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
@@ -20,11 +20,6 @@ find_package(glfw3 CONFIG REQUIRED)
 if (${isDev})
 find_package(Catch2 3 REQUIRED)
 endif()
-
-if(MSVC)
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-endif()
-
 
 # === Entry point ===
 add_executable(battleships)
