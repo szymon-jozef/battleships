@@ -36,7 +36,7 @@ class Server {
   /// @brief Validate message and route it
   void handleClientSendingAttack(std::shared_ptr<Connection> client, const Message &msg);
   /// @brief Validate message and route it
-  void handleClientRecievingAttack(std::shared_ptr<Connection> client, Message &msg);
+  void handleClientRecievingAttack(std::shared_ptr<Connection> client, const Message &msg);
   void broadcastCurrentTurn();
   /// @brief Broadcasts players
   void handleGameBeginning();

@@ -275,7 +275,7 @@ void Server::handleClientSendingAttack(std::shared_ptr<Connection> client, const
   victim->connection->send(msg);
 }
 
-void Server::handleClientRecievingAttack(std::shared_ptr<Connection>, Message &msg) {
+void Server::handleClientRecievingAttack(std::shared_ptr<Connection>, const Message &msg) {
   Message msgCpy = msg;
   auto attackerId = msgCpy.header.receiver;
   auto attacker = playerList.getPlayerById(attackerId);
