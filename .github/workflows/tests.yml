@@ -2,10 +2,16 @@ name: Unit and integration tests
 
 on:
   push:
+    paths:
+      - "**.cpp"
+      - "**.hpp"
     branches: [ master ]
   pull_request:
     branches: [ master ]
-
+    paths:
+      - "**.cpp"
+      - "**.hpp"
+      
 jobs:
   build:
 
