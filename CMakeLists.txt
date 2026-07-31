@@ -16,9 +16,6 @@ find_package(Threads REQUIRED)
 find_package(raylib REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 
-if (isDev)
-endif()
-
 include(cmake/battleships.cmake)
 include(cmake/game_logic.cmake)
 include(cmake/networking.cmake)
