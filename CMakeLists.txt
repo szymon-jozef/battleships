@@ -4,7 +4,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
-project(battleships VERSION 0.0.6)
+project(battleships 
+    VERSION 0.0.6
+    DESCRIPTION "Online game of battleships"
+    HOMEPAGE_URL "https://github.com/szymon-jozef/battleships"
+    LANGUAGES CXX
+)
 
 option(isDev "build tests" false)
 option(isRelease "install everything to ." false)
