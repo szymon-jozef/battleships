@@ -9,10 +9,6 @@ project(battleships VERSION 0.0.6)
 option(isDev "build tests" false)
 option(isRelease "install everything to ." false)
 
-if(MSVC)
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-endif()
-
 find_package(Boost REQUIRED COMPONENTS program_options)
 find_package(spdlog REQUIRED)
 find_package(fmt REQUIRED)
@@ -20,211 +16,25 @@ find_package(Threads REQUIRED)
 find_package(raylib REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 
-if (${isDev})
-find_package(Catch2 3 REQUIRED)
+if (isDev)
 endif()
 
-# === Entry point ===
-add_executable(battleships)
-target_sources(battleships
-    PRIVATE
-        src/main.cpp
-)
+include(cmake/battleships.cmake)
+include(cmake/game_logic.cmake)
+include(cmake/networking.cmake)
+include(cmake/game_manager.cmake)
+include(cmake/logging.cmake)
+include(cmake/gui.cmake)
 
-target_link_libraries(battleships
-    PRIVATE
-    game_logic
-    networking
-    gui
-)
-
-# === Game logic ===
-add_library(game_logic)
-file(GLOB_RECURSE LOGIC_SOURCES CONFIGURE_DEPENDS "src/game_logic/*.cpp")
-target_sources(game_logic
-    PRIVATE
-        ${LOGIC_SOURCES}
-    PUBLIC
-        FILE_SET HEADERS
-        BASE_DIRS
-            src/game_logic
-        FILES
-            src/game_logic/logic_models.hpp
-)
-
-target_link_libraries(game_logic
-    PUBLIC
-    spdlog::spdlog
-    fmt::fmt
-)
-
-# === Logging ===
-add_library(logging)
-target_sources(logging
-    PRIVATE
-        "src/logging/logging.cpp"
-    PUBLIC
-    FILE_SET HEADERS
-    BASE_DIRS
-        src/logging
-    FILES
-        src/logging/logging.hpp
-)
-
-target_link_libraries(logging
-    PRIVATE
-        spdlog::spdlog
-        fmt::fmt
-)
-
-
-# === Networking ===
-add_library(networking)
-file(GLOB NETWORKING_SOURCES CONFIGURE_DEPENDS "src/networking/*.cpp")
-target_sources(networking
-    PRIVATE
-        ${NETWORKING_SOURCES}
-    PUBLIC
-    FILE_SET HEADERS
-    BASE_DIRS
-        src/networking
-    FILES
-        src/networking/client.hpp
-        src/networking/connection.hpp
-        src/networking/data_types.hpp
-        src/networking/messages.hpp
-        src/networking/network_player.hpp
-        src/networking/server.hpp
-
-)
-
-target_link_libraries(networking
-    PUBLIC
-    spdlog::spdlog
-    fmt::fmt
-    Boost::headers
-    Threads::Threads
-)
-
-if (${isDev})
-add_executable(server_main)
-target_sources(server_main
-    PRIVATE
-        src/apps/server_main.cpp
-)
-
-add_executable(client_main)
-target_sources(client_main
-    PRIVATE
-        src/apps/client_main.cpp
-)
-
-endif()
-
-# === Game Manager ===
-add_library(game_manager)
-target_sources(
-    game_manager
-    PRIVATE
-        src/game_manager/game_manager.cpp
-    PUBLIC
-        FILE_SET HEADERS
-    BASE_DIRS
-        src/game_manager
-    FILES
-        src/game_manager/game_manager.hpp
-)
-
-target_link_libraries(game_manager
-    PUBLIC
-    game_logic
-    networking
-)
-
-# === GUI ===
-add_library(gui)
-file(GLOB_RECURSE GUI_HEADERS CONFIGURE_DEPENDS "src/gui/*.hpp")
-file(GLOB_RECURSE GUI CONFIGURE_DEPENDS "src/gui/*.cpp")
-
-
-target_sources(
-    gui
-    PRIVATE
-        ${GUI}
-    PUBLIC
-        FILE_SET HEADERS
-    BASE_DIRS
-        src/gui
-    FILES
-        ${GUI_HEADERS}
-)
-
-# === Linking ===
-target_link_libraries(battleships
-    PRIVATE
-        game_logic
-        networking
-        game_manager
-        logging
-        Boost::program_options
-    )
-
-if (${isDev})
-target_link_libraries(server_main
-    PRIVATE
-        networking
-)
-
-target_link_libraries(client_main
-    PRIVATE
-        networking
-)
-endif()
-
-target_link_libraries(gui
-    PRIVATE
-        raylib
-        glfw
-        networking
-        game_manager
-        game_logic
-        spdlog::spdlog
-)
-
-
-# === Tests ===
-if (${isDev})
-file(GLOB TEST_LOGIC_SOURCES CONFIGURE_DEPENDS "tests/game_logic/*.cpp")
-add_executable(LogicTests ${TEST_LOGIC_SOURCES})
-
-target_link_libraries(LogicTests
-    PRIVATE
-        Catch2::Catch2WithMain
-        game_logic
-)
-
-file(GLOB TEST_INTEGRATION_SOURCES CONFIGURE_DEPENDS "tests/integration_tests/*.cpp")
-add_executable(IntegrationTests ${TEST_INTEGRATION_SOURCES})
-
-target_link_libraries(IntegrationTests
-    PRIVATE
-        Catch2::Catch2WithMain
-        spdlog::spdlog
-        networking
-        game_manager
-        game_logic
-)
-include(CTest)
-include(Catch)
-catch_discover_tests(LogicTests)
-catch_discover_tests(IntegrationTests)
+if (isDev)
+    include(cmake/tests.cmake)
 endif()
 
 if(WIN32)
-    target_compile_definitions(battleships PRIVATE WIN32_LEAN_AND_MEAN NOGDI NOUSER NOMINMAX _CRT_SECURE_NO_WARNINGS)
-    target_compile_definitions(gui PRIVATE WIN32_LEAN_AND_MEAN NOGDI NOUSER NOMINMAX _CRT_SECURE_NO_WARNINGS)
-    target_compile_definitions(networking PRIVATE _CRT_SECURE_NO_WARNINGS)
+    include(cmake/windows.cmake)
 endif()
+
+include(cmake/install.cmake)
 
 # show warnings if developing
 if (isDev AND ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
@@ -235,31 +45,3 @@ target_compile_options(game_logic PRIVATE -Wall -Wextra -Wunreachable-code)
 target_compile_options(game_manager PRIVATE -Wall -Wextra -Wunreachable-code)
 endif()
 
-target_compile_definitions(battleships PUBLIC GAME_VERSION=\"${PROJECT_VERSION}\")
-
-if (isRelease)
-
-    install(TARGETS battleships DESTINATION .)
-    install(DIRECTORY assets DESTINATION .)
-
-else()
-    install(TARGETS battleships DESTINATION bin)
-
-    if (WIN32)
-        install(DIRECTORY assets DESTINATION "C:/Program files/battleships")
-    else()
-        install(DIRECTORY assets DESTINATION share/battleships)
-    endif()
-
-endif()
-
-set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
-set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
-
-if (WIN32)
-    set(CPACK_GENERATOR "ZIP")
-else()
-    set(CPACK_GENERATOR "TGZ")
-endif()
-
-include(CPack)
