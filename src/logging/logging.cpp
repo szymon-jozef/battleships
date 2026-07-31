@@ -1,0 +1,56 @@
+#include "logging.hpp"
+#include <cstdlib>
+#include <filesystem>
+#include <iostream>
+#include <spdlog/cfg/env.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/spdlog.h>
+
+namespace battleship::logger {
+
+const std::filesystem::path getLoggingPath() {
+  const char *appName = "battleships";
+
+#ifdef __linux__
+  char *statePath = std::getenv("XDG_STATE_HOME");
+
+  if (statePath) {
+    return std::filesystem::path(statePath) / appName / "logs";
+  }
+
+  char *homePath = std::getenv("HOME");
+
+  if (homePath) {
+    return std::filesystem::path(homePath) / ".local/state" / appName / "logs";
+  }
+
+#elif _WIN32
+  char *localAppDataPath = std::getenv("LOCALAPPDATA");
+  if (localAppDataPath) {
+    return std::filesystem::path(localAppDataPath) / appName / "logs";
+  }
+
+#endif
+  return std::filesystem::current_path() / "logs";
+}
+
+void setupSpdlogFileLogging() {
+  const std::filesystem::path loggingPath = getLoggingPath();
+  const std::filesystem::path loggingFilePath = loggingPath / "log.txt";
+
+  spdlog::info("Logs will be redirected to: {}", loggingFilePath.string());
+
+  std::filesystem::create_directories(loggingPath);
+
+  try {
+    auto logger = spdlog::basic_logger_mt("Logs", loggingFilePath);
+    spdlog::set_default_logger(logger);
+
+  } catch (const spdlog::spdlog_ex &ex) {
+    std::cout << "Log init failed: " << ex.what() << std::endl;
+  }
+
+  spdlog::cfg::load_env_levels();
+}
+
+} // namespace battleship::logger
