@@ -7,18 +7,12 @@ target_sources(battleships
 
 target_link_libraries(battleships
     PRIVATE
-    game_logic
-    networking
-    gui
-)
-
-target_link_libraries(battleships
-    PRIVATE
+        gui
         game_logic
         networking
         game_manager
         logging
         Boost::program_options
-    )
+)
 
 target_compile_definitions(battleships PUBLIC GAME_VERSION=\"${PROJECT_VERSION}\")
