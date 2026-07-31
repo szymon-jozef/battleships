@@ -11,6 +11,8 @@
           cppcheck
         ];
 
+        CMAKE_BUILD_TYPE = "Debug";
+
         inputsFrom = [
           (config.packages.default)
         ];
