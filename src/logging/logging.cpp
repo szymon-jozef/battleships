@@ -8,9 +8,8 @@
 namespace battleship::logger {
 
 std::filesystem::path getLoggingPath() {
-  constexpr auto appName = "battleships";
-
 #ifdef __linux__
+  constexpr auto appName = "battleships";
   char *statePath = std::getenv("XDG_STATE_HOME");
 
   if (statePath) {
@@ -24,6 +23,7 @@ std::filesystem::path getLoggingPath() {
   }
 
 #elif _WIN32
+  constexpr auto appName = "battleships";
   if (char *localAppDataPath = std::getenv("LOCALAPPDATA")) {
     return std::filesystem::path(localAppDataPath) / appName / "logs";
   }
