@@ -1,5 +1,4 @@
 #include "logging.hpp"
-#include <cstdlib>
 #include <filesystem>
 #include <iostream>
 #include <spdlog/cfg/env.h>
@@ -8,8 +7,8 @@
 
 namespace battleship::logger {
 
-const std::filesystem::path getLoggingPath() {
-  const char *appName = "battleships";
+std::filesystem::path getLoggingPath() {
+  constexpr auto appName = "battleships";
 
 #ifdef __linux__
   char *statePath = std::getenv("XDG_STATE_HOME");
@@ -25,8 +24,7 @@ const std::filesystem::path getLoggingPath() {
   }
 
 #elif _WIN32
-  char *localAppDataPath = std::getenv("LOCALAPPDATA");
-  if (localAppDataPath) {
+  if (char *localAppDataPath = std::getenv("LOCALAPPDATA")) {
     return std::filesystem::path(localAppDataPath) / appName / "logs";
   }
 
@@ -43,7 +41,7 @@ void setupSpdlogFileLogging() {
   std::filesystem::create_directories(loggingPath);
 
   try {
-    auto logger = spdlog::basic_logger_mt("Logs", loggingFilePath);
+    const auto logger = spdlog::basic_logger_mt("Logs", loggingFilePath.string());
     spdlog::set_default_logger(logger);
 
   } catch (const spdlog::spdlog_ex &ex) {

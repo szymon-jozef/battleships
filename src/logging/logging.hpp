@@ -14,7 +14,7 @@ namespace battleship::logger {
 /// %LOCALAPPDATA% -> cwd
 ///
 /// On everything else it will default to cwd
-const std::filesystem::path getLoggingPath();
+std::filesystem::path getLoggingPath();
 
 /// @brief Set the default logger and point it at path found by getLoggingPath
 /// Sets logging level to env var `SPDLOG_LEVEL`
