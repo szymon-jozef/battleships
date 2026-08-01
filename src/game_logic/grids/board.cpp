@@ -99,13 +99,14 @@ bool Board::isPlacementValid(unsigned short int row,
   int rectangleTop = std::max(0, static_cast<int>(row) - 1);
   int rectangleLeft = std::max(0, static_cast<int>(column) - 1);
 
-  int rectangleBottom = std::min(static_cast<int>(HEIGHT) - 1, static_cast<int>(row) + 1);
+  int rectangleBottom = std::min(static_cast<int>(HEIGHT) - 1, static_cast<int>(endRow) + 1);
   int rectangleRight = std::min(static_cast<int>(WIDTH) - 1, static_cast<int>(endColumn) + 1);
 
   for (int currentRow = rectangleTop; currentRow <= rectangleBottom; currentRow++) {
     for (int currentColumn = rectangleLeft; currentColumn <= rectangleRight; currentColumn++) {
       if (getFieldState(currentRow, currentColumn) == FieldState::TAKEN) {
-        spdlog::info("[Logic] Cannot place ship here, because of collision nearby!");
+        spdlog::info(
+            "[Logic] Cannot place ship here ({}, {}), because of collision nearby!", currentRow, currentColumn);
         return false;
       }
     }
