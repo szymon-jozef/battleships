@@ -94,7 +94,6 @@ void GameGrid::updateFieldsState() {
   }
 }
 
-// TODO! Use this only on status change
 /// @brief Set the active grid clickable
 void GameGrid::updateGridState() {
   switch (gameManager.getCurrentGameStatus()) {
@@ -102,7 +101,11 @@ void GameGrid::updateGridState() {
     break;
   case battleship::networking::GameStatus::PLACING_SHIPS:
     if (gridType == GridType::BOARD) {
-      setGridClickable(true);
+      if (gameManager.hasShips()) {
+        setGridClickable(true);
+      } else {
+        setGridClickable(false);
+      }
     } else {
       setGridClickable(false);
     }
@@ -111,11 +114,14 @@ void GameGrid::updateGridState() {
     if (gridType == GridType::BOARD) {
       setGridClickable(false);
     } else {
-      setGridClickable(true);
+      if (gameManager.isMyTurn()) {
+        setGridClickable(true);
+      } else {
+        setGridClickable(false);
+      }
     }
     break;
   case battleship::networking::GameStatus::GAME_FINISH:
-    // TODO! Add some summary screen
     break;
   }
 }
@@ -146,6 +152,7 @@ GameGrid::GameGrid(gameManager::GameManager &gameManager, GridType type)
 
 void GameGrid::toggleHorizontal() {
   isHorizontal = !isHorizontal;
+  isOrientationChanged = true;
 }
 
 bool GameGrid::getIsHorizontal() {
@@ -153,9 +160,6 @@ bool GameGrid::getIsHorizontal() {
 }
 
 void GameGrid::update() {
-  hoveredRow = std::nullopt;
-  hoveredColumn = std::nullopt;
-
   if (IsWindowResized()) {
     updateData();
     updateGridRect();
@@ -164,7 +168,10 @@ void GameGrid::update() {
   updateLabelContent();
   updateGridState();
   updateFieldsState();
+  updateHoveredField();
+}
 
+void GameGrid::updateHoveredField() {
   if (CheckCollisionPointRec(GetMousePosition(), gridRect) && isActive) {
     int relativeX = GetMouseX() - gridRect.x;
     int relativeY = GetMouseY() - gridRect.y;
@@ -174,8 +181,17 @@ void GameGrid::update() {
 
     int fieldSizeInt = static_cast<int>(fieldSize);
 
-    hoveredColumn = static_cast<unsigned short int>(relativeX / deltaSize);
-    hoveredRow = static_cast<unsigned short int>(relativeY / deltaSize);
+    auto newHoveredColumn = static_cast<unsigned short int>(relativeX / deltaSize);
+    auto newHoveredRow = static_cast<unsigned short int>(relativeY / deltaSize);
+
+    isHoveredFieldChanged = !hoveredColumn || !hoveredRow || newHoveredColumn != hoveredColumn.value() ||
+                            newHoveredRow != hoveredRow.value();
+
+    if (isHoveredFieldChanged) {
+      // hovered field changed so we check again
+      hoveredColumn = newHoveredColumn;
+      hoveredRow = newHoveredRow;
+    }
 
     if (isHoverValid() && offsetX <= fieldSize && offsetY <= fieldSizeInt &&
         getField(hoveredRow.value(), hoveredColumn.value()).getIsClickable()) {
@@ -190,6 +206,21 @@ void GameGrid::update() {
     }
   } else {
     isAnyHovered = false; // mouse isn't touching the grid so it cannot be hovered
+    hoveredRow = std::nullopt;
+    hoveredColumn = std::nullopt;
+  }
+
+  if (isAnyHovered && (isHoveredFieldChanged || isOrientationChanged) && hoveredRow && hoveredColumn) {
+    switch (gridType) {
+    case GridType::BOARD:
+      hightlightColor =
+          gameManager.isPlacementValid(hoveredRow.value(), hoveredColumn.value(), isHorizontal) ? GREEN : RED;
+      isOrientationChanged = false;
+      break;
+    case GridType::RADAR:
+      hightlightColor = BLACK;
+      break;
+    }
   }
 }
 
@@ -198,13 +229,11 @@ void GameGrid::handleFieldClick() {
   if (field.getIsClickable()) {
     switch (gridType) {
     case GridType::BOARD:
-      try {
+      if (gameManager.isPlacementValid(hoveredRow.value(), hoveredColumn.value(), isHorizontal)) {
         gameManager.placeShip(hoveredRow.value(), hoveredColumn.value(), isHorizontal);
         field.setClickable(false);
-
-      } catch (std::invalid_argument &e) {
-        spdlog::warn("[GUI] cannot place ship here: {}", e.what());
       }
+
       break;
     case GridType::RADAR:
       if (gameManager.isMyTurn()) {
@@ -256,13 +285,52 @@ Rectangle GameGrid::getGridRect() {
 }
 
 void GameGrid::drawHighlitedField() {
-  if (isHoverValid()) {
-    const auto &field = getField(hoveredRow.value(), hoveredColumn.value());
-    if (isActive && field.getIsClickable()) {
-      float x = gridRect.x + hoveredColumn.value() * deltaSize;
-      float y = gridRect.y + hoveredRow.value() * deltaSize;
-      DrawRectangleRec(Rectangle{x, y, fieldSize, fieldSize}, GREEN);
+  if (!isHoverValid()) {
+    return;
+  }
+
+  switch (gridType) {
+  case GridType::BOARD: {
+    auto ship = gameManager.getCurrentShip();
+    if (!ship) {
+      return;
     }
+
+    auto length = static_cast<unsigned short int>(ship.value());
+
+    for (unsigned short int i = 0; i < length; i++) {
+      const auto &field = getField(hoveredRow.value(), hoveredColumn.value());
+      if (isActive && field.getIsClickable()) {
+        float x = 0, y = 0;
+        if (isHorizontal) {
+          x = gridRect.x + (hoveredColumn.value() + i) * deltaSize;
+          y = gridRect.y + hoveredRow.value() * deltaSize;
+        } else {
+          x = gridRect.x + hoveredColumn.value() * deltaSize;
+          y = gridRect.y + (hoveredRow.value() + i) * deltaSize;
+        }
+
+        if (isAnyHovered && x < gridRect.x + gridRect.height && y < gridRect.y + gridRect.width) {
+          DrawRectangleRec(Rectangle{x, y, fieldSize, fieldSize}, hightlightColor);
+        }
+      }
+    }
+    break;
+  }
+  case GridType::RADAR: {
+    if (gameManager.isMyTurn()) {
+      const auto &field = getField(hoveredRow.value(), hoveredColumn.value());
+      if (isActive && field.getIsClickable()) {
+        float x = gridRect.x + hoveredColumn.value() * deltaSize;
+        float y = gridRect.y + hoveredRow.value() * deltaSize;
+
+        if (isAnyHovered && x < gridRect.x + gridRect.height && y < gridRect.y + gridRect.width) {
+          DrawRectangleRec(Rectangle{x, y, fieldSize, fieldSize}, hightlightColor);
+        }
+      }
+      break;
+    }
+  }
   }
 }
 

@@ -115,5 +115,17 @@ void GameManager::setOnShotResult(std::function<void(logic::FieldState)> func) {
   client.setOnShotResult(func);
 }
 
+bool GameManager::isPlacementValid(unsigned short int row, unsigned short int column, bool isHorizontal) {
+  return player.isPlacementValid(row, column, isHorizontal);
+}
+
+bool GameManager::hasShips() const {
+  return player.hasShips();
+}
+
+unsigned short int GameManager::shipsAmmount() const {
+  return player.shipsAmmount();
+}
+
 } // namespace gameManager
 } // namespace battleship

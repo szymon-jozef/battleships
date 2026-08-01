@@ -18,8 +18,12 @@ TEST_CASE("Player tests", "[player]") {
 
   SECTION("Test player placing all ships") {
     REQUIRE(player.hasShips());
-    REQUIRE_THROWS(player.placeShip(-6, 7, true));
-    REQUIRE_THROWS(player.placeShip(66, 7, true));
+
+    REQUIRE_FALSE(player.isPlacementValid(-6, 7, true));
+    REQUIRE_FALSE(player.isPlacementValid(66, 7, true));
+    REQUIRE_FALSE(player.placeShip(-6, 7, true));
+    REQUIRE_FALSE(player.placeShip(66, 7, true));
+
     REQUIRE(player.placeShip(0, 0, true));
     REQUIRE(player.placeShip(2, 0, true));
     REQUIRE(player.placeShip(4, 0, true));

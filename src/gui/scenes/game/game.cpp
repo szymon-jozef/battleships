@@ -17,16 +17,12 @@ void Game::updateLabels() {
   case networking::GameStatus::PLACING_SHIPS: {
     auto shipType = gameManager.getCurrentShip();
     if (shipType) {
-      // TODO! Show how many ships of given type are left
-      gameStatusLabel =
-          TextFormat("Place your ships!\nYour current ship has %d masts\nShip will be placed %s\nPress space to turn",
-                     static_cast<int>(shipType.value()),
-                     board.getIsHorizontal() ? "horizontally" : "vertically");
-
+      gameStatusLabel = TextFormat("Place your ships!\nPress space to change orientation\n%i ships left!\n",
+                                   gameManager.shipsAmmount());
       labelColor = GREEN;
     } else {
       gameStatusLabel = "No ships left!";
-      labelColor = GRAY;
+      labelColor = DARKGRAY;
     }
     break;
   }
@@ -163,7 +159,7 @@ void Game::update() {
   board.update();
   radar.update();
 
-  if (board.isAnyHovered || radar.isAnyHovered) {
+  if ((board.isAnyHovered && board.isActive) || (radar.isAnyHovered && radar.isActive)) {
     SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
   } else {
     SetMouseCursor(MOUSE_CURSOR_DEFAULT);
@@ -172,7 +168,6 @@ void Game::update() {
   updateLabels(); // we update labels all the time, because checking every frame if the ship type has changed is too
                   // much. TODO! Change this someday
 
-  // TODO! Move this somewhere more appropriate
   if (gameManager.getCurrentGameStatus() == networking::GameStatus::PLACING_SHIPS && IsKeyPressed(KEY_SPACE)) {
     board.toggleHorizontal();
   }

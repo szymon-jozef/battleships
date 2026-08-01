@@ -12,9 +12,11 @@ class GameGrid {
   Rectangle gridRect;
   std::vector<GameField> fields;
   std::optional<unsigned short int> hoveredRow = std::nullopt, hoveredColumn = std::nullopt;
+  Color hightlightColor;
 
   bool isHorizontal = true;
-  bool isActive = false;
+  bool isHoveredFieldChanged = false;
+  bool isOrientationChanged = false;
 
   float padding_x, padding_y, multiplier = 1.2f;
   float begin_y_pos;
@@ -39,6 +41,7 @@ class GameGrid {
   /// @brief Update the position of label
   void updateLabelPos();
   void updateLabelContent();
+  void updateHoveredField();
 
   /// @brief Make the grid clickable
   void setGridClickable(bool isClickable);
@@ -62,6 +65,7 @@ class GameGrid {
 public:
   enum class GridType { BOARD, RADAR };
   bool isAnyHovered = false;
+  bool isActive = false;
   GridType gridType;
 
   GameGrid(gameManager::GameManager &gameManager, GridType type);

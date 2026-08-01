@@ -1,7 +1,6 @@
 #include "logic_models.hpp"
 #include <catch2/catch_test_macros.hpp>
 #include <memory>
-#include <stdexcept>
 
 using namespace battleship::logic;
 
@@ -52,10 +51,15 @@ TEST_CASE("Board throws exceptions for out of bounds inputs", "[board][exception
 
   SECTION("Out of bounds in placeShip") {
     auto ship = std::make_shared<Ship>(ShipType::OneMaster);
+    const auto ship_ptr = ship.get();
 
-    REQUIRE_THROWS_AS(board.placeShip(ship, -1, 5, true), std::invalid_argument);
-    REQUIRE_THROWS_AS(board.placeShip(ship, 5, -1, true), std::invalid_argument);
-    REQUIRE_THROWS_AS(board.placeShip(ship, 2342, 3243, true), std::invalid_argument);
+    REQUIRE_FALSE(board.isPlacementValid(-1, 5, ship_ptr, true));
+    REQUIRE_FALSE(board.isPlacementValid(5, -1, ship_ptr, true));
+    REQUIRE_FALSE(board.isPlacementValid(2342, 3243, ship_ptr, true));
+
+    REQUIRE_FALSE(board.placeShip(ship, -1, 5, true));
+    REQUIRE_FALSE(board.placeShip(ship, 5, -1, true));
+    REQUIRE_FALSE(board.placeShip(ship, 2342, 3243, true));
   }
 
   SECTION("Out of bounds in takeShot") {

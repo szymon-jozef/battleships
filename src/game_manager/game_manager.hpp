@@ -41,6 +41,10 @@ public:
   bool isMyTurn();
 
   void setOnShotResult(std::function<void(logic::FieldState)> func);
+
+  bool isPlacementValid(unsigned short int row, unsigned short int column, bool isHorizontal);
+  bool hasShips() const;
+  unsigned short int shipsAmmount() const;
 };
 } // namespace gameManager
 } // namespace battleship

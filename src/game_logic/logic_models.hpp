@@ -87,6 +87,9 @@ public:
   /// - logic_error when can't retrieve the ship under taken field
   /// - invalid_argument when coords are out of bounds
   FieldState recieveShot(unsigned short int row, unsigned short int column);
+
+  /// @brief Returns true if ship of given type can be placed in given field, in given orientation
+  bool isPlacementValid(unsigned short int row, unsigned short int column, const Ship *ship, bool isHorizontal) const;
 };
 
 class Radar : public BaseGrid {
@@ -154,6 +157,11 @@ public:
   const std::string &getName() const;
   std::string boardAsString();
   std::string radarAsString();
+
+  bool isPlacementValid(unsigned short int row, unsigned short int column, bool isHorizontal) const;
+
+  bool hasShips() const;
+  unsigned short int shipsAmmount() const;
 
   unsigned short int getBoardWidth() const {
     return board.WIDTH;
