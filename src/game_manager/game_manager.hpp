@@ -44,6 +44,7 @@ public:
 
   bool isPlacementValid(unsigned short int row, unsigned short int column, bool isHorizontal);
   bool hasShips() const;
+  unsigned short int shipsAmmount() const;
 };
 } // namespace gameManager
 } // namespace battleship

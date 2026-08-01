@@ -123,5 +123,9 @@ bool GameManager::hasShips() const {
   return player.hasShips();
 }
 
+unsigned short int GameManager::shipsAmmount() const {
+  return player.shipsAmmount();
+}
+
 } // namespace gameManager
 } // namespace battleship

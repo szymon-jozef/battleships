@@ -17,16 +17,12 @@ void Game::updateLabels() {
   case networking::GameStatus::PLACING_SHIPS: {
     auto shipType = gameManager.getCurrentShip();
     if (shipType) {
-      // TODO! Show how many ships of given type are left
-      gameStatusLabel =
-          TextFormat("Place your ships!\nYour current ship has %d masts\nShip will be placed %s\nPress space to turn",
-                     static_cast<int>(shipType.value()),
-                     board.getIsHorizontal() ? "horizontally" : "vertically");
-
+      gameStatusLabel = TextFormat("Place your ships!\nPress space to change orientation\n%i ships left!\n",
+                                   gameManager.shipsAmmount());
       labelColor = GREEN;
     } else {
       gameStatusLabel = "No ships left!";
-      labelColor = GRAY;
+      labelColor = DARKGRAY;
     }
     break;
   }

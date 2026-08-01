@@ -120,5 +120,9 @@ bool Player::hasShips() const {
   return !shipsBay.empty();
 }
 
+unsigned short int Player::shipsAmmount() const {
+  return shipsBay.size();
+}
+
 } // namespace logic
 } // namespace battleship
