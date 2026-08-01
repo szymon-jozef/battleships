@@ -159,6 +159,7 @@ public:
   std::string radarAsString();
 
   bool isPlacementValid(unsigned short int row, unsigned short int column, bool isHorizontal) const;
+  bool hasShips() const;
 
   unsigned short int getBoardWidth() const {
     return board.WIDTH;

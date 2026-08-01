@@ -116,5 +116,9 @@ bool Player::isPlacementValid(unsigned short int row, unsigned short int column,
   return false;
 }
 
+bool Player::hasShips() const {
+  return !shipsBay.empty();
+}
+
 } // namespace logic
 } // namespace battleship

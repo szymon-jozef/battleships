@@ -119,5 +119,9 @@ bool GameManager::isPlacementValid(unsigned short int row, unsigned short int co
   return player.isPlacementValid(row, column, isHorizontal);
 }
 
+bool GameManager::hasShips() const {
+  return player.hasShips();
+}
+
 } // namespace gameManager
 } // namespace battleship

@@ -43,6 +43,7 @@ public:
   void setOnShotResult(std::function<void(logic::FieldState)> func);
 
   bool isPlacementValid(unsigned short int row, unsigned short int column, bool isHorizontal);
+  bool hasShips() const;
 };
 } // namespace gameManager
 } // namespace battleship

@@ -172,7 +172,6 @@ void Game::update() {
   updateLabels(); // we update labels all the time, because checking every frame if the ship type has changed is too
                   // much. TODO! Change this someday
 
-  // TODO! Move this somewhere more appropriate
   if (gameManager.getCurrentGameStatus() == networking::GameStatus::PLACING_SHIPS && IsKeyPressed(KEY_SPACE)) {
     board.toggleHorizontal();
   }

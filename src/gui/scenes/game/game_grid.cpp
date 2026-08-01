@@ -101,7 +101,11 @@ void GameGrid::updateGridState() {
     break;
   case battleship::networking::GameStatus::PLACING_SHIPS:
     if (gridType == GridType::BOARD) {
-      setGridClickable(true);
+      if (gameManager.hasShips()) {
+        setGridClickable(true);
+      } else {
+        setGridClickable(false);
+      }
     } else {
       setGridClickable(false);
     }
