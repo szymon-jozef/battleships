@@ -146,6 +146,7 @@ GameGrid::GameGrid(gameManager::GameManager &gameManager, GridType type)
 
 void GameGrid::toggleHorizontal() {
   isHorizontal = !isHorizontal;
+  isOrientationChanged = true;
 }
 
 bool GameGrid::getIsHorizontal() {
@@ -161,7 +162,10 @@ void GameGrid::update() {
   updateLabelContent();
   updateGridState();
   updateFieldsState();
+  updateHoveredField();
+}
 
+void GameGrid::updateHoveredField() {
   if (CheckCollisionPointRec(GetMousePosition(), gridRect) && isActive) {
     int relativeX = GetMouseX() - gridRect.x;
     int relativeY = GetMouseY() - gridRect.y;
@@ -174,31 +178,34 @@ void GameGrid::update() {
     auto newHoveredColumn = static_cast<unsigned short int>(relativeX / deltaSize);
     auto newHoveredRow = static_cast<unsigned short int>(relativeY / deltaSize);
 
-    if (!hoveredColumn || !hoveredRow || newHoveredColumn != hoveredColumn.value() ||
-        newHoveredRow != hoveredRow.value()) {
+    isHoveredFieldChanged = !hoveredColumn || !hoveredRow || newHoveredColumn != hoveredColumn.value() ||
+                            newHoveredRow != hoveredRow.value();
+
+    if (isHoveredFieldChanged) {
       // hovered field changed so we check again
       hoveredColumn = newHoveredColumn;
       hoveredRow = newHoveredRow;
+    }
 
-      if (isHoverValid() && offsetX <= fieldSize && offsetY <= fieldSizeInt &&
-          getField(hoveredRow.value(), hoveredColumn.value()).getIsClickable()) {
-        isAnyHovered = true;
+    if (isHoverValid() && offsetX <= fieldSize && offsetY <= fieldSizeInt &&
+        getField(hoveredRow.value(), hoveredColumn.value()).getIsClickable()) {
+      isAnyHovered = true;
 
-        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
-          handleFieldClick();
-        }
-
-      } else {
-        isAnyHovered = false;
+      if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
+        handleFieldClick();
       }
-    } else {
-      isAnyHovered = false; // mouse isn't touching the grid so it cannot be hovered
-    }
 
-    if (isAnyHovered) {
-      hightlightColor =
-          gameManager.isPlacementValid(hoveredRow.value(), hoveredColumn.value(), isHorizontal) ? GREEN : RED;
+    } else {
+      isAnyHovered = false;
     }
+  } else {
+    isAnyHovered = false; // mouse isn't touching the grid so it cannot be hovered
+  }
+
+  if (isAnyHovered && (isHoveredFieldChanged || isOrientationChanged)) {
+    hightlightColor =
+        gameManager.isPlacementValid(hoveredRow.value(), hoveredColumn.value(), isHorizontal) ? GREEN : RED;
+    isOrientationChanged = false;
   }
 }
 
@@ -268,7 +275,10 @@ void GameGrid::drawHighlitedField() {
     if (isActive && field.getIsClickable()) {
       float x = gridRect.x + hoveredColumn.value() * deltaSize;
       float y = gridRect.y + hoveredRow.value() * deltaSize;
-      DrawRectangleRec(Rectangle{x, y, fieldSize, fieldSize}, hightlightColor);
+
+      if (isAnyHovered) {
+        DrawRectangleRec(Rectangle{x, y, fieldSize, fieldSize}, hightlightColor);
+      }
     }
   }
 }
