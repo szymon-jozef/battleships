@@ -9,7 +9,15 @@
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/spdlog.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 int main(int ac, char **av) {
+#ifdef _WIN32
+  FreeConsole(); // hides cmd prompt when clicking .exe file on windows
+#endif
+
   boost::program_options::options_description desc("Allowe options");
   desc.add_options()("help", "produce help message")("version", "show version number")("log-stdout", "log to stdout");
 
