@@ -101,5 +101,12 @@ std::string Player::radarAsString() {
   return radar.asString();
 }
 
+bool Player::isPlacementValid(unsigned short int row,
+                              unsigned short int column,
+                              const Ship *ship,
+                              bool isHorizontal) const {
+  return board.isPlacementValid(row, column, ship, isHorizontal);
+}
+
 } // namespace logic
 } // namespace battleship
