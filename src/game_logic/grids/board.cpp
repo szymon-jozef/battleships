@@ -25,33 +25,11 @@ bool Board::placeShip(std::shared_ptr<Ship> ship,
                startRow,
                startColumn);
 
-  if (startRow >= HEIGHT || startColumn >= WIDTH) {
-    throw std::invalid_argument("Given of the beggining of the ship are out of bounds!");
+  if (!isPlacementValid(startRow, startColumn, ship.get(), isHorizontal)) {
+    return false;
   }
+
   unsigned short int shipLength = static_cast<unsigned short int>(ship->getType());
-
-  unsigned short int endRow = isHorizontal ? startRow : startRow + shipLength - 1;
-  unsigned short int endColumn = isHorizontal ? startColumn + shipLength - 1 : startColumn;
-
-  // we don't check < 0 since unsigned int + unsigned int cannot be less than 0
-  if (endRow >= HEIGHT || endColumn >= WIDTH) {
-    throw std::invalid_argument("Coordinates of the end of the ship are out of bounds!");
-  }
-
-  int rectangleTop = std::max(0, static_cast<int>(startRow) - 1);
-  int rectangleLeft = std::max(0, static_cast<int>(startColumn) - 1);
-
-  int rectangleBottom = std::min(static_cast<int>(HEIGHT) - 1, static_cast<int>(endRow) + 1);
-  int rectangleRight = std::min(static_cast<int>(WIDTH) - 1, static_cast<int>(endColumn) + 1);
-
-  for (int row = rectangleTop; row <= rectangleBottom; row++) {
-    for (int column = rectangleLeft; column <= rectangleRight; column++) {
-      if (getFieldState(row, column) == FieldState::TAKEN) {
-        throw std::invalid_argument("Cannot place ship here, because of collision nearby!");
-      }
-    }
-  }
-
   for (int i = 0; i < shipLength; i++) {
     if (isHorizontal) {
       spdlog::info("[Logic] Settings ({}, {}) as taken", startRow, startColumn + i);
@@ -95,6 +73,45 @@ FieldState Board::recieveShot(unsigned short int row, unsigned short int column)
   spdlog::info("[Logic] Enemy attempted to hit ({},{}) but he missed!", row, column);
   setFieldState(row, column, FieldState::MISSED);
   return FieldState::MISSED;
+}
+
+bool Board::isPlacementValid(unsigned short int row,
+                             unsigned short int column,
+                             const Ship *ship,
+                             bool isHorizontal) const {
+
+  if (row >= HEIGHT || column >= WIDTH) {
+    spdlog::info("[Logic] Given of the beggining of the ship are out of bounds!");
+    return false;
+  }
+
+  unsigned short int shipLength = static_cast<unsigned short int>(ship->getType());
+
+  unsigned short int endRow = isHorizontal ? row : row + shipLength - 1;
+  unsigned short int endColumn = isHorizontal ? column + shipLength - 1 : column;
+
+  // we don't check < 0 since unsigned int + unsigned int cannot be less than 0
+  if (endRow >= HEIGHT || endColumn >= WIDTH) {
+    spdlog::info("[Logic] Coordinates of the end of the ship are out of bounds!");
+    return false;
+  }
+
+  int rectangleTop = std::max(0, static_cast<int>(row) - 1);
+  int rectangleLeft = std::max(0, static_cast<int>(column) - 1);
+
+  int rectangleBottom = std::min(static_cast<int>(HEIGHT) - 1, static_cast<int>(row) + 1);
+  int rectangleRight = std::min(static_cast<int>(WIDTH) - 1, static_cast<int>(endColumn) + 1);
+
+  for (int currentRow = rectangleTop; currentRow <= rectangleBottom; currentRow++) {
+    for (int currentColumn = rectangleLeft; currentColumn <= rectangleRight; currentColumn++) {
+      if (getFieldState(currentRow, currentColumn) == FieldState::TAKEN) {
+        spdlog::info("[Logic] Cannot place ship here, because of collision nearby!");
+        return false;
+      }
+    }
+  }
+
+  return true;
 }
 
 } // namespace logic
