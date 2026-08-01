@@ -179,12 +179,17 @@ void GameGrid::update() {
 
     if (isHoverValid() && offsetX <= fieldSize && offsetY <= fieldSizeInt &&
         getField(hoveredRow.value(), hoveredColumn.value()).getIsClickable()) {
-      SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+      isAnyHovered = true;
 
       if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
         handleFieldClick();
       }
+
+    } else {
+      isAnyHovered = false;
     }
+  } else {
+    isAnyHovered = false; // mouse isn't touching the grid so it cannot be hovered
   }
 }
 

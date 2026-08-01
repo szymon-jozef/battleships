@@ -61,6 +61,7 @@ class GameGrid {
 
 public:
   enum class GridType { BOARD, RADAR };
+  bool isAnyHovered = false;
   GridType gridType;
 
   GameGrid(gameManager::GameManager &gameManager, GridType type);
