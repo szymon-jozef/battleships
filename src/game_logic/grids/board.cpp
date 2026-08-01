@@ -81,7 +81,7 @@ bool Board::isPlacementValid(unsigned short int row,
                              bool isHorizontal) const {
 
   if (row >= HEIGHT || column >= WIDTH) {
-    spdlog::info("[Logic] Given of the beggining of the ship are out of bounds!");
+    spdlog::info("[Logic] Given coordinates ({}, {}) of the beggining of the ship are out of bounds!", row, column);
     return false;
   }
 
@@ -92,7 +92,7 @@ bool Board::isPlacementValid(unsigned short int row,
 
   // we don't check < 0 since unsigned int + unsigned int cannot be less than 0
   if (endRow >= HEIGHT || endColumn >= WIDTH) {
-    spdlog::info("[Logic] Coordinates of the end of the ship are out of bounds!");
+    spdlog::info("[Logic] Coordinates ({},{}) of the end of the ship are out of bounds!", endRow, endColumn);
     return false;
   }
 
