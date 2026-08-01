@@ -198,13 +198,11 @@ void GameGrid::handleFieldClick() {
   if (field.getIsClickable()) {
     switch (gridType) {
     case GridType::BOARD:
-      try {
+      if (gameManager.isPlacementValid(hoveredRow.value(), hoveredColumn.value(), isHorizontal)) {
         gameManager.placeShip(hoveredRow.value(), hoveredColumn.value(), isHorizontal);
         field.setClickable(false);
-
-      } catch (std::invalid_argument &e) {
-        spdlog::warn("[GUI] cannot place ship here: {}", e.what());
       }
+
       break;
     case GridType::RADAR:
       if (gameManager.isMyTurn()) {
@@ -261,7 +259,11 @@ void GameGrid::drawHighlitedField() {
     if (isActive && field.getIsClickable()) {
       float x = gridRect.x + hoveredColumn.value() * deltaSize;
       float y = gridRect.y + hoveredRow.value() * deltaSize;
-      DrawRectangleRec(Rectangle{x, y, fieldSize, fieldSize}, GREEN);
+      if (gameManager.isPlacementValid(hoveredRow.value(), hoveredColumn.value(), isHorizontal)) {
+        DrawRectangleRec(Rectangle{x, y, fieldSize, fieldSize}, GREEN);
+      } else {
+        DrawRectangleRec(Rectangle{x, y, fieldSize, fieldSize}, RED);
+      }
     }
   }
 }

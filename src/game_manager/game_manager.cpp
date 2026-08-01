@@ -115,5 +115,9 @@ void GameManager::setOnShotResult(std::function<void(logic::FieldState)> func) {
   client.setOnShotResult(func);
 }
 
+bool GameManager::isPlacementValid(unsigned short int row, unsigned short int column, bool isHorizontal) {
+  return player.isPlacementValid(row, column, isHorizontal);
+}
+
 } // namespace gameManager
 } // namespace battleship
