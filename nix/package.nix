@@ -41,7 +41,7 @@
           desktopItems = [ desktopItem ];
 
           postInstall = ''
-            wrapProgram $out/bin/battleships --set BATTLESHIPS_ASSETS_DIR "$out/usr/share/battleships/assets"
+            wrapProgram $out/bin/battleships --set BATTLESHIPS_ASSETS_DIR "$out/share/battleships/assets"
           '';
 
         }
