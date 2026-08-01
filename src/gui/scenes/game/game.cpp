@@ -163,7 +163,7 @@ void Game::update() {
   board.update();
   radar.update();
 
-  if (board.isAnyHovered || radar.isAnyHovered) {
+  if ((board.isAnyHovered && board.isActive) || (radar.isAnyHovered && radar.isActive)) {
     SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
   } else {
     SetMouseCursor(MOUSE_CURSOR_DEFAULT);

@@ -94,7 +94,6 @@ void GameGrid::updateFieldsState() {
   }
 }
 
-// TODO! Use this only on status change
 /// @brief Set the active grid clickable
 void GameGrid::updateGridState() {
   switch (gameManager.getCurrentGameStatus()) {
@@ -111,11 +110,14 @@ void GameGrid::updateGridState() {
     if (gridType == GridType::BOARD) {
       setGridClickable(false);
     } else {
-      setGridClickable(true);
+      if (gameManager.isMyTurn()) {
+        setGridClickable(true);
+      } else {
+        setGridClickable(false);
+      }
     }
     break;
   case battleship::networking::GameStatus::GAME_FINISH:
-    // TODO! Add some summary screen
     break;
   }
 }

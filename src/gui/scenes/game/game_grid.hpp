@@ -15,7 +15,6 @@ class GameGrid {
   Color hightlightColor;
 
   bool isHorizontal = true;
-  bool isActive = false;
   bool isHoveredFieldChanged = false;
   bool isOrientationChanged = false;
 
@@ -66,6 +65,7 @@ class GameGrid {
 public:
   enum class GridType { BOARD, RADAR };
   bool isAnyHovered = false;
+  bool isActive = false;
   GridType gridType;
 
   GameGrid(gameManager::GameManager &gameManager, GridType type);
