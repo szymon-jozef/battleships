@@ -153,9 +153,6 @@ bool GameGrid::getIsHorizontal() {
 }
 
 void GameGrid::update() {
-  hoveredRow = std::nullopt;
-  hoveredColumn = std::nullopt;
-
   if (IsWindowResized()) {
     updateData();
     updateGridRect();
@@ -174,27 +171,34 @@ void GameGrid::update() {
 
     int fieldSizeInt = static_cast<int>(fieldSize);
 
-    hoveredColumn = static_cast<unsigned short int>(relativeX / deltaSize);
-    hoveredRow = static_cast<unsigned short int>(relativeY / deltaSize);
+    auto newHoveredColumn = static_cast<unsigned short int>(relativeX / deltaSize);
+    auto newHoveredRow = static_cast<unsigned short int>(relativeY / deltaSize);
 
-    if (isHoverValid() && offsetX <= fieldSize && offsetY <= fieldSizeInt &&
-        getField(hoveredRow.value(), hoveredColumn.value()).getIsClickable()) {
-      isAnyHovered = true;
+    if (!hoveredColumn || !hoveredRow || newHoveredColumn != hoveredColumn.value() ||
+        newHoveredRow != hoveredRow.value()) {
+      // hovered field changed so we check again
+      hoveredColumn = newHoveredColumn;
+      hoveredRow = newHoveredRow;
 
-      if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
-        handleFieldClick();
+      if (isHoverValid() && offsetX <= fieldSize && offsetY <= fieldSizeInt &&
+          getField(hoveredRow.value(), hoveredColumn.value()).getIsClickable()) {
+        isAnyHovered = true;
+
+        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
+          handleFieldClick();
+        }
+
+      } else {
+        isAnyHovered = false;
       }
-
     } else {
-      isAnyHovered = false;
+      isAnyHovered = false; // mouse isn't touching the grid so it cannot be hovered
     }
-  } else {
-    isAnyHovered = false; // mouse isn't touching the grid so it cannot be hovered
-  }
 
-  if (isAnyHovered) {
-    hightlightColor =
-        gameManager.isPlacementValid(hoveredRow.value(), hoveredColumn.value(), isHorizontal) ? GREEN : RED;
+    if (isAnyHovered) {
+      hightlightColor =
+          gameManager.isPlacementValid(hoveredRow.value(), hoveredColumn.value(), isHorizontal) ? GREEN : RED;
+    }
   }
 }
 
