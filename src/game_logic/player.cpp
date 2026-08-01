@@ -60,9 +60,12 @@ bool Player::placeShip(unsigned short int row, unsigned short int column, bool i
   }
 
   std::shared_ptr<Ship> currentShip = shipsBay.back();
-  board.placeShip(currentShip, row, column, isHorizontal);
-  shipsBay.pop_back(); // we take one ship off the stack, after we place it
-  return true;
+  bool result = board.placeShip(currentShip, row, column, isHorizontal);
+  if (result) {
+    shipsBay.pop_back(); // we take one ship off the stack, after we place it
+    return true;
+  }
+  return false;
 }
 
 FieldState Player::recieveShot(unsigned short int row, unsigned short int column) {
@@ -101,10 +104,8 @@ std::string Player::radarAsString() {
   return radar.asString();
 }
 
-bool Player::isPlacementValid(unsigned short int row,
-                              unsigned short int column,
-                              const Ship *ship,
-                              bool isHorizontal) const {
+bool Player::isPlacementValid(unsigned short int row, unsigned short int column, bool isHorizontal) const {
+  auto ship = shipsBay.back().get();
   return board.isPlacementValid(row, column, ship, isHorizontal);
 }
 
