@@ -12,6 +12,7 @@ class GameGrid {
   Rectangle gridRect;
   std::vector<GameField> fields;
   std::optional<unsigned short int> hoveredRow = std::nullopt, hoveredColumn = std::nullopt;
+  Color hightlightColor;
 
   bool isHorizontal = true;
   bool isActive = false;

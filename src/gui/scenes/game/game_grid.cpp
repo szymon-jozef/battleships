@@ -191,6 +191,11 @@ void GameGrid::update() {
   } else {
     isAnyHovered = false; // mouse isn't touching the grid so it cannot be hovered
   }
+
+  if (isAnyHovered) {
+    hightlightColor =
+        gameManager.isPlacementValid(hoveredRow.value(), hoveredColumn.value(), isHorizontal) ? GREEN : RED;
+  }
 }
 
 void GameGrid::handleFieldClick() {
@@ -259,11 +264,7 @@ void GameGrid::drawHighlitedField() {
     if (isActive && field.getIsClickable()) {
       float x = gridRect.x + hoveredColumn.value() * deltaSize;
       float y = gridRect.y + hoveredRow.value() * deltaSize;
-      if (gameManager.isPlacementValid(hoveredRow.value(), hoveredColumn.value(), isHorizontal)) {
-        DrawRectangleRec(Rectangle{x, y, fieldSize, fieldSize}, GREEN);
-      } else {
-        DrawRectangleRec(Rectangle{x, y, fieldSize, fieldSize}, RED);
-      }
+      DrawRectangleRec(Rectangle{x, y, fieldSize, fieldSize}, hightlightColor);
     }
   }
 }
