@@ -159,10 +159,15 @@ Game::~Game() {
 }
 
 void Game::update() {
-  SetMouseCursor(MOUSE_CURSOR_DEFAULT);
   Scene::update();
   board.update();
   radar.update();
+
+  if (board.isAnyHovered || radar.isAnyHovered) {
+    SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+  } else {
+    SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+  }
 
   updateLabels(); // we update labels all the time, because checking every frame if the ship type has changed is too
                   // much. TODO! Change this someday
