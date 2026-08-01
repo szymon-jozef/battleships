@@ -25,3 +25,7 @@ target_link_libraries(networking
     Boost::headers
     Threads::Threads
 )
+
+if(WIN32)
+    target_compile_definitions(networking PRIVATE _CRT_SECURE_NO_WARNINGS)
+endif()

@@ -14,6 +14,17 @@ project(battleships
 option(isDev "build tests" false)
 option(isRelease "install everything to ." false)
 
+if (WIN32)
+    set(VCPKG_TARGET_TRIPLET x64-windows-static)
+    set(BUILD_SHARED_LIBS OFF)
+
+    if(MSVC)
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    endif()
+endif()
+
+
+
 find_package(Boost REQUIRED COMPONENTS program_options)
 find_package(spdlog REQUIRED)
 find_package(fmt REQUIRED)
@@ -30,20 +41,16 @@ include(cmake/gui.cmake)
 
 if (isDev)
     include(cmake/tests.cmake)
+
+    # show warnings if developing
+    if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+        target_compile_options(battleships PRIVATE -Wall -Wextra -Wunreachable-code)
+        target_compile_options(gui PRIVATE -Wall -Wextra -Wunreachable-code)
+        target_compile_options(networking PRIVATE -Wall -Wextra -Wunreachable-code)
+        target_compile_options(game_logic PRIVATE -Wall -Wextra -Wunreachable-code)
+        target_compile_options(game_manager PRIVATE -Wall -Wextra -Wunreachable-code)
+    endif()
 endif()
 
-if(WIN32)
-    include(cmake/windows.cmake)
-endif()
 
 include(cmake/install.cmake)
-
-# show warnings if developing
-if (isDev AND ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-target_compile_options(battleships PRIVATE -Wall -Wextra -Wunreachable-code)
-target_compile_options(gui PRIVATE -Wall -Wextra -Wunreachable-code)
-target_compile_options(networking PRIVATE -Wall -Wextra -Wunreachable-code)
-target_compile_options(game_logic PRIVATE -Wall -Wextra -Wunreachable-code)
-target_compile_options(game_manager PRIVATE -Wall -Wextra -Wunreachable-code)
-endif()
-
