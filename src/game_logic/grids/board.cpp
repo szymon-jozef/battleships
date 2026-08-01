@@ -80,6 +80,10 @@ bool Board::isPlacementValid(unsigned short int row,
                              const Ship *ship,
                              bool isHorizontal) const {
 
+  if (!ship) {
+    return false;
+  }
+
   if (row >= HEIGHT || column >= WIDTH) {
     spdlog::info("[Logic] Given coordinates ({}, {}) of the beggining of the ship are out of bounds!", row, column);
     return false;

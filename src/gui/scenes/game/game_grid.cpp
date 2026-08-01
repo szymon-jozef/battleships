@@ -200,12 +200,21 @@ void GameGrid::updateHoveredField() {
     }
   } else {
     isAnyHovered = false; // mouse isn't touching the grid so it cannot be hovered
+    hoveredRow = std::nullopt;
+    hoveredColumn = std::nullopt;
   }
 
-  if (isAnyHovered && (isHoveredFieldChanged || isOrientationChanged)) {
-    hightlightColor =
-        gameManager.isPlacementValid(hoveredRow.value(), hoveredColumn.value(), isHorizontal) ? GREEN : RED;
-    isOrientationChanged = false;
+  if (isAnyHovered && (isHoveredFieldChanged || isOrientationChanged) && hoveredRow && hoveredColumn) {
+    switch (gridType) {
+    case GridType::BOARD:
+      hightlightColor =
+          gameManager.isPlacementValid(hoveredRow.value(), hoveredColumn.value(), isHorizontal) ? GREEN : RED;
+      isOrientationChanged = false;
+      break;
+    case GridType::RADAR:
+      hightlightColor = BLACK;
+      break;
+    }
   }
 }
 
@@ -270,16 +279,52 @@ Rectangle GameGrid::getGridRect() {
 }
 
 void GameGrid::drawHighlitedField() {
-  if (isHoverValid()) {
-    const auto &field = getField(hoveredRow.value(), hoveredColumn.value());
-    if (isActive && field.getIsClickable()) {
-      float x = gridRect.x + hoveredColumn.value() * deltaSize;
-      float y = gridRect.y + hoveredRow.value() * deltaSize;
+  if (!isHoverValid()) {
+    return;
+  }
 
-      if (isAnyHovered) {
-        DrawRectangleRec(Rectangle{x, y, fieldSize, fieldSize}, hightlightColor);
+  switch (gridType) {
+  case GridType::BOARD: {
+    auto ship = gameManager.getCurrentShip();
+    if (!ship) {
+      return;
+    }
+
+    auto length = static_cast<unsigned short int>(ship.value());
+
+    for (unsigned short int i = 0; i < length; i++) {
+      const auto &field = getField(hoveredRow.value(), hoveredColumn.value());
+      if (isActive && field.getIsClickable()) {
+        float x = 0, y = 0;
+        if (isHorizontal) {
+          x = gridRect.x + (hoveredColumn.value() + i) * deltaSize;
+          y = gridRect.y + hoveredRow.value() * deltaSize;
+        } else {
+          x = gridRect.x + hoveredColumn.value() * deltaSize;
+          y = gridRect.y + (hoveredRow.value() + i) * deltaSize;
+        }
+
+        if (isAnyHovered && x < gridRect.x + gridRect.height && y < gridRect.y + gridRect.width) {
+          DrawRectangleRec(Rectangle{x, y, fieldSize, fieldSize}, hightlightColor);
+        }
       }
     }
+    break;
+  }
+  case GridType::RADAR: {
+    if (gameManager.isMyTurn()) {
+      const auto &field = getField(hoveredRow.value(), hoveredColumn.value());
+      if (isActive && field.getIsClickable()) {
+        float x = gridRect.x + hoveredColumn.value() * deltaSize;
+        float y = gridRect.y + hoveredRow.value() * deltaSize;
+
+        if (isAnyHovered && x < gridRect.x + gridRect.height && y < gridRect.y + gridRect.width) {
+          DrawRectangleRec(Rectangle{x, y, fieldSize, fieldSize}, hightlightColor);
+        }
+      }
+      break;
+    }
+  }
   }
 }
 

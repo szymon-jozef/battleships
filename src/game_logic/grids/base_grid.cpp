@@ -10,6 +10,10 @@ BaseGrid::BaseGrid(const unsigned short int width, const unsigned short int heig
     , HEIGHT(height) {}
 
 FieldState BaseGrid::getFieldState(unsigned short int row, unsigned short int column) const {
+  auto index = row * WIDTH + column;
+  if (index >= WIDTH * HEIGHT) {
+    return FieldState::EMPTY;
+  }
   return grid[row * WIDTH + column].getState();
 }
 

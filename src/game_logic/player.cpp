@@ -105,8 +105,15 @@ std::string Player::radarAsString() {
 }
 
 bool Player::isPlacementValid(unsigned short int row, unsigned short int column, bool isHorizontal) const {
-  auto ship = shipsBay.back().get();
-  return board.isPlacementValid(row, column, ship, isHorizontal);
+  if (shipsBay.empty()) {
+    return false;
+  }
+
+  const auto ship = shipsBay.back().get();
+  if (ship) {
+    return board.isPlacementValid(row, column, ship, isHorizontal);
+  }
+  return false;
 }
 
 } // namespace logic
