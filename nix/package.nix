@@ -1,12 +1,13 @@
+{ metadata_json, ... }:
 {
   perSystem =
     { pkgs, ... }:
     let
       desktopItem = pkgs.makeDesktopItem {
-        name = "battleships";
-        desktopName = "Battleships";
-        exec = "battleships";
-        comment = "Online game of battleships";
+        name = metadata_json.name;
+        desktopName = metadata_json.name;
+        exec = metadata_json.name;
+        comment = metadata_json.description;
         categories = [
           "Game"
         ];
@@ -17,10 +18,8 @@
       packages.default = (
         with pkgs;
         stdenv.mkDerivation {
-          pname = "battleships";
-          version = builtins.head (
-            builtins.match ".*VERSION\ ([0-9.]+).*" (builtins.readFile ../CMakeLists.txt)
-          );
+          pname = metadata_json.name;
+          version = metadata_json.version;
           src = ./..;
 
           nativeBuildInputs = with pkgs; [
@@ -41,9 +40,17 @@
           desktopItems = [ desktopItem ];
 
           postInstall = ''
-            wrapProgram $out/bin/battleships --set BATTLESHIPS_ASSETS_DIR "$out/share/battleships/assets"
+            wrapProgram $out/bin/${metadata_json.name} --set BATTLESHIPS_ASSETS_DIR "$out/share/battleships/assets"
           '';
 
+          meta = {
+            description = metadata_json.description;
+            homepage = metadata_json.homepage_url;
+            license = lib.licenses.gpl3;
+            platforms = lib.platforms.linux;
+            downloadPage = metadata_json.release_url;
+            mainProgram = metadata_json.name;
+          };
         }
       );
     };

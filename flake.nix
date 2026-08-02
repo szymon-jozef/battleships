@@ -13,9 +13,11 @@
     inputs.flake-parts.lib.mkFlake { inherit inputs; } (
       { ... }:
       {
+        _module.args.metadata_json = builtins.fromJSON (builtins.readFile ./metadata.json);
+
         systems = [
           "x86_64-linux"
-          "aarch64-darwin"
+          #"aarch64-darwin" | maybe someday
         ];
         imports = [
           (inputs.import-tree ./nix)
