@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          token: ${{secrets.RELEASE_CREATE_TOKEN}}
 
       - name: Version bump 
         id: version
@@ -35,4 +37,4 @@ jobs:
       - name: Create release
         run: gh release create "v${{steps.version.outputs.new_version}}" --generate-notes -p # remove -p when we exit pre-release
         env:
-          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GH_TOKEN: ${{secrets.RELEASE_CREATE_TOKEN}}
