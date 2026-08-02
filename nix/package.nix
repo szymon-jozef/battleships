@@ -23,6 +23,7 @@
           src = ./..;
 
           CMAKE_GENERATOR = "Ninja";
+          CMAKE_BUILD_TYPE = "Release";
 
           nativeBuildInputs = with pkgs; [
             ninja
