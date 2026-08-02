@@ -4,12 +4,26 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
-project(battleships 
-    VERSION 0.0.7
-    DESCRIPTION "Online game of battleships"
-    HOMEPAGE_URL "https://github.com/szymon-jozef/battleships"
+file(READ ${CMAKE_CURRENT_SOURCE_DIR}/metadata.json METADATA_STRING)
+
+string(JSON name GET ${METADATA_STRING} name)
+string(JSON version GET ${METADATA_STRING} version)
+string(JSON description GET ${METADATA_STRING} description)
+string(JSON homepage_url GET ${METADATA_STRING} homepage_url)
+
+project(${name} 
+    VERSION "${version}"
+    DESCRIPTION "${description}"
+    HOMEPAGE_URL "${homepage_url}"
     LANGUAGES CXX
 )
+
+message(STATUS "=== Project metadata ===")
+message(STATUS "Name: ${PROJECT_NAME}")
+message(STATUS "Version: ${PROJECT_VERSION}")
+message(STATUS "Description: ${PROJECT_DESCRIPTION}")
+message(STATUS "Source URL: ${PROJECT_HOMEPAGE_URL}")
+message(STATUS "==============================")
 
 option(isDev "build tests" false)
 option(isRelease "install everything to ." false)

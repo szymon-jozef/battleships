@@ -1,4 +1,4 @@
-{ self, ... }:
+{ self, metadata_json, ... }:
 {
   flake.nixosModules.default =
     {
@@ -8,7 +8,7 @@
       ...
     }:
     let
-      cfg = config.programs.battleships;
+      cfg = config.programs.${metadata_json.name};
 
       inherit (lib)
         mkEnableOption
@@ -19,8 +19,8 @@
       inherit (pkgs.stdenv.hostPlatform) system;
     in
     {
-      options.programs.battleships = {
-        enable = mkEnableOption "Battleships";
+      options.programs.${metadata_json.name} = {
+        enable = mkEnableOption metadata_json.name;
 
         package = mkOption {
           default = self.packages.${system}.default;
