@@ -1,7 +1,7 @@
 {
-    "name" : "battleships",
-    "version" : "0.0.7",
-    "description" : "Online game of battleships",
-    "homepage_url" : "https://github.com/szymon-jozef/battleships",
-    "release_url" : "https://github.com/szymon-jozef/battleships/releases"
+    "name": "battleships",
+    "version": "0.0.8",
+    "description": "Online game of battleships",
+    "homepage_url": "https://github.com/szymon-jozef/battleships",
+    "release_url": "https://github.com/szymon-jozef/battleships/releases"
 }
