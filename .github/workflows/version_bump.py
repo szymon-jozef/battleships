@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 
 METADATA_FILE_PATH = "../../metadata.json"
@@ -54,6 +55,13 @@ def main() -> None:
             return
 
     new_version: str = f"{major_num}.{minor_num}.{patch_num}"
+    github_file_path = os.environ["GITHUB_OUTPUT"]
+
+    new_version_string = f"new_version={new_version}"
+
+    with open(github_file_path, "a") as f:
+        f.write(new_version_string)
+
     save_version(new_version)
 
 
