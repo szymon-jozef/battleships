@@ -22,6 +22,8 @@
           version = metadata_json.version;
           src = ./..;
 
+          CMAKE_GENERATOR = "Ninja";
+
           nativeBuildInputs = with pkgs; [
             ninja
             cmake
