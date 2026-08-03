@@ -1,4 +1,5 @@
 #include "widgets_vector.hpp"
+#include <memory>
 
 namespace battleship {
 namespace gui {
@@ -51,6 +52,12 @@ void WidgetsVector::push_back_nameInput(std::string &target) {
 void WidgetsVector::push_back_ipInput(std::string &target) {
   std::unique_ptr<TextInput> input =
       std::make_unique<TextInput>(getCurrentDistance(), scale, target, TextInput::InputType::IP);
+  widgets.push_back(std::move(input));
+}
+
+void WidgetsVector::push_back_volumeLevelInput(std::string &target) {
+  std::unique_ptr<TextInput> input =
+      std::make_unique<TextInput>(getCurrentDistance(), scale, target, TextInput::InputType::SOUND_LEVEL);
   widgets.push_back(std::move(input));
 }
 

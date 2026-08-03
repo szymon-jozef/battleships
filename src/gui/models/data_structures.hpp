@@ -8,6 +8,7 @@
 #include <spdlog/spdlog.h>
 #include <string>
 #include <string_view>
+#include <type_traits>
 
 namespace battleship {
 namespace gui {
@@ -54,10 +55,25 @@ class GameSettings {
 #endif
   }
 
+  template <typename T> static void loadCasted(const std::string_view &dataToCast, T &target, const T defaultValue) {
+    static_assert(std::is_arithmetic<T>::value, "Not an arithmetic type");
+
+    auto [ptr, ec] = std::from_chars(dataToCast.data(), dataToCast.data() + dataToCast.size(), target);
+
+    if (ec == std::errc::invalid_argument) {
+      spdlog::error("[GUI] tried casting something that wasn't a number!");
+      target = defaultValue;
+    } else if (ec == std::errc::result_out_of_range) {
+      spdlog::error("[GUI] numeric setting set as value out of range!");
+      target = defaultValue;
+    }
+  }
+
 public:
   std::string playerName;
   std::string serverUrl;
   uint16_t serverPort;
+  std::string volumeLevel;
 
   GameSettings() {
     loadPaths();
@@ -73,9 +89,15 @@ public:
       playerName = "player";
       serverUrl = "127.0.0.1";
       serverPort = 6767;
+      volumeLevel = "0.5";
       file.close();
       save();
+    } else {
+      load();
     }
+
+    SetMasterVolume(std::stof(volumeLevel));
+    spdlog::info("[GUI] game loaded with master volume at: {}", volumeLevel);
   }
 
   void save() {
@@ -90,8 +112,17 @@ public:
     file << "serverUrl=" << serverUrl << '\n';
     file << "serverPort=" << serverPort << '\n';
 
+    if (volumeLevel.empty()) {
+      file << "volumeLevel=" << "0.5" << '\n';
+    } else {
+      file << "volumeLevel=" << volumeLevel << '\n';
+    }
+
     file.close();
     spdlog::info("[GUI] settings have been saved");
+
+    SetMasterVolume(std::stof(volumeLevel));
+    spdlog::info("[GUI] master volume set at: {}", GetMasterVolume());
   }
   void load() {
     std::ifstream file(configFilePath);
@@ -121,16 +152,13 @@ public:
       } else if (type == "serverUrl") {
         serverUrl = value;
       } else if (type == "serverPort") {
-        auto [ptr, ec] = std::from_chars(value.data(), value.data() + value.size(), serverPort);
-
-        if (ec == std::errc::invalid_argument) {
-          spdlog::error("[GUI] server port was set as something that's not a number!");
-          serverPort = 6767;
-        } else if (ec == std::errc::result_out_of_range) {
-          spdlog::error("[GUI] server port was set as value out of range!");
-          serverPort = 6767;
+        loadCasted(value, serverPort, static_cast<uint16_t>(6767));
+      } else if (type == "volumeLevel") {
+        if (value.empty()) {
+          volumeLevel = "0.5";
+        } else {
+          volumeLevel = value;
         }
-
       } else {
         spdlog::warn("[GUI] unrecognize entry in the settings: {} - {}", type, value);
         continue;
@@ -231,12 +259,10 @@ private:
 class GameContext {
 public:
   GameContext()
-      : assetsManager(AssetsManager()) {
-    settings.load();
-  }
+      : assetsManager(AssetsManager()) {}
 
-  GameSettings settings;
   AssetsManager assetsManager;
+  GameSettings settings;
 
   std::string loserName;
   bool isWon = false;
