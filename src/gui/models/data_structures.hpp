@@ -8,6 +8,7 @@
 #include <spdlog/spdlog.h>
 #include <string>
 #include <string_view>
+#include <type_traits>
 
 namespace battleship {
 namespace gui {
@@ -54,10 +55,25 @@ class GameSettings {
 #endif
   }
 
+  template <typename T> static void loadCasted(const std::string_view &dataToCast, T &target, const T defaultValue) {
+    static_assert(std::is_arithmetic<T>::value, "Not an arithmetic type");
+
+    auto [ptr, ec] = std::from_chars(dataToCast.data(), dataToCast.data() + dataToCast.size(), target);
+
+    if (ec == std::errc::invalid_argument) {
+      spdlog::error("[GUI] tried casting something that wasn't a number!");
+      target = defaultValue;
+    } else if (ec == std::errc::result_out_of_range) {
+      spdlog::error("[GUI] numeric setting set as value out of range!");
+      target = defaultValue;
+    }
+  }
+
 public:
   std::string playerName;
   std::string serverUrl;
   uint16_t serverPort;
+  float volumeLevel;
 
   GameSettings() {
     loadPaths();
@@ -73,6 +89,7 @@ public:
       playerName = "player";
       serverUrl = "127.0.0.1";
       serverPort = 6767;
+      volumeLevel = 0.5f;
       file.close();
       save();
     }
@@ -89,6 +106,7 @@ public:
     file << "playerName=" << playerName << '\n';
     file << "serverUrl=" << serverUrl << '\n';
     file << "serverPort=" << serverPort << '\n';
+    file << "volumeLevel=" << volumeLevel << '\n';
 
     file.close();
     spdlog::info("[GUI] settings have been saved");
@@ -121,16 +139,9 @@ public:
       } else if (type == "serverUrl") {
         serverUrl = value;
       } else if (type == "serverPort") {
-        auto [ptr, ec] = std::from_chars(value.data(), value.data() + value.size(), serverPort);
-
-        if (ec == std::errc::invalid_argument) {
-          spdlog::error("[GUI] server port was set as something that's not a number!");
-          serverPort = 6767;
-        } else if (ec == std::errc::result_out_of_range) {
-          spdlog::error("[GUI] server port was set as value out of range!");
-          serverPort = 6767;
-        }
-
+        loadCasted(value, serverPort, static_cast<uint16_t>(6767));
+      } else if (type == "volumeLevel") {
+        loadCasted(value, volumeLevel, 0.5f);
       } else {
         spdlog::warn("[GUI] unrecognize entry in the settings: {} - {}", type, value);
         continue;
