@@ -10,6 +10,7 @@ Settings::Settings(GameContext &gameContext, Texture2D &background)
 
   widgets.push_back_label("Player options", BLACK);
   widgets.push_back_nameInput(gameContext.settings.playerName);
+  widgets.push_back_volumeLevelInput((gameContext.settings.volumeLevel));
   widgets.push_back_button("Go back", [this, &gameContext]() {
     onEveryClick();
 

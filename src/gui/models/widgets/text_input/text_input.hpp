@@ -11,7 +11,7 @@ namespace gui {
 class TextInput : public Widget {
   // 31 chars, because 32 is the max we can send through the network
 public:
-  enum class InputType { NAME, IP };
+  enum class InputType { NAME, IP, SOUND_LEVEL };
   TextInput(float pos_y, Rectangle scaleRect, std::string &target, InputType inputType);
 
   void update() override;

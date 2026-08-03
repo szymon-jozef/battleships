@@ -29,6 +29,7 @@ public:
   void push_back_button(std::string label, std::function<void()> onClick);
   void push_back_nameInput(std::string &target);
   void push_back_ipInput(std::string &target);
+  void push_back_volumeLevelInput(std::string &target);
 
   void push_back_label(std::string text, Color color);
 

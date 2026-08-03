@@ -1,6 +1,7 @@
 #include "text_input.hpp"
 #include "../text_label/text_label.hpp"
 #include "../widget.hpp"
+#include <cctype>
 #include <raylib.h>
 #include <spdlog/spdlog.h>
 
@@ -28,6 +29,9 @@ TextInput::TextInput(float pos_y, Rectangle scaleRect, std::string &target, Inpu
     break;
   case InputType::IP:
     inputText.setInnerLabel("IP address");
+    break;
+  case InputType::SOUND_LEVEL:
+    inputText.setInnerLabel("Sound level [0;1]");
     break;
   }
 }
@@ -135,6 +139,30 @@ void TextInput::normaliseText() {
     }
     break;
   }
+  case InputType::SOUND_LEVEL:
+    // we remove everything that's not number/dot
+    target.erase(std::remove_if(
+                     target.begin(), target.end(), [](auto const &c) -> bool { return (c < 48 || c > 57) && c != 46; }),
+                 target.end());
+
+    // 0.xx <- max 4 chars
+    if (target.size() >= 4) {
+      target.resize(4);
+    }
+
+    if (target == "") {
+      target = "0.0";
+    }
+
+    if (target != "" && std::stof(target) >= 1) {
+      target = "1.0";
+    }
+
+    if (target != "" && std::stof(target) < 0) {
+      target = "0.0";
+    }
+
+    break;
   default: {
     break;
   }

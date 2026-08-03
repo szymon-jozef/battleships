@@ -73,7 +73,7 @@ public:
   std::string playerName;
   std::string serverUrl;
   uint16_t serverPort;
-  float volumeLevel;
+  std::string volumeLevel;
 
   GameSettings() {
     loadPaths();
@@ -89,10 +89,15 @@ public:
       playerName = "player";
       serverUrl = "127.0.0.1";
       serverPort = 6767;
-      volumeLevel = 0.5f;
+      volumeLevel = "0.5";
       file.close();
       save();
+    } else {
+      load();
     }
+
+    SetMasterVolume(std::stof(volumeLevel));
+    spdlog::info("[GUI] game loaded with master volume at: {}", volumeLevel);
   }
 
   void save() {
@@ -106,10 +111,18 @@ public:
     file << "playerName=" << playerName << '\n';
     file << "serverUrl=" << serverUrl << '\n';
     file << "serverPort=" << serverPort << '\n';
-    file << "volumeLevel=" << volumeLevel << '\n';
+
+    if (volumeLevel.empty()) {
+      file << "volumeLevel=" << "0.5" << '\n';
+    } else {
+      file << "volumeLevel=" << volumeLevel << '\n';
+    }
 
     file.close();
     spdlog::info("[GUI] settings have been saved");
+
+    SetMasterVolume(std::stof(volumeLevel));
+    spdlog::info("[GUI] master volume set at: {}", GetMasterVolume());
   }
   void load() {
     std::ifstream file(configFilePath);
@@ -141,7 +154,11 @@ public:
       } else if (type == "serverPort") {
         loadCasted(value, serverPort, static_cast<uint16_t>(6767));
       } else if (type == "volumeLevel") {
-        loadCasted(value, volumeLevel, 0.5f);
+        if (value.empty()) {
+          volumeLevel = "0.5";
+        } else {
+          volumeLevel = value;
+        }
       } else {
         spdlog::warn("[GUI] unrecognize entry in the settings: {} - {}", type, value);
         continue;
@@ -242,12 +259,10 @@ private:
 class GameContext {
 public:
   GameContext()
-      : assetsManager(AssetsManager()) {
-    settings.load();
-  }
+      : assetsManager(AssetsManager()) {}
 
-  GameSettings settings;
   AssetsManager assetsManager;
+  GameSettings settings;
 
   std::string loserName;
   bool isWon = false;
