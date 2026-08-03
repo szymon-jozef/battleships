@@ -5,7 +5,7 @@
 namespace battleship {
 namespace logic {
 BaseGrid::BaseGrid(const unsigned short int width, const unsigned short int height)
-    : grid(height * width, Field())
+    : grid(static_cast<size_t>(height) * width, Field())
     , WIDTH(width)
     , HEIGHT(height) {}
 
