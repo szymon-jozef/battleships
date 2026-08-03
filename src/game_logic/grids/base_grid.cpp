@@ -5,7 +5,7 @@
 namespace battleship {
 namespace logic {
 BaseGrid::BaseGrid(const unsigned short int width, const unsigned short int height)
-    : grid(height * width, Field())
+    : grid(static_cast<size_t>(height) * width, Field())
     , WIDTH(width)
     , HEIGHT(height) {}
 
@@ -23,11 +23,11 @@ void BaseGrid::setFieldState(unsigned short int row, unsigned short int column, 
 
 std::string BaseGrid::asString() const {
   std::stringstream s;
-  for (unsigned short int fieldIndex = 0; fieldIndex < WIDTH * HEIGHT; fieldIndex++) {
-    s << static_cast<char>(grid[fieldIndex].getState());
-    if (fieldIndex % WIDTH == 0) {
+  for (size_t fieldIndex = 0; fieldIndex < grid.size(); fieldIndex++) {
+    if (fieldIndex != 0 && fieldIndex % WIDTH == 0) {
       s << '\n';
     }
+    s << static_cast<char>(grid[fieldIndex].getState());
   }
   return s.str();
 }
