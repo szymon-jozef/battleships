@@ -157,8 +157,16 @@ public:
         if (value.empty()) {
           volumeLevel = "0.5";
         } else {
-          volumeLevel = value;
+          std::string valueStr(value);
+          float valueFloat = std::stof(valueStr);
+          if (valueFloat < 0 || valueFloat > 1) {
+            spdlog::warn("[GUI] Volume value found in the setting out of range. Defaulting to 0.5");
+            volumeLevel = "0.5";
+          } else {
+            volumeLevel = value;
+          }
         }
+
       } else {
         spdlog::warn("[GUI] unrecognize entry in the settings: {} - {}", type, value);
         continue;
