@@ -27,12 +27,12 @@
         };
 
         git-hooks.hooks = {
-          cppcheck = {
+          "cppcheck" = {
             enable = true;
             name = "Cppcheck";
 
-            files = "\\.(cpp|hpp)$";
-            entry = "cppcheck --enable=warning,style,performance,portability --error-exitcode=1";
+            entry = "cppcheck --enable=warning,style,performance,portability --error-exitcode=1 --project=build/compile_commands.json";
+            pass_filenames = false;
           };
         };
 
