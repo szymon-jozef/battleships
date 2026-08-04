@@ -154,11 +154,11 @@ void TextInput::normaliseText() {
       target = "0.0";
     }
 
-    if (target != "" && std::stof(target) >= 1) {
+    if (std::stof(target) > 1) {
       target = "1.0";
     }
 
-    if (target != "" && std::stof(target) < 0) {
+    if (std::stof(target) < 0) {
       target = "0.0";
     }
 
