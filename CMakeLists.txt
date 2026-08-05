@@ -11,12 +11,24 @@ string(JSON version GET ${METADATA_STRING} version)
 string(JSON description GET ${METADATA_STRING} description)
 string(JSON homepage_url GET ${METADATA_STRING} homepage_url)
 
+if (WIN32)
+    set(VCPKG_TARGET_TRIPLET x64-windows-static)
+    set(BUILD_SHARED_LIBS OFF)
+endif()
+
 project(${name} 
     VERSION "${version}"
     DESCRIPTION "${description}"
     HOMEPAGE_URL "${homepage_url}"
     LANGUAGES CXX
 )
+
+
+if (WIN32)
+    if(MSVC)
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    endif()
+endif()
 
 message(STATUS "=== Project metadata ===")
 message(STATUS "Name: ${PROJECT_NAME}")
@@ -28,14 +40,6 @@ message(STATUS "==============================")
 option(isDev "build tests" false)
 option(isRelease "install everything to ." false)
 
-if (WIN32)
-    set(VCPKG_TARGET_TRIPLET x64-windows-static)
-    set(BUILD_SHARED_LIBS OFF)
-
-    if(MSVC)
-        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-    endif()
-endif()
 
 
 
