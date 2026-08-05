@@ -88,12 +88,8 @@
             buildInputs = with pkgs; [
               (boost.override { enableStatic = true; })
               (raylib.override { sharedLib = false; })
-
-              (spdlog.overrideAttrs (old: {
-                cmakeFlags = old.cmakeFlags or [ ] ++ [
-                  (pkgs.lib.strings.cmakeBool "BUILD_SHARED_LIBS" false)
-                ];
-              }))
+              (fmt.override { enableShared = false; })
+              (spdlog.override { staticBuild = true; })
 
               (glfw3.overrideAttrs (old: {
                 cmakeFlags = old.cmakeFlags or [ ] ++ [

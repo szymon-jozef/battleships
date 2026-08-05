@@ -14,6 +14,6 @@ target_sources(logging
 target_link_libraries(logging
     PRIVATE
         spdlog::spdlog_header_only
-        fmt::fmt
+        fmt::fmt-header-only
 )
 
