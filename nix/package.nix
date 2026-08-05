@@ -16,7 +16,7 @@
 
       pname = metadata_json.name;
       version = metadata_json.version;
-      src = ./..;
+      src = pkgs.lib.cleanSource ./..;
 
       cmakeFlags = [
         "-DCMAKE_GENERATOR=Ninja"
@@ -69,6 +69,9 @@
           }
         );
 
+        # Generic release to use in github actions
+        # You probably don't want to use it anywhere elsewhere
+        # It build this game statically
         generic = (
           pkgs.stdenv.mkDerivation {
             inherit
@@ -102,8 +105,18 @@
               BIN="$out/bin/${metadata_json.name}"
 
               patchelf --set-interpreter /lib64/ld-linux-x86-64.so.2 "$BIN"
-
               patchelf --set-rpath "" "$BIN"
+
+              # we do this as this target is for github actions
+              cp $out/bin/battleships $out/
+              cp $out/share/battleships/assets $out/ -r
+
+              rm $out/{bin,share} -rf
+
+              # we package this app
+              cd $out
+              tar czf battleships-${metadata_json.version}.tar.gz ./battleships .//assets
+              rm $out/assets battleships -rf
             '';
           }
         );
