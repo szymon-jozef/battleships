@@ -96,7 +96,11 @@ public:
       load();
     }
 
-    SetMasterVolume(std::stof(volumeLevel));
+    if (!volumeLevel.empty()) {
+      SetMasterVolume(std::stof(volumeLevel));
+    } else {
+      SetMasterVolume(0.5);
+    }
     spdlog::info("[GUI] game loaded with master volume at: {}", volumeLevel);
   }
 
