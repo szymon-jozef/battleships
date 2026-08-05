@@ -14,6 +14,7 @@
           valgrind
           pre-commit
           cppcheck
+          catch2_3
         ];
 
         env = {
