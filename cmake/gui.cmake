@@ -22,7 +22,7 @@ target_link_libraries(gui
         networking
         game_manager
         game_logic
-        spdlog::spdlog
+        spdlog::spdlog_header_only
 )
 
 if(WIN32)
