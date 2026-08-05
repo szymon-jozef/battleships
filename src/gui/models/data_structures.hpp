@@ -96,11 +96,13 @@ public:
       load();
     }
 
-    if (!volumeLevel.empty()) {
-      SetMasterVolume(std::stof(volumeLevel));
-    } else {
-      SetMasterVolume(0.5);
+    // this can still be empty, because we don't change if volumeLevel entry even exists in the config file
+    if (volumeLevel.empty()) {
+      volumeLevel = "0.5";
+      spdlog::warn("[GUI] volumeLevel field not found in the config file. Defaulting to 0.5");
     }
+
+    SetMasterVolume(std::stof(volumeLevel));
     spdlog::info("[GUI] game loaded with master volume at: {}", volumeLevel);
   }
 
@@ -160,6 +162,7 @@ public:
       } else if (type == "volumeLevel") {
         if (value.empty()) {
           volumeLevel = "0.5";
+          spdlog::warn("[GUI] volumeLevel value was empty. Defaulting to 0.5");
         } else {
           std::string valueStr(value);
           float valueFloat = std::stof(valueStr);
