@@ -115,7 +115,7 @@
 
               # we package this app
               cd $out
-              tar czf battleships-${metadata_json.version}.tar.gz ./battleships .//assets
+              tar czf battleships-${metadata_json.version}-linux.tar.gz ./battleships .//assets
               rm $out/assets battleships -rf
             '';
           }
