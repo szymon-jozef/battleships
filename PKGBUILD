@@ -1,5 +1,5 @@
 pkgname=battleships
-pkgver=0.0.1
+pkgver="0.1.0"
 pkgrel=1
 epoch=0
 pkgdesc="Game of battleships online"
@@ -8,7 +8,7 @@ url="https://github.com/szymon-jozef/battleships"
 license=('GPL-3.0')
 groups=()
 depends=("spdlog" "raylib" "boost")
-makedepends=("clang" "cmake" "ninja")
+makedepends=("clang" "cmake" "ninja" "jq")
 checkdepends=()
 optdepends=()
 provides=()
@@ -23,7 +23,8 @@ noextract=()
 md5sums=() #generate with 'makepkg -g'
 
 pkgver() {
-    grep -e "project.*VERSION" $startdir/CMakeLists.txt | awk 'NR==1' | awk '{print $3}' | tr -d ')'
+    cd "$startdir/"
+    jq .version ./metadata.json
 }
 
 prepare() {
