@@ -14,6 +14,6 @@ target_sources(game_logic
 
 target_link_libraries(game_logic
     PUBLIC
-    spdlog::spdlog
+    spdlog::spdlog_header_only
     fmt::fmt
 )

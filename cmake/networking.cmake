@@ -20,7 +20,7 @@ target_sources(networking
 
 target_link_libraries(networking
     PUBLIC
-    spdlog::spdlog
+    spdlog::spdlog_header_only
     fmt::fmt
     Boost::headers
     Threads::Threads

@@ -16,7 +16,7 @@ add_executable(IntegrationTests ${TEST_INTEGRATION_SOURCES})
 target_link_libraries(IntegrationTests
     PRIVATE
         Catch2::Catch2WithMain
-        spdlog::spdlog
+        spdlog::spdlog_header_only
         networking
         game_manager
         game_logic
