@@ -8,6 +8,7 @@
   - [Starting the game](#starting-the-game)
   - [Rules](#rules)
 - [Dependencies](#dependencies)
+- [Supported systems](#supported-systems)
 - [Installation](#installation)
   - [Manual compilation](#manual-compilation)
   - [NixOS](#nixos)
@@ -75,6 +76,16 @@ The player who shoots all the ships of his enemy first wins.
 - [glfw3](https://www.glfw.org/)
 - [catch2 (for tests)](https://github.com/catchorg/Catch2)
 
+# Supported systems
+List of supported systems:
+- nixOS
+- arch linux
+- windows 11
+
+Game should work on this systems, if it doesn't for you, please submit a [bug report](https://github.com/szymon-jozef/battleships/issues).
+
+If you want your system supported feel free to [pull request](https://github.com/szymon-jozef/battleships/pulls)
+
 # Installation
 ## Manual compilation
 Install all the dependencies or use vcpkg.
@@ -140,6 +151,8 @@ makepkg -si
 
 ## Release
 You can also install a prebuilt binary from the [release tab](https://github.com/szymon-jozef/battleships/releases).
+
+If you decide to use binary file on linux, make sure you have [glfw3](https://github.com/glfw/glfw) installed!
 
 # Uninstall
 ## Manual
