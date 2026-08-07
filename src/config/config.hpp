@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstdint>
 #include <glaze/json.hpp>
 #include <optional>
 #include <string>
@@ -26,26 +25,26 @@ class ConfigManager {
 
   /// @brief Scan the system for configuration directory
   /// @return Full path do this program configuration dir
-  std::filesystem::path getConfigPath();
+  static std::filesystem::path getConfigPath();
 
 public:
   /// @param path Manually set configuration path. Meant mostly for testing
-  explicit ConfigManager(const std::optional<const std::filesystem::path> path = std::nullopt);
+  explicit ConfigManager(const std::optional<const std::filesystem::path> &path = std::nullopt);
 
   void save();
   void load();
 
   // === Setters, getters and shitters ===
 
-  const std::string &getPlayerName() const;
+  [[nodiscard]] const std::string &getPlayerName() const;
   void setPlayerName(const std::string &name);
 
-  const std::string &getServerUrl() const;
+  [[nodiscard]] const std::string &getServerUrl() const;
   void setServerUrl(const std::string &newUrl);
 
-  uint16_t getServerPort() const;
+  [[nodiscard]] uint16_t getServerPort() const;
   void setServerPort(const uint16_t newPort);
 
-  const std::string &getVolumeLevel() const;
+  [[nodiscard]] const std::string &getVolumeLevel() const;
   void setVolumeLevel(const std::string &newVolumeLevel);
 };
