@@ -1,12 +1,13 @@
 #pragma once
+#include "../config/config.hpp"
+
 #include <atomic>
-#include <cstdint>
 #include <filesystem>
-#include <fstream>
 #include <glaze/core/common.hpp>
 #include <glaze/json.hpp>
 #include <raylib.h>
 #include <spdlog/spdlog.h>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 
@@ -23,156 +24,6 @@ enum class GuiState {
 
   SETTINGS,
   QUIT,
-};
-
-struct GameSettings {
-  std::string playerName{};
-  std::string serverUrl{};
-  uint16_t serverPort{};
-  std::string volumeLevel{};
-};
-
-static_assert(glz::reflectable<GameSettings>);
-
-class SettingsManager {
-  std::filesystem::path configDir;
-  std::filesystem::path configFile;
-
-  /// @brief Scan the system for configuration directory
-  /// @return Full path do this program configuration dir
-  std::filesystem::path getConfigPath() {
-#ifdef __linux__
-    char *configPathChars = std::getenv("XDG_CONFIG_HOME");
-    if (!configPathChars) {
-      spdlog::warn("[GUI] could not load $XDG_CONFIG_HOME");
-      char *homePathChars = std::getenv("HOME");
-      if (!homePathChars) {
-        spdlog::error("[GUI] could not get home user directory? Defaulting to cwd...");
-        return std::filesystem::path("./.") / "battleships";
-      }
-      return std::filesystem::path(homePathChars) / ".config/" / "battleships";
-    }
-    return std::filesystem::path(configPathChars) / "battleships";
-#elif _WIN32
-    char *configPathChars = std::getenv("LOCALAPPDATA");
-    if (!configPathChars) {
-      spdlog::warn("[GUI] could not load %LOCALAPPDATA%");
-      return std::filesystem::path("./.") / "battleships";
-    }
-    return std::filesystem::path(configPathChars) / "battleships";
-#endif
-  }
-
-public:
-  GameSettings settings{"player", "127.0.0.1", 6767, "0.5"};
-
-  /// @param path Manually set configuration path. Meant mostly for testing
-  explicit SettingsManager(std::optional<const std::filesystem::path> path = std::nullopt)
-      : configDir(path.value_or(getConfigPath())) {
-
-    std::filesystem::create_directories(configDir);
-
-    configFile = configDir / std::filesystem::path("config.json");
-    spdlog::info("[GUI] settings path is: {}", configFile.string());
-
-    if (!std::filesystem::is_regular_file(configFile)) {
-      std::ofstream file(configFile);
-      file.close();
-      save();
-    } else {
-      load();
-    }
-
-    if (settings.volumeLevel.empty()) { // this may be still be empty if some funny guy will set it this way by hand in
-                                        // the file, so we check this condition, so the program won't crash. Could be
-                                        // fixed by setting everything in settings optional, I guess
-      settings.volumeLevel = "0.5";
-      spdlog::warn("[GUI] volumeLevel field not found in the config file. Defaulting to 0.5");
-    }
-
-    SetMasterVolume(std::stof(settings.volumeLevel));
-    spdlog::info("[GUI] game loaded with master volume at: {}", settings.volumeLevel);
-  }
-
-  void save() {
-    std::string buffer{};
-    glz::error_ctx ec;
-    ec = glz::write_json(settings, buffer);
-
-    if (ec) {
-      spdlog::error("[GUI] While writing settings to json: {}", ec.custom_error_message);
-      return;
-    }
-
-    std::ofstream file(configFile);
-
-    if (!file) {
-      spdlog::error("[GUI] could not open config file before saving!");
-      return;
-    }
-
-    file << buffer;
-    file.close();
-
-    spdlog::info("[GUI] settings have been saved");
-
-    SetMasterVolume(std::stof(settings.volumeLevel));
-    spdlog::info("[GUI] master volume set at: {}", GetMasterVolume());
-  }
-
-  void load() {
-    std::ifstream file(configFile);
-
-    if (!file) {
-      spdlog::error("[GUI] could not open config file before reading!");
-      return;
-    }
-
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-
-    glz::error_ctx ec;
-    ec = glz::read_json(settings, buffer.str());
-
-    if (ec) {
-      spdlog::error("[GUI] While parsing config file: {}", ec.custom_error_message);
-      exit(1); // TODO! Do something else here
-    }
-  };
-
-  // === Setters, getters and shitters ===
-
-  const std::string &getPlayerName() const {
-    return settings.playerName;
-  }
-
-  void setPlayerName(const std::string &name) {
-    settings.playerName = name;
-  }
-
-  const std::string &getServerUrl() const {
-    return settings.serverUrl;
-  }
-
-  void setServerUrl(const std::string &newUrl) {
-    settings.serverUrl = newUrl;
-  }
-
-  uint16_t getServerPort() const {
-    return settings.serverPort;
-  }
-
-  void setServerPort(const uint16_t newPort) {
-    settings.serverPort = newPort;
-  }
-
-  const std::string &getVolumeLevel() const {
-    return settings.volumeLevel;
-  }
-
-  void setVolumeLevel(const std::string &newVolumeLevel) {
-    settings.volumeLevel = newVolumeLevel;
-  }
 };
 
 class AssetsManager {
@@ -265,11 +116,25 @@ private:
 
 class GameContext {
 public:
-  GameContext()
-      : assetsManager(AssetsManager()) {}
-
   AssetsManager assetsManager;
   SettingsManager gameSettings;
+
+  GameContext()
+      : assetsManager(AssetsManager()) {
+    const std::string volLvl = gameSettings.getVolumeLevel();
+    if (!volLvl.empty()) {
+      try {
+        float vol = std::stof(volLvl);
+
+        if (vol >= 0.0f && vol <= 1.0f) {
+          SetMasterVolume(vol);
+          spdlog::info("[GUI] master volume loaded and set at: {}", vol);
+        }
+      } catch (const std::invalid_argument &e) {
+        spdlog::warn("[GUI] could not set master volume: ", e.what());
+      }
+    }
+  }
 
   std::string loserName;
   bool isWon = false;

@@ -57,6 +57,7 @@ include(cmake/networking.cmake)
 include(cmake/game_manager.cmake)
 include(cmake/logging.cmake)
 include(cmake/gui.cmake)
+include(cmake/config.cmake)
 
 if (isDev)
     include(cmake/tests.cmake)
