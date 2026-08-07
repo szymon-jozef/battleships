@@ -1,10 +1,9 @@
 #include "config.hpp"
 #include <filesystem>
 #include <optional>
-#include <raylib.h>
 #include <spdlog/spdlog.h>
 
-ConfigManager::ConfigManager(const std::optional<const std::filesystem::path> path)
+ConfigManager::ConfigManager(const std::optional<const std::filesystem::path> &path)
     : configDir(path.value_or(getConfigPath())) {
 
   std::filesystem::create_directories(configDir);
