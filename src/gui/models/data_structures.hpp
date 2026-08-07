@@ -7,7 +7,6 @@
 #include <glaze/json.hpp>
 #include <raylib.h>
 #include <spdlog/spdlog.h>
-#include <stdexcept>
 #include <string>
 #include <string_view>
 
@@ -36,10 +35,12 @@ struct GameSettings {
 static_assert(glz::reflectable<GameSettings>);
 
 class SettingsManager {
-  std::filesystem::path configPath;
-  std::filesystem::path configFilePath;
+  std::filesystem::path configDir;
+  std::filesystem::path configFile;
 
-  void loadPaths() {
+  /// @brief Scan the system for configuration directory
+  /// @return Full path do this program configuration dir
+  std::filesystem::path getConfigPath() {
 #ifdef __linux__
     char *configPathChars = std::getenv("XDG_CONFIG_HOME");
     if (!configPathChars) {
@@ -47,46 +48,44 @@ class SettingsManager {
       char *homePathChars = std::getenv("HOME");
       if (!homePathChars) {
         spdlog::error("[GUI] could not get home user directory? Defaulting to cwd...");
-        configPath = std::filesystem::path("./.");
-        return;
+        return std::filesystem::path("./.") / "battleships";
       }
-      configPath = std::filesystem::path(homePathChars) / ".config/";
-      return;
+      return std::filesystem::path(homePathChars) / ".config/" / "battleships";
     }
-    configPath = std::filesystem::path(configPathChars);
+    return std::filesystem::path(configPathChars) / "battleships";
 #elif _WIN32
     char *configPathChars = std::getenv("LOCALAPPDATA");
     if (!configPathChars) {
       spdlog::warn("[GUI] could not load %LOCALAPPDATA%");
-      configPath = std::filesystem::path("./.");
-      return;
+      return std::filesystem::path("./.") / "battleships";
     }
-    configPath = std::filesystem::path(configPathChars);
+    return std::filesystem::path(configPathChars) / "battleships";
 #endif
   }
 
 public:
   GameSettings settings{"player", "127.0.0.1", 6767, "0.5"};
 
-  SettingsManager() {
-    loadPaths();
-    configPath /= "battleships";
+  /// @param path Manually set configuration path. Meant mostly for testing
+  explicit SettingsManager(std::optional<const std::filesystem::path> path = std::nullopt)
+      : configDir(path.value_or(getConfigPath())) {
 
-    std::filesystem::create_directories(configPath);
+    std::filesystem::create_directories(configDir);
 
-    configFilePath = configPath / std::filesystem::path("config.json");
-    spdlog::info("[GUI] settings path is: {}", configFilePath.string());
+    configFile = configDir / std::filesystem::path("config.json");
+    spdlog::info("[GUI] settings path is: {}", configFile.string());
 
-    if (!std::filesystem::is_regular_file(configFilePath)) {
-      std::ofstream file(configFilePath);
+    if (!std::filesystem::is_regular_file(configFile)) {
+      std::ofstream file(configFile);
       file.close();
       save();
     } else {
       load();
     }
 
-    // this can still be empty, because we don't change if volumeLevel entry even exists in the config file
-    if (settings.volumeLevel.empty()) {
+    if (settings.volumeLevel.empty()) { // this may be still be empty if some funny guy will set it this way by hand in
+                                        // the file, so we check this condition, so the program won't crash. Could be
+                                        // fixed by setting everything in settings optional, I guess
       settings.volumeLevel = "0.5";
       spdlog::warn("[GUI] volumeLevel field not found in the config file. Defaulting to 0.5");
     }
@@ -105,7 +104,7 @@ public:
       return;
     }
 
-    std::ofstream file(configFilePath);
+    std::ofstream file(configFile);
 
     if (!file) {
       spdlog::error("[GUI] could not open config file before saving!");
@@ -122,7 +121,7 @@ public:
   }
 
   void load() {
-    std::ifstream file(configFilePath);
+    std::ifstream file(configFile);
 
     if (!file) {
       spdlog::error("[GUI] could not open config file before reading!");
@@ -140,6 +139,8 @@ public:
       exit(1); // TODO! Do something else here
     }
   };
+
+  // === Setters, getters and shitters ===
 
   const std::string &getPlayerName() const {
     return settings.playerName;
