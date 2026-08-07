@@ -61,6 +61,7 @@
               spdlog
               raylib
               glfw3
+              glaze
             ];
 
             postInstall = ''
@@ -95,6 +96,7 @@
               (spdlog.override { staticBuild = true; })
 
               glfw3 # we build this dynamically
+              glaze # header only
             ];
 
             postFixup = ''

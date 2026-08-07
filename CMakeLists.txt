@@ -49,6 +49,7 @@ find_package(fmt REQUIRED)
 find_package(Threads REQUIRED)
 find_package(raylib REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
+find_package(glaze REQUIRED)
 
 include(cmake/battleships.cmake)
 include(cmake/game_logic.cmake)

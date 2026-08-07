@@ -23,6 +23,7 @@ target_link_libraries(gui
         game_manager
         game_logic
         spdlog::spdlog_header_only
+        glaze::glaze
 )
 
 if(WIN32)
