@@ -1,14 +1,15 @@
 #pragma once
 #include <atomic>
-#include <charconv>
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
+#include <glaze/core/common.hpp>
+#include <glaze/json.hpp>
 #include <raylib.h>
 #include <spdlog/spdlog.h>
+#include <stdexcept>
 #include <string>
 #include <string_view>
-#include <type_traits>
 
 namespace battleship {
 namespace gui {
@@ -25,7 +26,16 @@ enum class GuiState {
   QUIT,
 };
 
-class GameSettings {
+struct GameSettings {
+  std::string playerName{};
+  std::string serverUrl{};
+  uint16_t serverPort{};
+  std::string volumeLevel{};
+};
+
+static_assert(glz::reflectable<GameSettings>);
+
+class SettingsManager {
   std::filesystem::path configPath;
   std::filesystem::path configFilePath;
 
@@ -55,41 +65,20 @@ class GameSettings {
 #endif
   }
 
-  template <typename T> static void loadCasted(const std::string_view &dataToCast, T &target, const T defaultValue) {
-    static_assert(std::is_arithmetic<T>::value, "Not an arithmetic type");
-
-    auto [ptr, ec] = std::from_chars(dataToCast.data(), dataToCast.data() + dataToCast.size(), target);
-
-    if (ec == std::errc::invalid_argument) {
-      spdlog::error("[GUI] tried casting something that wasn't a number!");
-      target = defaultValue;
-    } else if (ec == std::errc::result_out_of_range) {
-      spdlog::error("[GUI] numeric setting set as value out of range!");
-      target = defaultValue;
-    }
-  }
-
 public:
-  std::string playerName;
-  std::string serverUrl;
-  uint16_t serverPort;
-  std::string volumeLevel;
+  GameSettings settings{"player", "127.0.0.1", 6767, "0.5"};
 
-  GameSettings() {
+  SettingsManager() {
     loadPaths();
     configPath /= "battleships";
 
     std::filesystem::create_directories(configPath);
 
-    configFilePath = configPath / std::filesystem::path("config.cfg");
+    configFilePath = configPath / std::filesystem::path("config.json");
     spdlog::info("[GUI] settings path is: {}", configFilePath.string());
 
     if (!std::filesystem::is_regular_file(configFilePath)) {
       std::ofstream file(configFilePath);
-      playerName = "player";
-      serverUrl = "127.0.0.1";
-      serverPort = 6767;
-      volumeLevel = "0.5";
       file.close();
       save();
     } else {
@@ -97,16 +86,25 @@ public:
     }
 
     // this can still be empty, because we don't change if volumeLevel entry even exists in the config file
-    if (volumeLevel.empty()) {
-      volumeLevel = "0.5";
+    if (settings.volumeLevel.empty()) {
+      settings.volumeLevel = "0.5";
       spdlog::warn("[GUI] volumeLevel field not found in the config file. Defaulting to 0.5");
     }
 
-    SetMasterVolume(std::stof(volumeLevel));
-    spdlog::info("[GUI] game loaded with master volume at: {}", volumeLevel);
+    SetMasterVolume(std::stof(settings.volumeLevel));
+    spdlog::info("[GUI] game loaded with master volume at: {}", settings.volumeLevel);
   }
 
   void save() {
+    std::string buffer{};
+    glz::error_ctx ec;
+    ec = glz::write_json(settings, buffer);
+
+    if (ec) {
+      spdlog::error("[GUI] While writing settings to json: {}", ec.custom_error_message);
+      return;
+    }
+
     std::ofstream file(configFilePath);
 
     if (!file) {
@@ -114,22 +112,15 @@ public:
       return;
     }
 
-    file << "playerName=" << playerName << '\n';
-    file << "serverUrl=" << serverUrl << '\n';
-    file << "serverPort=" << serverPort << '\n';
-
-    if (volumeLevel.empty()) {
-      file << "volumeLevel=" << "0.5" << '\n';
-    } else {
-      file << "volumeLevel=" << volumeLevel << '\n';
-    }
-
+    file << buffer;
     file.close();
+
     spdlog::info("[GUI] settings have been saved");
 
-    SetMasterVolume(std::stof(volumeLevel));
+    SetMasterVolume(std::stof(settings.volumeLevel));
     spdlog::info("[GUI] master volume set at: {}", GetMasterVolume());
   }
+
   void load() {
     std::ifstream file(configFilePath);
 
@@ -138,49 +129,49 @@ public:
       return;
     }
 
-    std::string line;
-    std::string_view line_view, type, value;
+    std::stringstream buffer;
+    buffer << file.rdbuf();
 
-    while (std::getline(file, line)) {
-      size_t delimeterPos;
+    glz::error_ctx ec;
+    ec = glz::read_json(settings, buffer.str());
 
-      line_view = std::string_view(line);
-      delimeterPos = line_view.find('=');
-      if (delimeterPos == 0 || delimeterPos == std::string::npos) {
-        continue;
-      }
-
-      type = line_view.substr(0, delimeterPos);
-      value = line_view.substr(delimeterPos + 1);
-
-      if (type == "playerName") {
-        playerName = value;
-      } else if (type == "serverUrl") {
-        serverUrl = value;
-      } else if (type == "serverPort") {
-        loadCasted(value, serverPort, static_cast<uint16_t>(6767));
-      } else if (type == "volumeLevel") {
-        if (value.empty()) {
-          volumeLevel = "0.5";
-          spdlog::warn("[GUI] volumeLevel value was empty. Defaulting to 0.5");
-        } else {
-          std::string valueStr(value);
-          float valueFloat = std::stof(valueStr);
-          if (valueFloat < 0 || valueFloat > 1) {
-            spdlog::warn("[GUI] Volume value found in the setting out of range. Defaulting to 0.5");
-            volumeLevel = "0.5";
-          } else {
-            volumeLevel = value;
-          }
-        }
-
-      } else {
-        spdlog::warn("[GUI] unrecognize entry in the settings: {} - {}", type, value);
-        continue;
-      }
-      spdlog::info("[GUI] setting have been loaded: {} - {}", type, value);
+    if (ec) {
+      spdlog::error("[GUI] While parsing config file: {}", ec.custom_error_message);
+      exit(1); // TODO! Do something else here
     }
   };
+
+  const std::string &getPlayerName() const {
+    return settings.playerName;
+  }
+
+  void setPlayerName(const std::string &name) {
+    settings.playerName = name;
+  }
+
+  const std::string &getServerUrl() const {
+    return settings.serverUrl;
+  }
+
+  void setServerUrl(const std::string &newUrl) {
+    settings.serverUrl = newUrl;
+  }
+
+  uint16_t getServerPort() const {
+    return settings.serverPort;
+  }
+
+  void setServerPort(const uint16_t newPort) {
+    settings.serverPort = newPort;
+  }
+
+  const std::string &getVolumeLevel() const {
+    return settings.volumeLevel;
+  }
+
+  void setVolumeLevel(const std::string &newVolumeLevel) {
+    settings.volumeLevel = newVolumeLevel;
+  }
 };
 
 class AssetsManager {
@@ -277,7 +268,7 @@ public:
       : assetsManager(AssetsManager()) {}
 
   AssetsManager assetsManager;
-  GameSettings settings;
+  SettingsManager gameSettings;
 
   std::string loserName;
   bool isWon = false;

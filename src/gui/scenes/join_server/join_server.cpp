@@ -6,11 +6,15 @@ namespace gui {
 JoinServer::JoinServer(GameContext &gameContext, Texture2D &background)
     : Scene(gameContext, background)
     , widgets(gameContext, 0.1, 0.1, 0.4, 0.1) {
-  widgets.push_back_ipInput(gameContext.settings.serverUrl);
 
-  widgets.push_back_button("Join", [&gameContext]() {
+  widgets.push_back_ipInput(url);
+
+  widgets.push_back_button("Join", [&gameContext, this]() {
     PlaySound(gameContext.assetsManager.start);
-    gameContext.settings.save();
+
+    gameContext.gameSettings.setServerUrl(url);
+    gameContext.gameSettings.save();
+
     gameContext.guiState = GuiState::GAME;
   });
 
