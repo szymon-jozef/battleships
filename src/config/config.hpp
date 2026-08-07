@@ -5,6 +5,11 @@
 #include <optional>
 #include <string>
 
+#define DEFAULT_NAME "player"
+#define DEFAULT_URL "127.0.0.1"
+#define DEFAULT_PORT 6767
+#define DEFAULT_VOLUME "0.5"
+
 struct GameSettings {
   std::string playerName{};
   std::string serverUrl{};
@@ -17,7 +22,7 @@ static_assert(glz::reflectable<GameSettings>);
 class ConfigManager {
   std::filesystem::path configDir;
   std::filesystem::path configFile;
-  GameSettings settings{"player", "127.0.0.1", 6767, "0.5"};
+  GameSettings settings{DEFAULT_NAME, DEFAULT_URL, DEFAULT_PORT, DEFAULT_VOLUME};
 
   /// @brief Scan the system for configuration directory
   /// @return Full path do this program configuration dir

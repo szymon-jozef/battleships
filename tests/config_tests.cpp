@@ -22,10 +22,10 @@ TEST_CASE("Config manager default values") {
   ConfigManager manager(genRandPath() / "defaults");
   manager.load();
 
-  REQUIRE(manager.getPlayerName() == "player");
-  REQUIRE(manager.getServerPort() == 6767);
-  REQUIRE(manager.getServerUrl() == "127.0.0.1");
-  REQUIRE(manager.getVolumeLevel() == "0.5");
+  REQUIRE(manager.getPlayerName() == DEFAULT_NAME);
+  REQUIRE(manager.getServerPort() == DEFAULT_PORT);
+  REQUIRE(manager.getServerUrl() == DEFAULT_URL);
+  REQUIRE(manager.getVolumeLevel() == DEFAULT_VOLUME);
 }
 
 TEST_CASE("Saving and reading config", "[ConfigManager]") {
