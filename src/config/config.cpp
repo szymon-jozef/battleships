@@ -8,7 +8,6 @@ ConfigManager::ConfigManager(const std::optional<const std::filesystem::path> pa
     : configDir(path.value_or(getConfigPath())) {
 
   std::filesystem::create_directories(configDir);
-
   configFile = configDir / std::filesystem::path("config.json");
   spdlog::info("[GUI] settings path is: {}", configFile.string());
 
@@ -65,9 +64,6 @@ void ConfigManager::save() {
   file.close();
 
   spdlog::info("[GUI] settings have been saved");
-
-  SetMasterVolume(std::stof(settings.volumeLevel));
-  spdlog::info("[GUI] master volume set at: {}", GetMasterVolume());
 }
 
 void ConfigManager::load() {
