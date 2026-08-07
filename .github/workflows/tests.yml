@@ -37,3 +37,6 @@ jobs:
 
       - name: integration tests
         run: ${{github.workspace}}/build/IntegrationTests
+
+      - name: config parsing tests
+        run: ${{github.workspace}}/build/ConfigTests

@@ -10,6 +10,7 @@ namespace gui {
 
 class JoinServer : public Scene {
   WidgetsVector widgets;
+  std::string url = gameContext.gameSettings.getServerUrl();
 
 public:
   JoinServer(GameContext &gameContext, Texture2D &background);

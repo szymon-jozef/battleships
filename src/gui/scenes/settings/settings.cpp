@@ -1,4 +1,6 @@
 #include "settings.hpp"
+#include <raylib.h>
+#include <stdexcept>
 
 namespace battleship {
 namespace gui {
@@ -9,18 +11,31 @@ Settings::Settings(GameContext &gameContext, Texture2D &background)
   backgroundTint = LIGHTGRAY;
 
   widgets.push_back_label("Player options", BLACK);
-  widgets.push_back_nameInput(gameContext.settings.playerName);
-  widgets.push_back_volumeLevelInput((gameContext.settings.volumeLevel));
+
+  widgets.push_back_nameInput(name);
+  widgets.push_back_volumeLevelInput((volumeLevel));
+
   widgets.push_back_button("Go back", [this, &gameContext]() {
+    // TODO! Server should not allow connections with nonames
+    // Especially since you can just set empty name in the config file
+
     onEveryClick();
 
-    if (gameContext.settings.playerName.empty()) {
+    if (name.empty()) {
       spdlog::warn("[GUI] trying to save empty name. That's a nono!");
       return;
     }
-    // TODO! Server should not allow connections with nonames
-    // Especially since you can just set empty name in the config file
-    gameContext.settings.save();
+
+    gameContext.gameSettings.setPlayerName(name);
+    gameContext.gameSettings.setVolumeLevel(volumeLevel);
+
+    try {
+      SetMasterVolume(std::stof(volumeLevel));
+    } catch (const std::invalid_argument &e) {
+      spdlog::warn("[GUI] while setting master volume: {}", e.what());
+    }
+
+    gameContext.gameSettings.save();
     gameContext.guiState = GuiState::MAIN_MENU;
   });
 }

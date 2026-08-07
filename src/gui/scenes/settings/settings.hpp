@@ -8,6 +8,7 @@ namespace gui {
 
 class Settings : public Scene {
   WidgetsVector widgets;
+  std::string name = gameContext.gameSettings.getPlayerName(), volumeLevel = gameContext.gameSettings.getVolumeLevel();
 
 public:
   Settings(GameContext &gameContext, Texture2D &background);

@@ -1,14 +1,15 @@
 #pragma once
+#include "../config/config.hpp"
+
 #include <atomic>
-#include <charconv>
-#include <cstdint>
 #include <filesystem>
-#include <fstream>
+#include <glaze/core/common.hpp>
+#include <glaze/json.hpp>
 #include <raylib.h>
 #include <spdlog/spdlog.h>
+#include <stdexcept>
 #include <string>
 #include <string_view>
-#include <type_traits>
 
 namespace battleship {
 namespace gui {
@@ -23,164 +24,6 @@ enum class GuiState {
 
   SETTINGS,
   QUIT,
-};
-
-class GameSettings {
-  std::filesystem::path configPath;
-  std::filesystem::path configFilePath;
-
-  void loadPaths() {
-#ifdef __linux__
-    char *configPathChars = std::getenv("XDG_CONFIG_HOME");
-    if (!configPathChars) {
-      spdlog::warn("[GUI] could not load $XDG_CONFIG_HOME");
-      char *homePathChars = std::getenv("HOME");
-      if (!homePathChars) {
-        spdlog::error("[GUI] could not get home user directory? Defaulting to cwd...");
-        configPath = std::filesystem::path("./.");
-        return;
-      }
-      configPath = std::filesystem::path(homePathChars) / ".config/";
-      return;
-    }
-    configPath = std::filesystem::path(configPathChars);
-#elif _WIN32
-    char *configPathChars = std::getenv("LOCALAPPDATA");
-    if (!configPathChars) {
-      spdlog::warn("[GUI] could not load %LOCALAPPDATA%");
-      configPath = std::filesystem::path("./.");
-      return;
-    }
-    configPath = std::filesystem::path(configPathChars);
-#endif
-  }
-
-  template <typename T> static void loadCasted(const std::string_view &dataToCast, T &target, const T defaultValue) {
-    static_assert(std::is_arithmetic<T>::value, "Not an arithmetic type");
-
-    auto [ptr, ec] = std::from_chars(dataToCast.data(), dataToCast.data() + dataToCast.size(), target);
-
-    if (ec == std::errc::invalid_argument) {
-      spdlog::error("[GUI] tried casting something that wasn't a number!");
-      target = defaultValue;
-    } else if (ec == std::errc::result_out_of_range) {
-      spdlog::error("[GUI] numeric setting set as value out of range!");
-      target = defaultValue;
-    }
-  }
-
-public:
-  std::string playerName;
-  std::string serverUrl;
-  uint16_t serverPort;
-  std::string volumeLevel;
-
-  GameSettings() {
-    loadPaths();
-    configPath /= "battleships";
-
-    std::filesystem::create_directories(configPath);
-
-    configFilePath = configPath / std::filesystem::path("config.cfg");
-    spdlog::info("[GUI] settings path is: {}", configFilePath.string());
-
-    if (!std::filesystem::is_regular_file(configFilePath)) {
-      std::ofstream file(configFilePath);
-      playerName = "player";
-      serverUrl = "127.0.0.1";
-      serverPort = 6767;
-      volumeLevel = "0.5";
-      file.close();
-      save();
-    } else {
-      load();
-    }
-
-    // this can still be empty, because we don't change if volumeLevel entry even exists in the config file
-    if (volumeLevel.empty()) {
-      volumeLevel = "0.5";
-      spdlog::warn("[GUI] volumeLevel field not found in the config file. Defaulting to 0.5");
-    }
-
-    SetMasterVolume(std::stof(volumeLevel));
-    spdlog::info("[GUI] game loaded with master volume at: {}", volumeLevel);
-  }
-
-  void save() {
-    std::ofstream file(configFilePath);
-
-    if (!file) {
-      spdlog::error("[GUI] could not open config file before saving!");
-      return;
-    }
-
-    file << "playerName=" << playerName << '\n';
-    file << "serverUrl=" << serverUrl << '\n';
-    file << "serverPort=" << serverPort << '\n';
-
-    if (volumeLevel.empty()) {
-      file << "volumeLevel=" << "0.5" << '\n';
-    } else {
-      file << "volumeLevel=" << volumeLevel << '\n';
-    }
-
-    file.close();
-    spdlog::info("[GUI] settings have been saved");
-
-    SetMasterVolume(std::stof(volumeLevel));
-    spdlog::info("[GUI] master volume set at: {}", GetMasterVolume());
-  }
-  void load() {
-    std::ifstream file(configFilePath);
-
-    if (!file) {
-      spdlog::error("[GUI] could not open config file before reading!");
-      return;
-    }
-
-    std::string line;
-    std::string_view line_view, type, value;
-
-    while (std::getline(file, line)) {
-      size_t delimeterPos;
-
-      line_view = std::string_view(line);
-      delimeterPos = line_view.find('=');
-      if (delimeterPos == 0 || delimeterPos == std::string::npos) {
-        continue;
-      }
-
-      type = line_view.substr(0, delimeterPos);
-      value = line_view.substr(delimeterPos + 1);
-
-      if (type == "playerName") {
-        playerName = value;
-      } else if (type == "serverUrl") {
-        serverUrl = value;
-      } else if (type == "serverPort") {
-        loadCasted(value, serverPort, static_cast<uint16_t>(6767));
-      } else if (type == "volumeLevel") {
-        if (value.empty()) {
-          volumeLevel = "0.5";
-          spdlog::warn("[GUI] volumeLevel value was empty. Defaulting to 0.5");
-        } else {
-          std::string valueStr(value);
-          float valueFloat = std::stof(valueStr);
-          if (valueFloat < 0 || valueFloat > 1) {
-            spdlog::warn("[GUI] Volume value found in the setting out of range. Defaulting to 0.5");
-            volumeLevel = "0.5";
-          } else {
-            volumeLevel = value;
-          }
-        }
-
-      } else {
-        spdlog::warn("[GUI] unrecognize entry in the settings: {} - {}", type, value);
-        continue;
-      }
-      spdlog::info("[GUI] setting have been loaded: {} - {}", type, value);
-    }
-  };
 };
 
 class AssetsManager {
@@ -273,11 +116,25 @@ private:
 
 class GameContext {
 public:
-  GameContext()
-      : assetsManager(AssetsManager()) {}
-
   AssetsManager assetsManager;
-  GameSettings settings;
+  ConfigManager gameSettings;
+
+  GameContext()
+      : assetsManager(AssetsManager()) {
+    const std::string volLvl = gameSettings.getVolumeLevel();
+    if (!volLvl.empty()) {
+      try {
+        float vol = std::stof(volLvl);
+
+        if (vol >= 0.0f && vol <= 1.0f) {
+          SetMasterVolume(vol);
+          spdlog::info("[GUI] master volume loaded and set at: {}", vol);
+        }
+      } catch (const std::invalid_argument &e) {
+        spdlog::warn("[GUI] could not set master volume: ", e.what());
+      }
+    }
+  }
 
   std::string loserName;
   bool isWon = false;
