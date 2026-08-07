@@ -14,7 +14,7 @@ struct GameSettings {
 
 static_assert(glz::reflectable<GameSettings>);
 
-class SettingsManager {
+class ConfigManager {
   std::filesystem::path configDir;
   std::filesystem::path configFile;
   GameSettings settings{"player", "127.0.0.1", 6767, "0.5"};
@@ -25,7 +25,7 @@ class SettingsManager {
 
 public:
   /// @param path Manually set configuration path. Meant mostly for testing
-  explicit SettingsManager(const std::optional<const std::filesystem::path> path = std::nullopt);
+  explicit ConfigManager(const std::optional<const std::filesystem::path> path = std::nullopt);
 
   void save();
   void load();

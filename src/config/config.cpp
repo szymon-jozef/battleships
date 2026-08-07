@@ -4,7 +4,7 @@
 #include <raylib.h>
 #include <spdlog/spdlog.h>
 
-SettingsManager::SettingsManager(const std::optional<const std::filesystem::path> path)
+ConfigManager::ConfigManager(const std::optional<const std::filesystem::path> path)
     : configDir(path.value_or(getConfigPath())) {
 
   std::filesystem::create_directories(configDir);
@@ -21,7 +21,7 @@ SettingsManager::SettingsManager(const std::optional<const std::filesystem::path
   }
 }
 
-std::filesystem::path SettingsManager::getConfigPath() {
+std::filesystem::path ConfigManager::getConfigPath() {
 #ifdef __linux__
   char *configPathChars = std::getenv("XDG_CONFIG_HOME");
   if (!configPathChars) {
@@ -44,7 +44,7 @@ std::filesystem::path SettingsManager::getConfigPath() {
 #endif
 }
 
-void SettingsManager::save() {
+void ConfigManager::save() {
   std::string buffer{};
   glz::error_ctx ec;
   ec = glz::write_json(settings, buffer);
@@ -70,7 +70,7 @@ void SettingsManager::save() {
   spdlog::info("[GUI] master volume set at: {}", GetMasterVolume());
 }
 
-void SettingsManager::load() {
+void ConfigManager::load() {
   std::ifstream file(configFile);
 
   if (!file) {
@@ -92,34 +92,34 @@ void SettingsManager::load() {
 
 // === Setters, getters and shitters ===
 
-const std::string &SettingsManager::getPlayerName() const {
+const std::string &ConfigManager::getPlayerName() const {
   return settings.playerName;
 }
 
-void SettingsManager::setPlayerName(const std::string &name) {
+void ConfigManager::setPlayerName(const std::string &name) {
   settings.playerName = name;
 }
 
-const std::string &SettingsManager::getServerUrl() const {
+const std::string &ConfigManager::getServerUrl() const {
   return settings.serverUrl;
 }
 
-void SettingsManager::setServerUrl(const std::string &newUrl) {
+void ConfigManager::setServerUrl(const std::string &newUrl) {
   settings.serverUrl = newUrl;
 }
 
-uint16_t SettingsManager::getServerPort() const {
+uint16_t ConfigManager::getServerPort() const {
   return settings.serverPort;
 }
 
-void SettingsManager::setServerPort(const uint16_t newPort) {
+void ConfigManager::setServerPort(const uint16_t newPort) {
   settings.serverPort = newPort;
 }
 
-const std::string &SettingsManager::getVolumeLevel() const {
+const std::string &ConfigManager::getVolumeLevel() const {
   return settings.volumeLevel;
 }
 
-void SettingsManager::setVolumeLevel(const std::string &newVolumeLevel) {
+void ConfigManager::setVolumeLevel(const std::string &newVolumeLevel) {
   settings.volumeLevel = newVolumeLevel;
 }

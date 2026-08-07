@@ -117,7 +117,7 @@ private:
 class GameContext {
 public:
   AssetsManager assetsManager;
-  SettingsManager gameSettings;
+  ConfigManager gameSettings;
 
   GameContext()
       : assetsManager(AssetsManager()) {
