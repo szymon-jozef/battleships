@@ -41,16 +41,12 @@ bool TextInput::handleKeyboardInput() {
 
   if (isMouseOnText || isFocused) {
     bool isEdited = false;
-    if (isMouseOnText) {
-      SetMouseCursor(MOUSE_CURSOR_IBEAM);
-    }
     isEdited = getKeyboardInput() || removeCharFromBuffer() || clearBuffer();
 
     normaliseText();
 
     return isEdited;
   }
-  SetMouseCursor(MOUSE_CURSOR_DEFAULT);
 
   return false;
 }
