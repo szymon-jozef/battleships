@@ -44,6 +44,7 @@ protected:
 
 public:
   bool isFocusable = false;
+  bool isHovered = false;
 
   Widget(std::string label, float pos_y, Rectangle scaleRect, float fontScale, bool isFocusable = true)
       : scaleRect(scaleRect)
@@ -67,6 +68,7 @@ public:
 
   virtual void update() {
     updateEveryPos();
+    isHovered = CheckCollisionPointRec(GetMousePosition(), finalPositionRect);
   };
 
   void updateEveryPos(bool force = false) {

@@ -1,5 +1,6 @@
 #include "widgets_vector.hpp"
 #include <memory>
+#include <raylib.h>
 
 namespace battleship {
 namespace gui {
@@ -70,6 +71,8 @@ void WidgetsVector::update_all() {
   float absolute_y = GetScreenHeight() * start_y;
   float absolute_margin = GetScreenHeight() * margin;
 
+  bool isHoveredText = false;
+  bool isAnyHovered = false;
   for (auto &widget : widgets) {
     widget->setY(absolute_y);
 
@@ -78,7 +81,21 @@ void WidgetsVector::update_all() {
     widget->unFocus();
 
     absolute_y += widget->getRect().height + absolute_margin;
+
+    isAnyHovered = isAnyHovered || (widget->isFocusable && widget->isHovered);
+    isHoveredText = isAnyHovered && (isHoveredText || dynamic_cast<TextInput *>(widget.get()) != nullptr);
   }
+
+  if (isAnyHovered) {
+    if (isHoveredText) {
+      SetMouseCursor(MOUSE_CURSOR_IBEAM);
+    } else {
+      SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+    }
+  } else {
+    SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+  }
+
   handleFocusChange();
 }
 
