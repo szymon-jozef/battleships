@@ -35,6 +35,6 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v7
 
       - name: Create release
-        run: gh release create "v${{steps.version.outputs.new_version}}" --generate-notes -p # remove -p when we exit pre-release
+        run: gh release create "v${{steps.version.outputs.new_version}}" --generate-notes
         env:
           GH_TOKEN: ${{secrets.RELEASE_CREATE_TOKEN}}
