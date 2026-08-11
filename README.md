@@ -30,7 +30,9 @@ This is a rewrite of [this project](https://github.com/szymon-jozef/battleship-p
 
 # Classic game of battleships online.
 
-Currently WIP.
+Mostly finished, as I'm getting tired of this project. Perhaps someday I'll come back to this and add things mentioned in the issues tab.
+
+If you find any bugs, I'll still try to fix them, so feel free to report it!
 
 ## Screenshots
 ![Main menu](.github/screenshots/main_menu.png)
