@@ -16,6 +16,11 @@ MainMenu::MainMenu(GameContext &gameContext, Texture2D &background)
     gameContext.guiState = GuiState::SETTINGS;
   });
 
+  widgets.push_back_button("Game information", [this, &gameContext]() {
+    onEveryClick();
+    gameContext.guiState = GuiState::INFORMATION;
+  });
+
   widgets.push_back_button("Quit", [this, &gameContext]() {
     onEveryClick();
     gameContext.guiState = GuiState::QUIT;
