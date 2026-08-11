@@ -16,6 +16,7 @@ namespace gui {
 
 enum class GuiState {
   MAIN_MENU,
+  INFORMATION,
   MODE_SELECTION,
 
   GAME,

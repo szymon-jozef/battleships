@@ -23,6 +23,8 @@ project(${name}
     LANGUAGES CXX
 )
 
+add_compile_definitions(GAME_VERSION=\"${PROJECT_VERSION}\")
+
 if (WIN32)
     add_compile_definitions(_WIN32_WINNT=0x0A00)
     add_compile_definitions(WIN32_LEAN_AND_MEAN NOGDI NOUSER NOMINMAX _CRT_SECURE_NO_WARNINGS)

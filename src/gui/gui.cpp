@@ -36,6 +36,9 @@ int run() {
         case GuiState::MAIN_MENU:
           currentScene = std::make_unique<MainMenu>(gameContext, gameContext.assetsManager.bg1);
           break;
+        case GuiState::INFORMATION:
+          currentScene = std::make_unique<Information>(gameContext, gameContext.assetsManager.bg1);
+          break;
         case GuiState::MODE_SELECTION:
           currentScene = std::make_unique<ModeSelection>(gameContext, gameContext.assetsManager.bg2);
           break;
