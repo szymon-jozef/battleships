@@ -16,3 +16,8 @@ target_link_libraries(battleships
 )
 
 target_compile_definitions(battleships PUBLIC GAME_VERSION=\"${PROJECT_VERSION}\")
+
+if (WIN32)
+    set_property(TARGET battleships PROPERTY WIN32_EXECUTABLE ON)
+    set_target_properties(battleships PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup")
+endif()
